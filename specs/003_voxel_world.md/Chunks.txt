@@ -1,0 +1,177 @@
+==============================================================================
+CHUNKS
+==============================================================================
+
+Chunks are the fundamental storage units of the Voxel World.
+
+Every voxel belongs to exactly one chunk.
+
+Chunks provide efficient memory allocation, localized editing, rendering
+updates and scalable world management.
+
+==============================================================================
+
+PURPOSE
+
+Chunks divide the world into manageable regions.
+
+Instead of storing one massive voxel array, the world is partitioned into
+independent chunks.
+
+This allows efficient editing, rendering and memory usage.
+
+==============================================================================
+
+CHUNK SIZE
+
+All chunks use a fixed size.
+
+The chunk size is defined globally for the entire world.
+
+Every chunk must have identical dimensions.
+
+The chunk size must remain configurable by the engine, but constant inside a
+single project.
+
+==============================================================================
+
+CHUNK COORDINATES
+
+Each chunk is identified by an integer coordinate.
+
+Chunk coordinates refer to chunk positions, not voxel positions.
+
+Voxel coordinates are translated internally into:
+
+Chunk Coordinate
+
++
+
+Local Coordinate
+
+==============================================================================
+
+LAZY ALLOCATION
+
+Chunks are created only when required.
+
+Empty regions consume no memory.
+
+Creating a voxel inside an empty region automatically allocates a new chunk.
+
+==============================================================================
+
+EMPTY CHUNKS
+
+Chunks containing only Air voxels are considered empty.
+
+Empty chunks may be automatically destroyed.
+
+Removing unused chunks helps minimize memory consumption.
+
+==============================================================================
+
+INTERNAL STORAGE
+
+A chunk owns every voxel located inside its boundaries.
+
+Voxel storage remains completely internal.
+
+No external subsystem may access internal storage directly.
+
+==============================================================================
+
+LOCAL COORDINATES
+
+Voxel positions inside a chunk are represented using local integer
+coordinates.
+
+Local coordinates always remain within chunk boundaries.
+
+==============================================================================
+
+CHUNK RESPONSIBILITIES
+
+Each chunk is responsible for:
+
+Voxel storage.
+
+Local voxel lookup.
+
+Dirty state.
+
+Mesh cache.
+
+Bounding box.
+
+Palette references.
+
+Metadata storage.
+
+==============================================================================
+
+BOUNDING BOX
+
+Each chunk maintains an axis-aligned bounding box.
+
+Bounding boxes accelerate:
+
+Raycasting.
+
+Visibility tests.
+
+Selection tests.
+
+Spatial queries.
+
+==============================================================================
+
+DIRTY STATE
+
+A chunk becomes dirty whenever one or more voxels change.
+
+Dirty chunks require renderer updates.
+
+Dirty state is managed exclusively by the Voxel Grid.
+
+==============================================================================
+
+MESH CACHE
+
+Chunks may contain temporary mesh caches.
+
+Cached meshes are disposable.
+
+The mesh cache is never considered authoritative voxel data.
+
+==============================================================================
+
+MEMORY LIFETIME
+
+Chunks exist only while necessary.
+
+Unused chunks should be eligible for destruction.
+
+The engine should avoid keeping unnecessary chunk allocations alive.
+
+==============================================================================
+
+THREADING
+
+Independent chunks should allow independent processing.
+
+Whenever possible, operations affecting separate chunks may execute
+concurrently.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Future optimizations such as compression, streaming or virtual storage
+should remain internal to the chunk implementation.
+
+External systems should not depend on how chunks store their voxel data.
+
+==============================================================================
+
+END OF CHUNKS

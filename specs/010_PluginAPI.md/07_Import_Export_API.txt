@@ -1,0 +1,228 @@
+==============================================================================
+PLUGIN API — IMPORT / EXPORT API
+==============================================================================
+
+The Import/Export API allows plugins to provide additional formats and conversion
+workflows for VoxelForge.
+
+Importers and exporters operate through documented interfaces and must remain
+separate from the Renderer and other unrelated subsystems.
+
+==============================================================================
+
+PURPOSE
+
+The API provides controlled extension points for:
+
+Importers.
+
+Exporters.
+
+Format Detection.
+
+Import Options.
+
+Export Options.
+
+Progress Reporting.
+
+Cancellation.
+
+Validation.
+
+==============================================================================
+
+IMPORTER
+
+A plugin importer converts an external supported format into VoxelForge world
+data.
+
+An importer should provide:
+
+Unique Identifier.
+
+Display Name.
+
+Supported File Extensions.
+
+Format Information.
+
+Import Options.
+
+Import Logic.
+
+The importer must use the documented VoxelWorld APIs when creating world data.
+
+==============================================================================
+
+EXPORTER
+
+A plugin exporter converts VoxelForge world data into an external format.
+
+An exporter should provide:
+
+Unique Identifier.
+
+Display Name.
+
+Supported File Extensions.
+
+Format Information.
+
+Export Options.
+
+Export Logic.
+
+Exporters must read world data through documented APIs.
+
+==============================================================================
+
+FORMAT DETECTION
+
+When multiple formats are supported, format detection should use explicit format
+metadata, file extensions and, where appropriate, file signatures.
+
+An importer must not assume that an extension alone guarantees that a file is
+valid.
+
+==============================================================================
+
+VOXELWORLD INTEGRATION
+
+Imported voxel data must be created through the normal VoxelWorld architecture.
+
+The importer must preserve:
+
+Voxel Coordinates.
+
+Chunk Coordinates.
+
+Block Identifiers.
+
+World Dimensions.
+
+Relevant Metadata.
+
+The importer must not directly manipulate private chunk storage.
+
+==============================================================================
+
+CHUNK PROCESSING
+
+Large imports and exports should be processed incrementally where practical.
+
+Operations should avoid unnecessarily keeping the complete dataset in memory.
+
+Chunk processing must remain compatible with the VoxelWorld ownership model.
+
+==============================================================================
+
+MINECRAFT
+
+Minecraft importers and exporters must preserve the required Minecraft-compatible
+block and coordinate information.
+
+Format-specific conversion must not silently discard supported voxel data.
+
+==============================================================================
+
+BLOXD.IO
+
+Bloxd.io schematic import/export must use the documented `.bloxdschem` format
+implementation.
+
+A Bloxd.io schematic may contain a maximum of 200 chunks.
+
+If an exported world exceeds 200 chunks, the exporter must split it into
+multiple valid `.bloxdschem` files.
+
+No world data may be silently truncated because of this limit.
+
+Each generated schematic must contain a valid subset of the source world and
+must preserve the correct coordinates.
+
+==============================================================================
+
+PROGRESS
+
+Long-running import/export operations should expose progress information when
+the API supports it.
+
+Progress reporting must not significantly increase processing overhead.
+
+==============================================================================
+
+CANCELLATION
+
+Long-running operations should support cancellation when the API contract
+provides it.
+
+Cancellation must leave the application in a valid state.
+
+Partially written output must be handled according to the export contract.
+
+==============================================================================
+
+ERROR HANDLING
+
+Invalid files must produce clear import errors.
+
+Unsupported formats must be reported without corrupting world state.
+
+Export failures must not silently produce invalid or incomplete files.
+
+Plugin failures must remain isolated from unrelated VoxelForge systems.
+
+==============================================================================
+
+THREADING
+
+Import and export operations may run through the Task System when appropriate.
+
+Threading rules must be respected.
+
+UI operations must not be performed directly from worker threads unless the API
+explicitly permits them.
+
+==============================================================================
+
+PERFORMANCE
+
+Importers and exporters should avoid unnecessary copies and allocations.
+
+Large datasets should use streaming or incremental processing where practical.
+
+Performance-sensitive conversion code should be benchmarked using representative
+files.
+
+==============================================================================
+
+REGISTRATION
+
+Importers and exporters must be registered through their respective registries.
+
+Identifiers must be unique.
+
+Plugin-owned registrations must be removed or disabled when the plugin lifecycle
+ends.
+
+==============================================================================
+
+RENDERER SEPARATION
+
+Import and export plugins must not depend on private Renderer implementation
+details.
+
+Importing or exporting a world must not require rendering the world.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Import/Export API provides a reliable extension mechanism for file formats
+and conversion workflows while preserving world correctness, performance,
+Minecraft compatibility, Bloxd.io compatibility and subsystem separation.
+
+==============================================================================
+
+END OF IMPORT / EXPORT API

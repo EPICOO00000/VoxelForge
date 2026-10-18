@@ -1,0 +1,186 @@
+# Test Data
+
+## Purpose
+
+Test data provides deterministic inputs for VoxelForge tests.
+
+Test fixtures must be designed to cover normal operation, boundary conditions, invalid input, compatibility requirements, and known regression cases.
+
+## General Requirements
+
+Test data must be:
+
+- Deterministic.
+- Reproducible.
+- Minimal where possible.
+- Clearly identified.
+- Independent of personal user data.
+- Safe to distribute with the project.
+- Stable across test runs.
+
+Tests must not depend on files created manually by developers on their personal machines.
+
+## Voxel Fixtures
+
+Basic voxel fixtures should include:
+
+- Empty world.
+- Single block.
+- Small solid cube.
+- Mixed block types.
+- Sparse structure.
+- Dense structure.
+- Multiple adjacent chunks.
+- Structure crossing chunk boundaries.
+
+Fixtures should be small enough to inspect manually when debugging.
+
+## Coordinate Fixtures
+
+Coordinate fixtures must include:
+
+- Origin.
+- Positive coordinates.
+- Negative coordinates where supported.
+- First voxel of a chunk.
+- Last voxel of a chunk.
+- First voxel of the next chunk.
+- Structures spanning multiple chunks.
+
+These fixtures are especially important for detecting off-by-one errors.
+
+## Block Database Fixtures
+
+Block database test data should contain:
+
+- Valid common blocks.
+- Multiple block categories.
+- Transparent blocks where supported.
+- Invalid block IDs.
+- Missing definitions.
+- Minimal definitions.
+- Definitions containing all required renderer properties.
+
+The expected result of every invalid fixture must be explicitly defined.
+
+## Minecraft Fixtures
+
+Minecraft-compatible fixtures should contain representative structures rather than unnecessarily large worlds.
+
+Fixtures should cover:
+
+- Basic solid structures.
+- Multiple block types.
+- Empty regions.
+- Chunk boundaries.
+- Large structures where required.
+- Features supported by the current importer/exporter.
+
+If a Minecraft feature is unsupported, the fixture should be used to verify the documented fallback or failure behavior.
+
+## Bloxd.io Fixtures
+
+Bloxd.io fixtures must use valid `.bloxdschem` data compatible with the supported schema.
+
+Fixtures should cover:
+
+- Empty/minimal schematic.
+- One chunk.
+- Multiple chunks.
+- Different block IDs.
+- Repeated block IDs suitable for RLE testing.
+- Chunk-boundary structures.
+- Maximum-size schematic.
+
+A maximum-size fixture must contain exactly 200 chunks.
+
+A separate fixture must represent a structure requiring at least 201 chunks so that splitting behavior can be tested.
+
+## RLE Fixtures
+
+RLE test data must include patterns such as:
+
+- One repeated block.
+- Two repeated blocks.
+- Alternating block IDs.
+- Long runs.
+- Many short runs.
+- A complete 32×32×32 chunk.
+- Data containing block ID zero where valid.
+
+Encoded data must decode to the exact expected block sequence.
+
+## Invalid Data
+
+Invalid fixtures should test controlled error handling.
+
+Examples include:
+
+- Truncated files.
+- Invalid headers.
+- Invalid dimensions.
+- Invalid chunk counts.
+- Invalid chunk coordinates.
+- Invalid block IDs.
+- Invalid RLE sequences.
+- Incomplete records.
+- Unexpected end-of-file.
+- Unsupported versions.
+
+Invalid data must never be treated as valid world data.
+
+## Performance Data
+
+Performance fixtures should exist at several scales.
+
+Example categories:
+
+- Tiny.
+- Small.
+- Medium.
+- Large.
+- Stress.
+
+The same logical structure should be available at different scales where practical so that scaling behavior can be measured.
+
+## Regression Fixtures
+
+Every regression fixture must document the behavior it protects.
+
+A regression fixture should remain as small as possible while still reproducing the original problem.
+
+If the original bug came from a large real-world structure, create a reduced reproduction whenever possible.
+
+## Generated Test Data
+
+Generated fixtures are allowed when generation is deterministic.
+
+A generator must use a fixed seed when randomness is required.
+
+The generated result must be reproducible across test runs.
+
+Tests must not depend on uncontrolled random data.
+
+## Temporary Test Data
+
+Tests that create temporary worlds, schematic files, or other resources must use dedicated temporary locations.
+
+Temporary data must be cleaned up after the test finishes.
+
+A failed test must not make subsequent tests depend on leftover temporary files.
+
+## Test Data Integrity
+
+Fixtures must not be modified by tests.
+
+If a test needs to modify a fixture, it must first create a copy or load it into an isolated writable representation.
+
+This prevents one test from changing the input of another test.
+
+## Test Data and Compatibility
+
+Compatibility fixtures must be retained for every supported external format.
+
+When a format implementation changes, existing valid fixtures must continue to pass unless the supported format itself has intentionally changed.
+
+Minecraft and Bloxd.io compatibility fixtures must therefore be treated as long-term regression assets.

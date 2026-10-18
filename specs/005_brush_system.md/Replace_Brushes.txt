@@ -1,0 +1,92 @@
+==============================================================================
+REPLACE BRUSHES
+==============================================================================
+
+Replace Brushes perform conditional voxel transformations.
+
+==============================================================================
+
+PURPOSE
+
+Replacement tools automate repetitive editing tasks.
+
+==============================================================================
+
+MATCH CONDITIONS
+
+Replace operations may match:
+
+Block Type.
+
+Material.
+
+Metadata.
+
+Tags.
+
+Height.
+
+Orientation.
+
+Custom Filters.
+
+==============================================================================
+
+REPLACEMENT MODES
+
+Replace All.
+
+Replace First Match.
+
+Replace Random.
+
+Replace Pattern.
+
+Replace Weighted.
+
+==============================================================================
+
+SEARCH AREA
+
+Replacement is limited by:
+
+Brush Shape.
+
+Selection.
+
+Chunk.
+
+Entire World.
+
+==============================================================================
+
+RULES
+
+Only matching voxels are modified.
+
+Non-matching voxels remain unchanged.
+
+==============================================================================
+
+MULTI-REPLACE
+
+One source block may map to multiple destination blocks.
+
+Weighted probabilities may be used.
+
+==============================================================================
+
+PREVIEW
+
+Replace Brushes should preview affected voxels before execution.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Replace operations should enable fast large-scale editing while maintaining
+deterministic results.
+
+==============================================================================
+
+END OF REPLACE BRUSHES

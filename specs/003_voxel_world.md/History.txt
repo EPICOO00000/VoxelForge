@@ -1,0 +1,178 @@
+==============================================================================
+HISTORY
+==============================================================================
+
+The History System records modifications performed on the Voxel World.
+
+It provides deterministic Undo and Redo operations while minimizing memory
+usage.
+
+==============================================================================
+
+PURPOSE
+
+History allows users to safely experiment during editing.
+
+Every reversible modification should be recorded.
+
+History guarantees deterministic restoration of previous world states.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+History must remain:
+
+Deterministic.
+
+Memory efficient.
+
+Reliable.
+
+Independent from rendering.
+
+Independent from Blender.
+
+==============================================================================
+
+DATA OWNERSHIP
+
+History never owns voxel data.
+
+The Voxel World remains the only authoritative storage.
+
+History stores only the information required to restore previous states.
+
+==============================================================================
+
+CHANGE RECORDING
+
+Every editing operation generates a History Entry.
+
+History entries describe modifications rather than complete world copies.
+
+Only modified voxel data should be stored.
+
+==============================================================================
+
+HISTORY ENTRIES
+
+A History Entry may contain:
+
+Modified Voxels
+
+Affected Chunks
+
+Previous Values
+
+New Values
+
+Selection State
+
+Operation Metadata
+
+Timestamp
+
+Additional future information.
+
+==============================================================================
+
+UNDO
+
+Undo restores the previous recorded state.
+
+Undo must restore:
+
+Voxel Data
+
+Selections
+
+Dirty Chunks
+
+Palette Changes
+
+Every restored state must exactly match the original state.
+
+==============================================================================
+
+REDO
+
+Redo reapplies previously undone modifications.
+
+Redo must produce the exact same world state as the original operation.
+
+==============================================================================
+
+GROUPED OPERATIONS
+
+Multiple voxel modifications may belong to a single History Entry.
+
+Examples include:
+
+Brush Strokes
+
+Flood Fill
+
+Terrain Generation
+
+Mass Replace
+
+Import Operations
+
+Grouped operations improve usability.
+
+==============================================================================
+
+MEMORY MANAGEMENT
+
+History should minimize memory consumption.
+
+Complete world snapshots should be avoided whenever practical.
+
+Sparse modification storage is preferred.
+
+==============================================================================
+
+HISTORY LIMITS
+
+Future versions may define configurable history limits.
+
+Old history entries may be discarded when necessary.
+
+Discarding history must never affect the current world state.
+
+==============================================================================
+
+THREAD SAFETY
+
+History modifications must remain synchronized with world modifications.
+
+Incomplete history entries are prohibited.
+
+==============================================================================
+
+FAILURE RECOVERY
+
+Failed editing operations must never create corrupted history entries.
+
+History consistency always has priority over recording incomplete actions.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Future versions may record additional operation metadata.
+
+The public history interface should remain stable.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+History records changes.
+
+It never replaces the Voxel World.
+
+==============================================================================
+
+END OF HISTORY

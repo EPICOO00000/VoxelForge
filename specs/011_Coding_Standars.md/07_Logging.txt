@@ -1,0 +1,214 @@
+==============================================================================
+CODING STANDARDS — LOGGING
+==============================================================================
+
+VoxelForge logging must provide useful diagnostic information without creating
+unnecessary noise or exposing sensitive information.
+
+==============================================================================
+
+GENERAL PRINCIPLE
+
+Logs should help developers understand:
+
+What happened.
+
+Where it happened.
+
+Why it happened.
+
+What operation was being performed.
+
+Whether the operation succeeded or failed.
+
+Logging must not replace proper error handling.
+
+==============================================================================
+
+LOG LEVELS
+
+Use the project's established logging levels consistently.
+
+Typical levels include:
+
+DEBUG
+Detailed information useful during development or diagnosis.
+
+INFO
+Important normal application events.
+
+WARNING
+Unexpected conditions that do not necessarily prevent the operation from
+continuing.
+
+ERROR
+A failure that prevents an operation from completing correctly.
+
+FATAL / CRITICAL
+A severe failure affecting application or subsystem viability, when supported
+by the logging system.
+
+Do not use ERROR for ordinary expected conditions.
+
+==============================================================================
+
+MESSAGE QUALITY
+
+Log messages must be concise but informative.
+
+Prefer:
+
+"Failed to load block database: invalid registry entry"
+
+over:
+
+"Error."
+
+Include relevant context when it helps diagnose the problem.
+
+==============================================================================
+
+CONTEXT
+
+Logs should identify the relevant subsystem or operation.
+
+Useful context may include:
+
+Chunk coordinates.
+
+File names.
+
+Operation identifiers.
+
+Plugin identifiers.
+
+Block identifiers.
+
+Import/export formats.
+
+Task identifiers.
+
+Do not include unnecessary information simply because it is available.
+
+==============================================================================
+
+PERFORMANCE
+
+Logging must not introduce significant overhead in performance-sensitive paths.
+
+Avoid constructing expensive diagnostic data when the corresponding log level is
+disabled.
+
+Do not log every voxel operation, block modification or rendering operation in
+normal production logging.
+
+High-frequency diagnostic logging should normally be DEBUG-level and
+controllable.
+
+==============================================================================
+
+ERROR LOGGING
+
+When an operation fails, the log should contain enough information to diagnose
+the failure.
+
+Where an underlying error exists, preserve its useful cause information rather
+than replacing it with a generic message.
+
+==============================================================================
+
+USER DATA AND PRIVACY
+
+Never log sensitive information unnecessarily.
+
+This includes:
+
+Passwords.
+
+Authentication Tokens.
+
+Private Credentials.
+
+Unnecessary Personal Information.
+
+Private Plugin Data.
+
+Secrets contained in configuration files.
+
+File contents should not be logged merely for convenience.
+
+==============================================================================
+
+WORLD DATA
+
+VoxelForge may process large world datasets.
+
+Do not dump complete chunks, regions or worlds into logs.
+
+When voxel information is required for diagnosis, log compact identifiers,
+coordinates, counts or summaries instead.
+
+==============================================================================
+
+PLUGIN LOGGING
+
+Plugins should use the official logging interface when one is provided.
+
+Plugin logs should identify the plugin responsible for the message.
+
+A plugin must not modify or disable logging behavior belonging to unrelated
+plugins or core systems.
+
+==============================================================================
+
+IMPORT / EXPORT LOGGING
+
+Import and export operations should provide useful progress and failure
+information without logging every processed block.
+
+For large exports, summaries such as processed chunk counts, generated file
+counts and failures are preferable to per-block messages.
+
+Bloxd.io exports that are split because of the 200-chunk-per-schematic limit
+should make the resulting file partitioning clear in diagnostic logs when
+appropriate.
+
+==============================================================================
+
+DEBUGGING
+
+Temporary debugging logs must not remain permanently in production code unless
+they provide legitimate ongoing diagnostic value.
+
+Do not leave accidental console prints or ad-hoc debug output in committed
+code.
+
+==============================================================================
+
+LOG FORMAT
+
+Follow the project's configured logging format.
+
+Messages should remain machine-readable where structured logging is supported.
+
+Avoid relying on visual formatting or emojis for important diagnostic meaning.
+
+==============================================================================
+
+DUPLICATION
+
+Avoid logging the same failure repeatedly at every layer.
+
+The layer that has the most useful context should generally produce the primary
+diagnostic entry, while higher layers may provide user-facing handling.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Logging should make failures and important system behavior diagnosable while
+remaining efficient, readable and safe.
+
+==============================================================================
+
+END OF CODING STANDARDS — LOGGING

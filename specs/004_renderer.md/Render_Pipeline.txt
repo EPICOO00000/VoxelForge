@@ -1,0 +1,163 @@
+==============================================================================
+RENDER PIPELINE
+==============================================================================
+
+The Render Pipeline defines every stage required to transform voxel data
+into Blender meshes.
+
+Every rendered chunk follows the same deterministic pipeline.
+
+==============================================================================
+
+PIPELINE OVERVIEW
+
+Voxel World
+
+↓
+
+Dirty Chunk Detection
+
+↓
+
+Chunk Data Extraction
+
+↓
+
+Face Visibility Analysis
+
+↓
+
+Mesh Generation
+
+↓
+
+Vertex Buffer Generation
+
+↓
+
+Mesh Construction
+
+↓
+
+GPU Upload
+
+↓
+
+Viewport Update
+
+==============================================================================
+
+STAGE 1 — DIRTY DETECTION
+
+The renderer begins by requesting Dirty Chunks from the Voxel World.
+
+Only Dirty Chunks are processed.
+
+Clean Chunks are skipped.
+
+==============================================================================
+
+STAGE 2 — DATA EXTRACTION
+
+Voxel information is copied into temporary working buffers.
+
+The renderer never edits voxel storage.
+
+Data extraction is read-only.
+
+==============================================================================
+
+STAGE 3 — VISIBILITY ANALYSIS
+
+Invisible faces are removed.
+
+Only potentially visible geometry continues through the pipeline.
+
+Face visibility depends on neighboring voxels.
+
+==============================================================================
+
+STAGE 4 — MESH GENERATION
+
+Visible voxel faces are converted into polygon geometry.
+
+Multiple algorithms may be used internally.
+
+The pipeline interface remains identical regardless of implementation.
+
+==============================================================================
+
+STAGE 5 — BUFFER GENERATION
+
+Mesh information is organized into contiguous buffers.
+
+Typical buffers include:
+
+Vertices.
+
+Indices.
+
+Normals.
+
+UVs.
+
+Material Indices.
+
+Buffer generation should minimize allocations.
+
+==============================================================================
+
+STAGE 6 — BLENDER MESH CREATION
+
+Generated buffers are transferred into Blender Mesh data.
+
+Temporary generation buffers may then be discarded.
+
+==============================================================================
+
+STAGE 7 — GPU SYNCHRONIZATION
+
+Updated Blender meshes are uploaded to the GPU.
+
+Only modified meshes require synchronization.
+
+==============================================================================
+
+STAGE 8 — VIEWPORT UPDATE
+
+The viewport refreshes automatically after mesh synchronization.
+
+The rendered representation becomes consistent with the Voxel World.
+
+==============================================================================
+
+PIPELINE CHARACTERISTICS
+
+The pipeline must remain:
+
+Deterministic.
+
+Incremental.
+
+Recoverable.
+
+Parallelizable.
+
+==============================================================================
+
+PIPELINE FAILURES
+
+Failure in one chunk must not interrupt rendering of unrelated chunks.
+
+Independent chunks should continue processing whenever possible.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Render Pipeline transforms authoritative voxel data into efficient
+visual geometry while remaining completely independent from editing logic.
+
+==============================================================================
+
+END OF RENDER PIPELINE

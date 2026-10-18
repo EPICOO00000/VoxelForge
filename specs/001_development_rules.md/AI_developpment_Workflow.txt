@@ -1,0 +1,239 @@
+==============================================================================
+AI DEVELOPMENT WORKFLOW
+==============================================================================
+
+Artificial Intelligence is considered a software development assistant.
+
+AI helps designing, implementing, documenting, reviewing and improving the
+project.
+
+However, AI is never the owner of the project.
+
+The official specifications always remain the single source of truth.
+
+Whenever AI output conflicts with the specifications, the specifications
+must always be followed.
+
+==============================================================================
+
+GENERAL WORKFLOW
+
+Every task must follow the same development workflow.
+
+1. Understand the request.
+
+Read the user's request carefully before writing any code.
+
+Never assume hidden requirements.
+
+If something is unclear, ask for clarification instead of guessing.
+
+2. Read the specifications.
+
+Before modifying any part of the project, identify the relevant
+specification documents.
+
+Never implement a feature without understanding its specification.
+
+3. Analyse the existing implementation.
+
+Before creating anything new, inspect the current architecture.
+
+Determine whether an existing system already solves the problem.
+
+Avoid duplicate implementations.
+
+4. Create an implementation plan.
+
+Before writing code, explain:
+
+- what will be modified
+- which files are affected
+- which classes are created
+- which classes are modified
+- possible risks
+- possible alternatives
+
+Large features should always be divided into smaller implementation steps.
+
+5. Wait for validation.
+
+If the implementation changes the architecture,
+public interfaces,
+project structure,
+or specifications,
+
+wait for approval before continuing.
+
+6. Implement.
+
+Only after the implementation plan has been validated.
+
+Follow all project specifications.
+
+Follow coding standards.
+
+Follow architecture rules.
+
+7. Review.
+
+After implementation:
+
+verify correctness
+
+verify compatibility
+
+verify readability
+
+verify maintainability
+
+verify performance impact
+
+==============================================================================
+
+WHEN MODIFYING EXISTING CODE
+
+Before modifying an existing class:
+
+Understand its responsibility.
+
+Understand who depends on it.
+
+Understand why it was originally designed this way.
+
+Never rewrite code only because another implementation looks cleaner.
+
+==============================================================================
+
+WHEN CREATING NEW CODE
+
+Before creating:
+
+a class
+
+a module
+
+an interface
+
+a manager
+
+a utility
+
+verify that an equivalent component does not already exist.
+
+Prefer extending existing systems whenever possible.
+
+Avoid unnecessary abstractions.
+
+==============================================================================
+
+WHEN REFACTORING
+
+Refactoring must never change behaviour unless explicitly requested.
+
+Every refactoring should improve at least one of the following:
+
+- readability
+
+- maintainability
+
+- modularity
+
+- performance
+
+- memory usage
+
+If no measurable improvement exists,
+the refactoring should not be performed.
+
+==============================================================================
+
+WHEN SOLVING A PROBLEM
+
+Never immediately write code.
+
+First identify:
+
+the root cause
+
+the affected systems
+
+possible solutions
+
+advantages
+
+disadvantages
+
+Only then choose an implementation.
+
+==============================================================================
+
+WHEN MULTIPLE SOLUTIONS EXIST
+
+Present every reasonable solution.
+
+For each solution explain:
+
+Description
+
+Advantages
+
+Disadvantages
+
+Complexity
+
+Performance impact
+
+Memory impact
+
+Maintenance impact
+
+Finally recommend the preferred solution and explain why.
+
+==============================================================================
+
+ERROR HANDLING
+
+If a specification is ambiguous:
+
+do not invent behaviour.
+
+Instead,
+
+identify the ambiguity,
+
+explain the possible interpretations,
+
+and request clarification.
+
+==============================================================================
+
+DOCUMENTATION
+
+Whenever a significant feature is implemented,
+the corresponding documentation must also be updated.
+
+Code and documentation should evolve together.
+
+==============================================================================
+
+FINAL VERIFICATION
+
+Before considering a task complete,
+verify that:
+
+The implementation follows the specifications.
+
+The architecture remains coherent.
+
+No unnecessary complexity was introduced.
+
+No duplicated logic exists.
+
+The project remains maintainable.
+
+The implementation can support future extensions.
+
+==============================================================================
+
+END OF AI DEVELOPMENT WORKFLOW

@@ -1,0 +1,339 @@
+==============================================================================
+VOXELFORGE TESTING — TEST STRATEGY
+==============================================================================
+
+PURPOSE
+
+The testing strategy defines how VoxelForge functionality is validated during
+development and before release.
+
+Testing must combine fast local tests with deeper integration, performance,
+compatibility and regression testing.
+
+==============================================================================
+
+TEST PYRAMID
+
+VoxelForge should generally follow a layered testing strategy.
+
+FAST TESTS
+
+Fast unit tests should form the largest part of the suite.
+
+They should execute frequently during development and validate deterministic
+logic without requiring the complete application.
+
+Examples:
+
+- Coordinate calculations.
+- Chunk indexing.
+- Block database lookups.
+- Brush mathematics.
+- Serialization helpers.
+- Validation logic.
+
+INTEGRATION TESTS
+
+Integration tests verify subsystem boundaries.
+
+They may involve real files, world data, databases or application services.
+
+They should remain reasonably fast but may require more setup than unit tests.
+
+SYSTEM TESTS
+
+System tests validate complete user workflows.
+
+They should be fewer than unit tests but cover the most important end-to-end
+operations.
+
+SPECIALIZED TESTS
+
+Performance, stress, compatibility and rendering tests should be maintained
+separately because their execution requirements differ from ordinary tests.
+
+==============================================================================
+
+RISK-BASED TESTING
+
+Testing effort should be proportional to the potential impact of failure.
+
+High-risk areas include:
+
+- World modification.
+- Chunk storage.
+- Import/export.
+- Serialization.
+- Renderer state.
+- Plugin lifecycle.
+- Concurrent world operations.
+- Large-world processing.
+- Bloxd.io schematic generation.
+
+These systems require stronger coverage than low-risk presentation details.
+
+==============================================================================
+
+TESTING BY CHANGE
+
+When modifying a subsystem:
+
+1. Run the relevant fast tests.
+2. Run tests directly covering the changed behavior.
+3. Run integration tests involving affected interfaces.
+4. Run regression tests related to previous failures.
+5. Run broader system tests when the change crosses subsystem boundaries.
+
+A rendering-only change should not require every expensive world-generation test
+during every local edit, but the appropriate broader suite must still run before
+release.
+
+==============================================================================
+
+UNIT TEST REQUIREMENTS
+
+Unit tests should:
+
+- Have a clear single responsibility.
+- Avoid unnecessary external dependencies.
+- Use deterministic inputs.
+- Test normal and invalid inputs.
+- Cover important boundary conditions.
+- Produce actionable failure messages.
+
+Pure calculations should be heavily unit-tested where practical.
+
+==============================================================================
+
+INTEGRATION TEST REQUIREMENTS
+
+Integration tests should verify actual contracts between components.
+
+Examples:
+
+WORLD STORAGE + CHUNK SYSTEM
+
+Verify that chunks can be created, modified, stored and retrieved without
+coordinate or data corruption.
+
+BRUSH + WORLD
+
+Verify that brush operations modify exactly the intended voxels.
+
+BLOCK DATABASE + RENDERER
+
+Verify that known block definitions produce the expected rendering inputs.
+
+IMPORT + WORLD
+
+Verify that imported data produces the expected internal representation.
+
+WORLD + EXPORT
+
+Verify that exported data represents the requested world state.
+
+PLUGIN API + CORE
+
+Verify that plugins can use documented APIs and receive expected lifecycle
+events.
+
+==============================================================================
+
+ROUND-TRIP STRATEGY
+
+Formats and transformations should use round-trip tests whenever practical.
+
+Example:
+
+source data
+    ->
+import
+    ->
+VoxelForge representation
+    ->
+export
+    ->
+re-import
+    ->
+comparison
+
+The comparison must focus on data that the format promises to preserve.
+
+==============================================================================
+
+MINECRAFT COMPATIBILITY
+
+Minecraft-related import/export tests must include representative structures
+and edge cases.
+
+Tests should verify:
+
+- Dimensions.
+- Coordinates.
+- Block identities.
+- Chunk boundaries.
+- Empty regions.
+- Large structures.
+- Supported metadata.
+- Unsupported data handling.
+
+Unsupported Minecraft features must fail explicitly or degrade according to
+the documented behavior rather than silently corrupting the world.
+
+==============================================================================
+
+BLOXD.IO COMPATIBILITY
+
+Bloxd.io schematic tests must validate the `.bloxdschem` representation used
+by VoxelForge.
+
+Tests must cover:
+
+- Valid header generation.
+- Correct dimensions.
+- Correct chunk coordinates.
+- Correct block payload.
+- Correct RLE encoding.
+- Correct decoding.
+- Correct empty-array termination.
+- Multi-chunk files.
+- Round-trip preservation.
+
+The maximum supported size of a single Bloxd.io schematic is 200 chunks.
+
+A structure exceeding 200 chunks must be partitioned into multiple schematic
+files.
+
+Tests must explicitly verify:
+
+- Exactly 200 chunks succeeds.
+- 201 chunks does not produce an oversized single file.
+- Larger structures are split correctly.
+- Every source chunk appears exactly once in the resulting set.
+- No chunk is silently omitted.
+- Chunk coordinates remain correct after splitting.
+
+==============================================================================
+
+NEGATIVE TESTING
+
+Tests must intentionally provide invalid input.
+
+Examples include:
+
+- Corrupted files.
+- Truncated files.
+- Invalid block IDs.
+- Invalid dimensions.
+- Invalid chunk coordinates.
+- Malformed RLE data.
+- Empty input where prohibited.
+- Oversized schematic requests.
+- Missing resources.
+- Invalid plugin calls.
+
+The expected result must be defined for each class of invalid input.
+
+==============================================================================
+
+CONCURRENCY TESTING
+
+Systems using parallel processing must be tested under different workloads.
+
+Tests should verify:
+
+- No data races where applicable.
+- No duplicate modifications.
+- No lost modifications.
+- Correct synchronization.
+- Correct task completion.
+- Correct cancellation behavior.
+- Correct final world state.
+
+Tests must not rely on a particular thread execution order unless that ordering
+is explicitly part of the contract.
+
+==============================================================================
+
+PERFORMANCE TESTING
+
+Performance tests should measure important workloads using representative data.
+
+Measurements may include:
+
+- World loading time.
+- World saving time.
+- Chunk processing throughput.
+- Brush operation time.
+- Rendering performance.
+- Import/export throughput.
+- Memory usage.
+
+Performance tests should be separated from ordinary correctness tests when
+their execution cost makes frequent execution impractical.
+
+==============================================================================
+
+STRESS TESTING
+
+Stress tests should intentionally exceed normal workloads while remaining
+within defined resource and safety limits.
+
+Examples:
+
+- Very large worlds.
+- Many simultaneous chunks.
+- Large brush operations.
+- Large schematic exports.
+- Repeated import/export cycles.
+- Large numbers of plugin operations.
+
+The purpose is to identify instability, leaks, runaway memory use and
+concurrency problems.
+
+==============================================================================
+
+REGRESSION STRATEGY
+
+Known bugs should become permanent regression tests whenever practical.
+
+Regression tests should remain part of the suite after the original issue has
+been fixed.
+
+==============================================================================
+
+RELEASE TESTING
+
+Before a significant release, the test process should include:
+
+- Full unit suite.
+- Full integration suite.
+- Important system workflows.
+- Import/export compatibility.
+- Minecraft compatibility tests.
+- Bloxd.io compatibility tests.
+- Rendering tests.
+- Regression suite.
+- Relevant performance tests.
+- Relevant stress tests.
+
+==============================================================================
+
+TEST STRATEGY PRINCIPLE
+
+The test suite must provide confidence proportional to the risk of change.
+
+Fast tests protect development velocity.
+
+Integration tests protect subsystem contracts.
+
+System tests protect user workflows.
+
+Compatibility tests protect supported ecosystems.
+
+Performance and stress tests protect scalability and stability.
+
+==============================================================================
+
+END OF TESTING — TEST STRATEGY
+==============================================================================

@@ -1,0 +1,253 @@
+==============================================================================
+PLUGIN API — EVENT API
+==============================================================================
+
+The Event API provides a controlled mechanism for plugins to observe relevant
+VoxelForge events.
+
+Events allow plugins to react to application activity without creating direct
+dependencies on internal subsystem implementations.
+
+==============================================================================
+
+PURPOSE
+
+The Event API may expose events related to:
+
+World Changes.
+
+Voxel Operations.
+
+Brush Operations.
+
+Chunk State.
+
+Import.
+
+Export.
+
+UI Actions.
+
+Plugin Lifecycle.
+
+Application State.
+
+Other explicitly documented events.
+
+==============================================================================
+
+EVENT OWNERSHIP
+
+Each event has an authoritative owner.
+
+The owning subsystem is responsible for creating and dispatching the event.
+
+Plugins may subscribe to documented events but must not directly manipulate the
+internal event dispatcher.
+
+==============================================================================
+
+SUBSCRIPTION
+
+Plugins subscribe through the Event API.
+
+A subscription should identify:
+
+Event Type.
+
+Plugin Owner.
+
+Callback or Handler.
+
+Optional Filtering Configuration.
+
+Subscriptions must be removable.
+
+==============================================================================
+
+UNSUBSCRIPTION
+
+Plugins must remove subscriptions when they are disabled or unloaded.
+
+The Event System must not retain callbacks belonging to inactive plugins.
+
+Automatic cleanup may be provided by the Plugin Runtime where supported.
+
+==============================================================================
+
+EVENT DATA
+
+Event payloads should expose only the information required by the documented
+event contract.
+
+Internal implementation objects should not automatically become event payloads.
+
+Event data should remain stable across compatible API versions.
+
+==============================================================================
+
+WORLD EVENTS
+
+World-related events may communicate information such as:
+
+Voxel Modification.
+
+Chunk Modification.
+
+World Loading.
+
+World Unloading.
+
+Selection Changes.
+
+A plugin observing these events must not bypass the normal world-editing APIs.
+
+==============================================================================
+
+BRUSH EVENTS
+
+Brush events may indicate that a brush operation has:
+
+Started.
+
+Completed.
+
+Failed.
+
+Been Cancelled.
+
+Event payloads should provide the information required by plugins without
+exposing private Brush System state.
+
+==============================================================================
+
+IMPORT AND EXPORT EVENTS
+
+Import/export events may provide:
+
+Operation Started.
+
+Progress.
+
+Completion.
+
+Failure.
+
+Cancellation.
+
+Plugins must not assume that an import or export operation is successful merely
+because it started.
+
+==============================================================================
+
+PLUGIN EVENTS
+
+The Plugin Runtime may expose lifecycle events such as:
+
+Plugin Discovered.
+
+Plugin Loaded.
+
+Plugin Initialized.
+
+Plugin Activated.
+
+Plugin Deactivated.
+
+Plugin Shutdown.
+
+Plugin Failure.
+
+Plugins must not create implicit lifecycle dependencies through event ordering.
+
+==============================================================================
+
+EVENT ORDER
+
+Where event order is significant, it must be explicitly documented.
+
+Plugins must not rely on accidental ordering between unrelated events.
+
+==============================================================================
+
+THREADING
+
+Each event must define its execution context.
+
+A plugin must not assume that every event is delivered on the UI thread.
+
+Event handlers must follow the thread-safety guarantees of the API.
+
+==============================================================================
+
+PERFORMANCE
+
+Event handlers may execute on performance-sensitive paths.
+
+Plugins should keep handlers lightweight.
+
+Expensive work should be deferred to the Task System when appropriate.
+
+A plugin must not perform unnecessary synchronous processing inside high-
+frequency events.
+
+==============================================================================
+
+ERROR ISOLATION
+
+A plugin event handler failure must not prevent unrelated subscribers from
+receiving the event when the runtime supports isolated dispatch.
+
+Errors should be reported through the appropriate diagnostic mechanism.
+
+==============================================================================
+
+WORLD MODIFICATION FROM EVENTS
+
+An event handler may initiate another operation only when the event contract
+permits it.
+
+Recursive or uncontrolled event-triggered modifications must be avoided.
+
+A plugin must not create infinite event loops by responding to an event with an
+operation that continuously produces the same event.
+
+==============================================================================
+
+HISTORY AND EVENTS
+
+Plugins observing world changes must treat History and Event processing as
+separate responsibilities.
+
+A plugin must not manually reproduce History behavior when the normal History
+API already handles the operation.
+
+==============================================================================
+
+MINECRAFT AND BLOXD.IO
+
+Events related to imported or exported worlds must preserve the same data
+correctness requirements as the underlying systems.
+
+Bloxd.io schematic export events must correctly represent multi-file exports
+when the 200-chunk-per-schematic limit requires the output to be split.
+
+==============================================================================
+
+LIFECYCLE
+
+Event subscriptions are owned by the plugin that created them.
+
+When the plugin lifecycle ends, its subscriptions must be safely removed.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Event API allows plugins to observe VoxelForge activity without creating
+uncontrolled dependencies, while preserving performance, lifecycle safety,
+threading guarantees and architectural separation.
+
+==============================================================================
+
+END OF EVENT API

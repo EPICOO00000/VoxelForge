@@ -1,0 +1,99 @@
+==============================================================================
+BLOCK VARIANTS
+==============================================================================
+
+Block Variants represent predefined visual or logical variations of a Block
+Definition.
+
+Variants avoid unnecessary duplication while allowing multiple appearances or
+behaviors to share the same conceptual block.
+
+==============================================================================
+
+PURPOSE
+
+Variants allow one Block Definition to represent multiple predefined versions
+without creating entirely separate definitions.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Variants must remain:
+
+Deterministic.
+
+Lightweight.
+
+Data Driven.
+
+Serializable.
+
+Game Independent.
+
+==============================================================================
+
+EXAMPLES
+
+Possible Variants include:
+
+Different Colors.
+
+Different Wood Species.
+
+Different Stone Types.
+
+Seasonal Variants.
+
+Decorative Variants.
+
+==============================================================================
+
+RELATIONSHIP WITH STATES
+
+Variants are predefined configurations.
+
+States describe runtime properties.
+
+A Variant may define default State values.
+
+==============================================================================
+
+RELATIONSHIP WITH METADATA
+
+Variants are shared.
+
+Metadata is unique per voxel instance.
+
+Variants must never replace Metadata.
+
+==============================================================================
+
+LOOKUP
+
+Variants are resolved through the Block Registry.
+
+Every Variant belongs to exactly one Block Definition.
+
+==============================================================================
+
+PLUGIN SUPPORT
+
+Plugins may define additional Variants for existing or custom blocks.
+
+==============================================================================
+
+VERSIONING
+
+Variants should remain stable across engine versions whenever possible.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Variants provide reusable predefined block configurations while minimizing
+duplication and preserving a clean Block Database.
+
+==============================================================================
+
+END OF BLOCK VARIANTS

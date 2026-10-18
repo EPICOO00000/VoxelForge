@@ -1,0 +1,188 @@
+==============================================================================
+SELECTIONS
+==============================================================================
+
+Selections define editable regions inside the Voxel World.
+
+They allow editing operations to be restricted to specific voxel regions
+without modifying the world itself.
+
+Selections are logical structures.
+
+They never own voxel data.
+
+==============================================================================
+
+PURPOSE
+
+Selections provide spatial constraints for editing operations.
+
+They are used by:
+
+Brushes
+
+Fill Operations
+
+Replace Operations
+
+Generators
+
+Importers
+
+Exporters
+
+Plugins
+
+Every subsystem may query selections but never owns them.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Selections must remain:
+
+Independent from rendering.
+
+Independent from Blender.
+
+Independent from game formats.
+
+Fast to query.
+
+Easy to update.
+
+Memory efficient.
+
+==============================================================================
+
+DATA OWNERSHIP
+
+Selections never duplicate voxel information.
+
+Selections only describe spatial regions.
+
+Voxel data always remains inside the Voxel World.
+
+==============================================================================
+
+SELECTION TYPES
+
+The architecture should support multiple selection types.
+
+Examples include:
+
+Box Selection
+
+Sphere Selection
+
+Cylinder Selection
+
+Freeform Selection
+
+Mask Selection
+
+Future custom selection types.
+
+All selection types should expose a common interface.
+
+==============================================================================
+
+SELECTION OPERATIONS
+
+Selections support operations such as:
+
+Create
+
+Move
+
+Resize
+
+Invert
+
+Union
+
+Intersection
+
+Difference
+
+Clear
+
+Operations should not modify voxel data directly.
+
+==============================================================================
+
+SELECTION QUERIES
+
+Selections provide efficient spatial queries.
+
+Typical queries include:
+
+Contains Position
+
+Contains Voxel
+
+Intersects Chunk
+
+Intersects Region
+
+Bounding Box
+
+Mask Generation
+
+==============================================================================
+
+MULTIPLE SELECTIONS
+
+Future versions may support multiple simultaneous selections.
+
+Selection logic should remain extensible.
+
+==============================================================================
+
+SELECTION MASKS
+
+Selections may generate temporary masks.
+
+Masks accelerate brush execution and region processing.
+
+Masks are temporary data.
+
+They never become authoritative world data.
+
+==============================================================================
+
+PERFORMANCE
+
+Selection queries occur frequently during editing.
+
+Query operations should remain highly optimized.
+
+Repeated allocation should be minimized.
+
+==============================================================================
+
+THREAD SAFETY
+
+Read operations should support concurrent execution whenever possible.
+
+Write operations must preserve selection consistency.
+
+==============================================================================
+
+EXTENSIBILITY
+
+New selection types should integrate without modifying existing systems.
+
+Selection interfaces should remain stable.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Selections describe where editing is allowed.
+
+They never describe what exists inside the world.
+
+==============================================================================
+
+END OF SELECTIONS

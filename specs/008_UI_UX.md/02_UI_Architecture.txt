@@ -1,0 +1,123 @@
+ ==============================================================================
+UI ARCHITECTURE
+==============================================================================
+
+The User Interface follows a layered architecture separating presentation from
+engine logic.
+
+Every action passes through Operators before reaching the Engine.
+
+==============================================================================
+
+ARCHITECTURE
+
+User
+
+↓
+
+Panels
+
+↓
+
+Buttons
+
+↓
+
+Operators
+
+↓
+
+Engine
+
+↓
+
+Subsystem
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+The UI layer must remain:
+
+Independent.
+
+Stateless whenever possible.
+
+Modular.
+
+Reusable.
+
+Easy to extend.
+
+==============================================================================
+
+COMPONENTS
+
+The UI consists of:
+
+Panels.
+
+Menus.
+
+Toolbars.
+
+Dialogs.
+
+Property Groups.
+
+Operators.
+
+Gizmos.
+
+Viewport Overlays.
+
+==============================================================================
+
+OPERATORS
+
+Operators act as the bridge between Blender and the Engine.
+
+Operators orchestrate engine calls but never implement engine algorithms.
+
+==============================================================================
+
+PROPERTY GROUPS
+
+Property Groups store editable user settings.
+
+They do not contain engine state.
+
+==============================================================================
+
+PANELS
+
+Panels expose functionality grouped by category.
+
+Panels should avoid excessive nesting.
+
+==============================================================================
+
+DEPENDENCIES
+
+The UI may depend on:
+
+Engine.
+
+Operators.
+
+Utilities.
+
+Plugin API.
+
+The UI must never be depended upon by engine subsystems.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The UI Architecture should isolate Blender-specific code from the engine while
+providing a clean and maintainable interface.
+
+==============================================================================
+
+END OF UI ARCHITECTURE

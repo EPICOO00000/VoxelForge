@@ -1,0 +1,127 @@
+==============================================================================
+THEMES
+==============================================================================
+
+Themes define the visual appearance of the VoxelForge user interface.
+
+Themes modify presentation only.
+
+They never affect engine behavior, editing algorithms or project data.
+
+==============================================================================
+
+PURPOSE
+
+The Theme System allows users and studios to customize the interface while
+maintaining a consistent and professional editing experience.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Themes should be:
+
+Readable.
+
+Consistent.
+
+Accessible.
+
+Minimal.
+
+Professional.
+
+==============================================================================
+
+CUSTOMIZABLE ELEMENTS
+
+Themes may customize:
+
+Panel Colors.
+
+Background Colors.
+
+Accent Colors.
+
+Icons.
+
+Brush Preview Colors.
+
+Selection Colors.
+
+Overlay Colors.
+
+Grid Colors.
+
+Highlight Colors.
+
+==============================================================================
+
+BLENDER INTEGRATION
+
+VoxelForge should automatically inherit Blender's active theme whenever
+possible.
+
+Custom VoxelForge themes should remain visually coherent with Blender's user
+interface.
+
+==============================================================================
+
+VISUAL CONSISTENCY
+
+The same action should always use the same visual language.
+
+Examples:
+
+Green indicates successful operations.
+
+Yellow indicates warnings.
+
+Red indicates errors.
+
+Blue indicates selections.
+
+==============================================================================
+
+ICONS
+
+Icons should remain recognizable regardless of the active theme.
+
+Meaning should never depend exclusively on color.
+
+==============================================================================
+
+CUSTOM THEMES
+
+Users may create:
+
+Personal Themes.
+
+Studio Themes.
+
+Project Themes.
+
+Plugin Themes.
+
+==============================================================================
+
+FUTURE EXTENSIONS
+
+Future versions may support:
+
+Theme Packages.
+
+Online Theme Libraries.
+
+Automatic Theme Switching.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Theme System should improve comfort and personalization while preserving
+clarity, consistency and usability.
+
+==============================================================================
+
+END OF THEMES

@@ -1,0 +1,151 @@
+==============================================================================
+CODING STANDARDS — DEPRECATION
+==============================
+
+Deprecation is the controlled process of marking an existing API, feature or
+behavior as obsolete while providing a supported path toward its replacement.
+
+==============================================================================
+
+GENERAL PRINCIPLE
+
+Deprecation must be intentional and documented.
+
+An API should not be deprecated merely because a newer implementation exists.
+There should be a clear reason for moving users toward the replacement.
+
+==============================================================================
+
+DEPRECATION NOTICE
+
+A deprecated API or feature should clearly communicate:
+
+That it is deprecated.
+
+Why it is deprecated when useful.
+
+What should be used instead.
+
+Any important compatibility implications.
+
+The expected removal policy or version when such information is defined.
+
+==============================================================================
+
+PUBLIC API
+
+Public plugin APIs require particular care.
+
+A deprecated API must remain functional for the compatibility period defined by
+the project's versioning policy unless there is a documented exceptional reason
+to remove it earlier.
+
+==============================================================================
+
+REPLACEMENTS
+
+Whenever possible, a deprecated API should have a documented replacement.
+
+The replacement should provide equivalent or clearly documented improved
+functionality.
+
+Avoid deprecating an API while providing no practical migration path.
+
+==============================================================================
+
+MIGRATION
+
+Migration guidance should explain important differences between the old and new
+interfaces.
+
+For APIs used by plugins, migration information should cover:
+
+Changed method names.
+
+Changed parameters.
+
+Changed return values.
+
+Changed lifecycle behavior.
+
+Changed error handling.
+
+Changed compatibility requirements.
+
+==============================================================================
+
+INTERNAL CODE
+
+Core code should not continue introducing new dependencies on deprecated APIs.
+
+New code should use the supported replacement unless compatibility requirements
+explicitly require the deprecated interface.
+
+==============================================================================
+
+REMOVAL
+
+Deprecated functionality should only be removed according to the project's
+compatibility and release policy.
+
+Before removal, verify that:
+
+The documented deprecation period has been respected.
+
+Migration guidance exists.
+
+Known consumers have a viable replacement.
+
+Tests no longer depend on obsolete behavior unless compatibility tests are
+intentional.
+
+==============================================================================
+
+SERIALIZED DATA AND FILE FORMATS
+
+Deprecation must be handled carefully for persistent data formats.
+
+Existing Minecraft worlds, supported schematic formats and Bloxd.io schematic
+files must not become unreadable merely because an internal API has been
+deprecated.
+
+Format migration must be explicit when required.
+
+==============================================================================
+
+PLUGIN COMPATIBILITY
+
+Plugin APIs may remain available after deprecation to preserve compatibility.
+
+Deprecation warnings should identify the affected API and preferred replacement
+without overwhelming normal application logs.
+
+==============================================================================
+
+WARNINGS
+
+Warnings should be useful and actionable.
+
+Do not repeatedly emit identical warnings from tight loops.
+
+Do not use deprecation warnings as a substitute for proper documentation.
+
+==============================================================================
+
+DOCUMENTATION
+
+Deprecated APIs must be clearly marked in the relevant API documentation.
+
+When an API is removed, documentation should be updated so users do not
+mistakenly continue implementing against it.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Deprecation should allow VoxelForge to evolve without unnecessarily breaking
+existing users, plugins or project data.
+
+==============================================================================
+
+END OF CODING STANDARDS — DEPRECATION

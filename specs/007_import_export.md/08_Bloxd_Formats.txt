@@ -1,0 +1,157 @@
+==============================================================================
+BLOXD.IO FORMAT
+==============================================================================
+
+VoxelForge supports Bloxd.io through the .bloxdschem format.
+
+The implementation follows the reverse-engineered Schema Version 0 currently
+used by the official Bloxd.io converter.
+
+==============================================================================
+
+GENERAL CHARACTERISTICS
+
+Container:
+
+Avro Binary
+
+Schema Version:
+
+Version 0
+
+Storage Model:
+
+Chunk Based
+
+Compression:
+
+Run-Length Encoding (RLE)
+
+==============================================================================
+
+CHUNK STRUCTURE
+
+Each chunk always represents:
+
+32 × 32 × 32 voxels
+
+Exactly 32768 voxel positions.
+
+Chunk dimensions are fixed.
+
+Variable chunk sizes are not supported.
+
+==============================================================================
+
+VOXEL ORDER
+
+Voxel data inside each chunk is serialized using the following index:
+
+local_x × 1024
++
+local_y × 32
++
+local_z
+
+Importers and Exporters must preserve this ordering exactly.
+
+==============================================================================
+
+BLOCK STORAGE
+
+Chunk voxel data is stored using Run-Length Encoding.
+
+Each run stores:
+
+Run Length
+
+↓
+
+Universal Block Identifier
+
+Runs are serialized using unsigned LEB128 integer encoding.
+
+==============================================================================
+
+FILE STRUCTURE
+
+A Bloxd schematic contains:
+
+Header
+
+World Name
+
+World Position
+
+World Size
+
+Chunk List
+
+Each chunk stores:
+
+Chunk Coordinates
+
+Compressed Block Data
+
+==============================================================================
+
+POSITIONS
+
+Chunk coordinates are stored independently from world dimensions.
+
+Exporters must preserve chunk positions exactly.
+
+==============================================================================
+
+SIZE LIMITATIONS
+
+Current Bloxd implementations support approximately:
+
+200 chunks per .bloxdschem file
+
+Larger Voxel Worlds must be exported as multiple files.
+
+Automatic file splitting is mandatory.
+
+==============================================================================
+
+FILE SPLITTING
+
+When the export exceeds the supported chunk limit:
+
+The exporter creates multiple .bloxdschem files.
+
+Each file preserves absolute chunk coordinates.
+
+No voxel data may be lost.
+
+Splitting must remain transparent to users whenever possible.
+
+==============================================================================
+
+IMPORT
+
+Importers reconstruct the complete Voxel World from one or multiple
+.bloxdschem files.
+
+==============================================================================
+
+EXPORT
+
+Exporters serialize chunks independently.
+
+The exporter must never require the entire world to exist as one contiguous
+memory buffer.
+
+Streaming export is strongly recommended.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Bloxd.io support should faithfully reproduce the official binary format while
+remaining completely isolated from the Core architecture.
+
+==============================================================================
+
+END OF BLOXD.IO FORMAT

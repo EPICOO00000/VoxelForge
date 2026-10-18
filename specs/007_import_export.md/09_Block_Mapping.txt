@@ -1,0 +1,115 @@
+==============================================================================
+BLOCK MAPPING
+==============================================================================
+
+Block Mapping defines how external block identifiers are translated into
+Universal Block IDs and vice versa.
+
+Every conversion performed by VoxelForge passes through the Block Database.
+
+==============================================================================
+
+PURPOSE
+
+The Mapping System guarantees that the Core remains completely independent
+from external games.
+
+The Core manipulates only Universal Block IDs.
+
+==============================================================================
+
+CONVERSION PIPELINE
+
+Minecraft Block
+
+↓
+
+Universal Block ID
+
+↓
+
+Bloxd Block
+
+Direct Minecraft → Bloxd conversion is forbidden.
+
+==============================================================================
+
+MAPPING TYPES
+
+Mappings include:
+
+Block Identifier Mapping.
+
+State Mapping.
+
+Metadata Mapping.
+
+Variant Mapping.
+
+Version Mapping.
+
+==============================================================================
+
+LOOKUP
+
+Mappings should provide constant-time lookup whenever possible.
+
+Lookup performance is more important than registration speed.
+
+==============================================================================
+
+VERSION SUPPORT
+
+Mappings may vary between game versions.
+
+Version-specific mappings belong to the Block Database.
+
+==============================================================================
+
+UNKNOWN BLOCKS
+
+Unknown identifiers should never terminate the conversion process.
+
+Fallback strategies include:
+
+Missing Block.
+
+Unknown Block.
+
+Exporter Warning.
+
+User Notification.
+
+==============================================================================
+
+PLUGIN SUPPORT
+
+Plugins may register additional mappings.
+
+Plugin mappings follow exactly the same validation rules as built-in mappings.
+
+==============================================================================
+
+VALIDATION
+
+Every mapping must be:
+
+Unique.
+
+Deterministic.
+
+Reversible whenever possible.
+
+Validated during registration.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Mapping System provides a stable translation layer allowing every
+supported voxel ecosystem to communicate through one universal internal
+representation.
+
+==============================================================================
+
+END OF BLOCK MAPPING

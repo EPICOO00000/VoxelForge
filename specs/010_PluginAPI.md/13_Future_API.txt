@@ -1,0 +1,350 @@
+==============================================================================
+PLUGIN API — FUTURE API
+==============================================================================
+
+The Future API defines the principles and extension points intended for future
+versions of the VoxelForge Plugin API.
+
+This specification exists to ensure that new plugin capabilities can be added
+without breaking the architecture, compatibility guarantees or existing
+plugins.
+
+==============================================================================
+
+PURPOSE
+
+Future API development may extend:
+
+World Access.
+
+Brushes.
+
+Blocks.
+
+Rendering.
+
+Import / Export.
+
+UI.
+
+Events.
+
+Tasks.
+
+Plugin Services.
+
+Automation.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Future APIs must remain:
+
+Explicit.
+
+Documented.
+
+Versioned.
+
+Thread-safe according to their contract.
+
+Performance-aware.
+
+Compatible with existing architecture.
+
+Safe for plugin lifecycle transitions.
+
+New APIs must not expose private implementation details unnecessarily.
+
+==============================================================================
+
+EXTENSION MODEL
+
+New functionality should preferably be introduced through explicit extension
+interfaces rather than exposing internal VoxelForge classes.
+
+A plugin should depend on stable API contracts rather than implementation
+details.
+
+==============================================================================
+
+WORLD API EVOLUTION
+
+Future versions may expose additional world operations, including more advanced
+batch editing, querying and transformation mechanisms.
+
+New operations must preserve the existing requirements for:
+
+History.
+
+Events.
+
+Chunk State.
+
+Block Validity.
+
+Rendering Invalidation.
+
+Threading.
+
+==============================================================================
+
+BRUSH API EVOLUTION
+
+Future Brush API versions may support additional brush types, procedural
+operations, previews or asynchronous execution.
+
+New brush capabilities must remain compatible with the existing Brush System.
+
+Large operations should continue to use appropriate task and batching
+mechanisms.
+
+==============================================================================
+
+BLOCK API EVOLUTION
+
+Future Block API versions may expose additional block metadata, materials,
+properties or registration capabilities.
+
+Changes must not require plugins to depend on the internal Block Database.
+
+Existing block identifiers must remain stable whenever compatibility requires
+it.
+
+==============================================================================
+
+RENDER API EVOLUTION
+
+Future rendering extensions may provide additional viewport, overlay, gizmo or
+custom rendering capabilities.
+
+New rendering APIs must preserve Renderer ownership and must not require plugins
+to replace or directly manipulate the internal rendering pipeline.
+
+==============================================================================
+
+IMPORT / EXPORT EVOLUTION
+
+Future versions may add new format interfaces, streaming mechanisms, conversion
+pipelines or validation facilities.
+
+Importers and exporters must remain independent from the Renderer.
+
+Large datasets should continue to support incremental processing.
+
+For Bloxd.io `.bloxdschem` workflows, the maximum of 200 chunks per schematic
+must remain respected unless the external format itself changes.
+
+Worlds larger than this limit must be divided into multiple schematic files.
+
+==============================================================================
+
+UI EVOLUTION
+
+Future UI APIs may expose additional panels, commands, toolbars, dialogs,
+property editors and application integration points.
+
+New UI APIs must preserve:
+
+UI Thread Rules.
+
+Accessibility.
+
+Plugin Lifecycle Safety.
+
+Application Responsiveness.
+
+==============================================================================
+
+EVENT EVOLUTION
+
+Future events may expose additional application and subsystem state.
+
+New events must define:
+
+Event Ownership.
+
+Payload.
+
+Execution Context.
+
+Ordering Guarantees.
+
+Lifecycle Behavior.
+
+Performance Expectations.
+
+Plugins must not rely on undocumented event ordering.
+
+==============================================================================
+
+TASK AND ASYNCHRONOUS APIs
+
+Future APIs may expose more asynchronous operations.
+
+Long-running operations should provide appropriate mechanisms for:
+
+Progress.
+
+Cancellation.
+
+Failure Reporting.
+
+Completion.
+
+Plugins must not block the UI unnecessarily.
+
+==============================================================================
+
+CAPABILITY DETECTION
+
+Future optional features should preferably be discoverable through capability
+detection.
+
+Plugins should not depend exclusively on exact application versions when a
+direct capability query is available.
+
+==============================================================================
+
+EXPERIMENTAL APIs
+
+Experimental APIs may be introduced before they become stable.
+
+Experimental interfaces must be clearly identified as such.
+
+They may change or be removed without the compatibility guarantees of stable
+APIs.
+
+Plugins using experimental APIs should declare that dependency where supported.
+
+==============================================================================
+
+DEPRECATION
+
+Future API versions must provide a clear migration path when replacing existing
+interfaces.
+
+Deprecated interfaces should remain available for an appropriate compatibility
+period whenever practical.
+
+==============================================================================
+
+SECURITY
+
+Future APIs must follow the existing plugin security model.
+
+A new capability must not automatically grant unrestricted access to:
+
+Files.
+
+Networks.
+
+World Data.
+
+External Processes.
+
+User Data.
+
+System Resources.
+
+New permissions must be explicitly defined and validated.
+
+==============================================================================
+
+PERFORMANCE
+
+New APIs must be evaluated for their impact on:
+
+CPU Usage.
+
+Memory Usage.
+
+GPU Usage.
+
+Disk I/O.
+
+Network Usage.
+
+Frame Time.
+
+Large World Operations.
+
+API convenience must not justify uncontrolled resource consumption.
+
+==============================================================================
+
+MINECRAFT COMPATIBILITY
+
+Future API additions must preserve supported Minecraft import/export workflows.
+
+New abstractions must not silently discard Minecraft-compatible block or world
+information.
+
+==============================================================================
+
+BLOXD.IO COMPATIBILITY
+
+Future API additions must preserve supported Bloxd.io workflows.
+
+The `.bloxdschem` format must remain correctly generated and interpreted through
+the dedicated Import/Export system.
+
+Any export exceeding 200 chunks must continue to be split into multiple valid
+schematic files.
+
+The Render API and UI API must not introduce dependencies that make schematic
+export require rendering.
+
+==============================================================================
+
+PLUGIN LIFECYCLE
+
+Every future API capability must define how it behaves during:
+
+Plugin Load.
+
+Initialization.
+
+Activation.
+
+Runtime.
+
+Deactivation.
+
+Shutdown.
+
+Unload.
+
+A new API must not leave plugin-owned resources or callbacks active after
+unloading.
+
+==============================================================================
+
+VERSIONING
+
+All stable future APIs must follow the Plugin API Versioning rules.
+
+Breaking changes require an explicit version transition.
+
+New optional functionality should remain backward-compatible whenever practical.
+
+==============================================================================
+
+DOCUMENTATION REQUIREMENT
+
+A future API must not be considered stable until its behavior, parameters,
+threading requirements, lifecycle behavior, errors and compatibility guarantees
+are documented.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Future API provides a controlled path for expanding VoxelForge's plugin
+system while preserving architectural separation, compatibility, performance,
+security and long-term maintainability.
+
+==============================================================================
+
+END OF FUTURE API

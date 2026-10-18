@@ -1,0 +1,116 @@
+==============================================================================
+VERSION COMPATIBILITY
+==============================================================================
+
+Voxel formats evolve over time.
+
+Importers and Exporters must explicitly define the versions they support.
+
+==============================================================================
+
+PURPOSE
+
+Version Compatibility allows VoxelForge to support multiple generations of
+external formats without affecting the Core architecture.
+
+==============================================================================
+
+SUPPORTED VERSIONS
+
+Each Importer and Exporter defines:
+
+Minimum Supported Version.
+
+Maximum Supported Version.
+
+Preferred Version.
+
+Deprecated Versions.
+
+==============================================================================
+
+IMPORT
+
+During import:
+
+Read Version Information.
+
+Validate Compatibility.
+
+Select Conversion Rules.
+
+Convert Data.
+
+==============================================================================
+
+EXPORT
+
+During export:
+
+Determine Target Version.
+
+Apply Version-Specific Rules.
+
+Generate Compatible Output.
+
+==============================================================================
+
+VERSION DIFFERENCES
+
+Possible differences include:
+
+Block IDs.
+
+Block States.
+
+Metadata.
+
+Chunk Layout.
+
+Compression Methods.
+
+Serialization Format.
+
+==============================================================================
+
+FALLBACKS
+
+When importing unsupported versions:
+
+Attempt automatic compatibility conversion whenever safe.
+
+Otherwise generate an explicit compatibility error.
+
+Silent conversion failures are forbidden.
+
+==============================================================================
+
+BACKWARD COMPATIBILITY
+
+Whenever practical, new engine versions should continue importing older
+project formats.
+
+==============================================================================
+
+FORWARD COMPATIBILITY
+
+Forward compatibility should be attempted only when explicitly supported.
+
+Unsupported future formats must generate informative errors.
+
+==============================================================================
+
+PLUGIN SUPPORT
+
+Plugins may implement additional version converters.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Version compatibility should isolate external format evolution from the rest
+of the engine while providing predictable conversion behavior.
+
+==============================================================================
+
+END OF VERSION COMPATIBILITY

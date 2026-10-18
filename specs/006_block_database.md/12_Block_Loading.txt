@@ -1,0 +1,81 @@
+==============================================================================
+BLOCK LOADING
+==============================================================================
+
+The Block Loading System is responsible for constructing the Block Database
+during engine initialization.
+
+==============================================================================
+
+PURPOSE
+
+Loading converts external block definition files into validated Block
+Definitions registered inside the Block Registry.
+
+==============================================================================
+
+LOADING ORDER
+
+The recommended loading order is:
+
+Load Built-in Definitions.
+
+Validate Built-in Definitions.
+
+Load Built-in Mappings.
+
+Load Plugins.
+
+Register Plugin Blocks.
+
+Register Plugin Mappings.
+
+Finalize Registry.
+
+==============================================================================
+
+VALIDATION
+
+Every loaded definition must pass validation before registration.
+
+Invalid definitions must never enter the Registry.
+
+==============================================================================
+
+ERROR HANDLING
+
+Loading errors should provide clear diagnostics.
+
+Recoverable errors should not stop engine initialization whenever possible.
+
+==============================================================================
+
+HOT RELOADING
+
+Future implementations may support reloading Block Definitions without
+restarting the engine.
+
+==============================================================================
+
+EXTERNAL FILES
+
+Definitions should be loaded from external configuration files.
+
+The engine should not require recompilation to modify block definitions.
+
+==============================================================================
+
+PLUGIN LOADING
+
+Plugin Block Definitions follow the same loading pipeline as built-in blocks.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The loading system should provide a reliable, deterministic and extensible
+pipeline for constructing the complete Block Database.
+
+==============================================================================
+
+END OF BLOCK LOADING

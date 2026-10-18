@@ -1,0 +1,116 @@
+==============================================================================
+MINECRAFT FORMATS
+==============================================================================
+
+VoxelForge supports the Minecraft ecosystem through dedicated Importers and
+Exporters.
+
+Each Minecraft format is implemented independently while sharing the same
+Importer and Exporter interfaces.
+
+==============================================================================
+
+SUPPORTED FORMATS
+
+The initial implementation supports:
+
+Minecraft Schematic
+
+Minecraft Litematic
+
+Additional Minecraft formats may be added without modifying existing
+implementations.
+
+==============================================================================
+
+SCHEMATIC
+
+The Schematic format stores voxel data using palettes and metadata structures
+compatible with traditional Minecraft editors.
+
+Importers must support reading block identifiers, dimensions and metadata.
+
+Exporters must preserve block positions whenever possible.
+
+==============================================================================
+
+LITEMATIC
+
+Litematic is the preferred modern Minecraft exchange format.
+
+It supports:
+
+Multiple regions.
+
+Block palettes.
+
+Block states.
+
+Metadata.
+
+Large structures.
+
+Exporters should preserve as much information as possible.
+
+==============================================================================
+
+BLOCK PALETTES
+
+Minecraft formats typically store palettes rather than raw Universal IDs.
+
+Importers must translate palette entries into Universal Block IDs through the
+Block Database.
+
+Exporters generate palettes from Universal Block IDs during serialization.
+
+==============================================================================
+
+BLOCK STATES
+
+Minecraft block states must be translated into Universal Block States.
+
+Examples include:
+
+Facing.
+
+Axis.
+
+Open.
+
+Powered.
+
+Waterlogged.
+
+Age.
+
+Rotation.
+
+==============================================================================
+
+METADATA
+
+Whenever supported by the target format, metadata should be imported and
+exported.
+
+Unsupported metadata should generate warnings instead of silently being lost.
+
+==============================================================================
+
+VERSION COMPATIBILITY
+
+Minecraft formats evolve between game versions.
+
+Each Importer and Exporter must explicitly define the supported version range.
+
+Version-specific conversion rules belong to the format implementation.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Minecraft support should remain modular, version-aware and fully independent
+from the Core engine.
+
+==============================================================================
+
+END OF MINECRAFT FORMATS

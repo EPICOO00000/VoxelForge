@@ -1,0 +1,200 @@
+==============================================================================
+MESH GENERATION
+==============================================================================
+
+Mesh Generation transforms optimized polygon descriptions into the mesh data
+required by Blender.
+
+It converts abstract rendering information into concrete geometry buffers.
+
+==============================================================================
+
+PURPOSE
+
+Mesh Generation prepares every buffer necessary to construct a Blender Mesh.
+
+No voxel information is modified during this stage.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Mesh Generation must remain:
+
+Deterministic.
+
+Incremental.
+
+Efficient.
+
+Independent from Blender APIs whenever possible.
+
+==============================================================================
+
+INPUT
+
+Mesh Generation receives optimized polygons from the Greedy Meshing stage.
+
+Polygon topology is already finalized.
+
+==============================================================================
+
+OUTPUT
+
+Mesh Generation produces contiguous geometry buffers.
+
+Typical buffers include:
+
+Vertices.
+
+Triangle Indices.
+
+Normals.
+
+UV Coordinates.
+
+Material Indices.
+
+Vertex Attributes.
+
+==============================================================================
+
+VERTEX GENERATION
+
+Each polygon generates the minimum number of required vertices.
+
+Duplicate vertices may be reused whenever practical.
+
+Vertex ordering must remain deterministic.
+
+==============================================================================
+
+INDEX GENERATION
+
+Triangles reference vertices using index buffers.
+
+Indexed geometry minimizes memory consumption and GPU transfer size.
+
+==============================================================================
+
+NORMAL GENERATION
+
+Normals define surface orientation.
+
+Voxel faces generally produce flat normals.
+
+Future smooth shading options should remain possible without redesign.
+
+==============================================================================
+
+UV GENERATION
+
+Texture coordinates are generated according to block definitions.
+
+UV generation must remain deterministic.
+
+Texture atlases should be supported.
+
+Future material systems should remain compatible.
+
+==============================================================================
+
+MATERIAL ASSIGNMENT
+
+Every polygon receives a material reference.
+
+Material assignment should avoid duplication.
+
+Multiple polygons may reference the same material.
+
+==============================================================================
+
+VERTEX ORDER
+
+Vertex ordering must remain consistent.
+
+Consistent ordering improves:
+
+Normal generation.
+
+Back-face culling.
+
+Determinism.
+
+Debugging.
+
+==============================================================================
+
+BUFFER LAYOUT
+
+Buffers should remain contiguous in memory.
+
+Sequential layouts improve:
+
+Cache efficiency.
+
+GPU upload speed.
+
+Bulk memory operations.
+
+==============================================================================
+
+TEMPORARY DATA
+
+Intermediate buffers exist only during mesh construction.
+
+They should be released immediately after successful mesh creation.
+
+==============================================================================
+
+VALIDATION
+
+Generated geometry must be internally consistent.
+
+Invalid indices.
+
+Missing vertices.
+
+Broken polygons.
+
+Invalid UVs.
+
+Corrupted normals.
+
+Such situations must be detected before Blender mesh construction.
+
+==============================================================================
+
+PERFORMANCE
+
+Large chunks should be generated using bulk memory operations whenever
+possible.
+
+Repeated Python object creation should be minimized.
+
+==============================================================================
+
+NUMPY
+
+Mesh buffers should preferably be assembled using NumPy arrays.
+
+Vectorized operations should replace Python loops whenever practical.
+
+==============================================================================
+
+THREAD SAFETY
+
+Independent chunks may generate meshes simultaneously.
+
+Shared rendering resources require synchronization.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Mesh Generation converts optimized polygon descriptions into compact,
+high-performance geometry buffers ready for Blender Mesh creation.
+
+==============================================================================
+
+END OF MESH GENERATION

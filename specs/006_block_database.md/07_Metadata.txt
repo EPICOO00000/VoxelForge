@@ -1,0 +1,109 @@
+==============================================================================
+BLOCK METADATA
+==============================================================================
+
+Metadata stores additional information that cannot be represented through
+Universal Block IDs or Block States alone.
+
+Metadata belongs to voxel instances.
+
+Metadata never belongs to Block Definitions.
+
+==============================================================================
+
+PURPOSE
+
+Metadata allows advanced blocks to store custom information while keeping the
+majority of voxels lightweight.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Metadata must remain:
+
+Optional.
+
+Sparse.
+
+Serializable.
+
+Validated.
+
+Version Compatible.
+
+==============================================================================
+
+EXAMPLES
+
+Possible metadata includes:
+
+Custom Names.
+
+Inventory Contents.
+
+Text.
+
+Owner Information.
+
+Script Data.
+
+Custom Colors.
+
+Timers.
+
+Plugin Data.
+
+==============================================================================
+
+SPARSE STORAGE
+
+Only voxels requiring metadata allocate metadata storage.
+
+Ordinary voxels consume no metadata memory.
+
+==============================================================================
+
+OWNERSHIP
+
+Metadata belongs to individual voxel instances.
+
+Multiple voxels sharing the same Block Definition may contain completely
+different metadata.
+
+==============================================================================
+
+VALIDATION
+
+Metadata should be validated using the rules defined by the Block Definition.
+
+==============================================================================
+
+IMPORT
+
+Importers convert external metadata into the internal metadata model.
+
+==============================================================================
+
+EXPORT
+
+Exporters convert metadata into the target game's supported format.
+
+Unsupported metadata should follow exporter fallback rules.
+
+==============================================================================
+
+PLUGIN SUPPORT
+
+Plugins may define additional metadata schemas.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Metadata should provide flexible per-voxel customization while remaining
+memory efficient and independent from Block Definitions.
+
+==============================================================================
+
+END OF BLOCK METADATA

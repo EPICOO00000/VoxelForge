@@ -1,0 +1,255 @@
+==============================================================================
+PERFORMANCE PROFILING
+==============================================================================
+
+Profiling is used to identify the actual sources of performance cost inside
+VoxelForge.
+
+Profiling must guide optimization decisions rather than optimization being based
+on assumptions.
+
+==============================================================================
+
+PROFILING OBJECTIVES
+
+Profiling should identify:
+
+CPU Hotspots.
+
+GPU Bottlenecks.
+
+Memory Costs.
+
+Allocation Costs.
+
+Synchronization Costs.
+
+Task Scheduling Costs.
+
+I/O Costs.
+
+==============================================================================
+
+CPU PROFILING
+
+CPU profiling should identify functions and systems responsible for significant
+execution time.
+
+Potential areas include:
+
+Voxel Operations.
+
+Brush Execution.
+
+Chunk Processing.
+
+Mesh Generation.
+
+Import Processing.
+
+Export Processing.
+
+Task Scheduling.
+
+Event Processing.
+
+==============================================================================
+
+GPU PROFILING
+
+GPU profiling should identify expensive rendering operations.
+
+Potential measurements include:
+
+GPU Frame Time.
+
+Mesh Processing.
+
+Draw Calls.
+
+Buffer Uploads.
+
+Shader Execution.
+
+GPU Memory Usage.
+
+==============================================================================
+
+MEMORY PROFILING
+
+Memory profiling should identify:
+
+Peak Memory Usage.
+
+Persistent Allocations.
+
+Temporary Allocations.
+
+Allocation Frequency.
+
+Memory Growth.
+
+Cache Usage.
+
+==============================================================================
+
+ALLOCATION PROFILING
+
+Frequent allocations inside performance-critical paths should be identified.
+
+Profiling should distinguish between allocation size and allocation frequency.
+
+Both can contribute significantly to performance cost.
+
+==============================================================================
+
+TASK PROFILING
+
+The Task System may expose information such as:
+
+Task Execution Time.
+
+Queue Wait Time.
+
+Task Count.
+
+Worker Utilization.
+
+Task Dependencies.
+
+Synchronization Time.
+
+==============================================================================
+
+CHUNK PROFILING
+
+Chunk processing may expose:
+
+Chunk Processing Time.
+
+Mesh Generation Time.
+
+Voxel Processing Time.
+
+Neighbor Processing Time.
+
+Number Of Rebuilds.
+
+==============================================================================
+
+BRUSH PROFILING
+
+Brush operations may expose:
+
+Total Brush Time.
+
+Voxel Processing Time.
+
+Mask Generation Time.
+
+Chunk Update Time.
+
+History Recording Time.
+
+Event Dispatch Time.
+
+==============================================================================
+
+IMPORT AND EXPORT PROFILING
+
+Import and export profiling should distinguish between:
+
+File I/O.
+
+Parsing.
+
+Conversion.
+
+Voxel Creation.
+
+Chunk Construction.
+
+Serialization.
+
+Compression or Encoding.
+
+==============================================================================
+
+PROFILE REPRESENTATIVE WORKLOADS
+
+Profiling should be performed on realistic workloads.
+
+A microbenchmark may identify a local bottleneck, but the result should be
+validated against representative application behavior before making a major
+architectural decision.
+
+==============================================================================
+
+HOT PATHS
+
+Code identified as a hot path should receive optimization attention only when
+its measured cost justifies the complexity of the proposed optimization.
+
+Hot paths must remain compatible with the architecture and correctness rules.
+
+==============================================================================
+
+PROFILING OVERHEAD
+
+Instrumentation may affect execution time and memory usage.
+
+Measurements should account for profiling overhead when interpreting results.
+
+Production performance must not be inferred directly from heavily instrumented
+debug builds.
+
+==============================================================================
+
+COMPARISON
+
+Before and after profiling should use equivalent workloads whenever possible.
+
+The environment and benchmark configuration should be recorded so results can
+be compared meaningfully.
+
+==============================================================================
+
+OPTIMIZATION PROCESS
+
+The recommended process is:
+
+Measure.
+
+Identify.
+
+Change.
+
+Measure Again.
+
+Compare.
+
+Keep Or Revert.
+
+Optimization should not proceed solely from theoretical assumptions when the
+behavior can be measured.
+
+==============================================================================
+
+REGRESSION DETECTION
+
+Profiling should be repeated after significant performance-related changes.
+
+Unexpected regressions must be investigated before considering the optimization
+complete.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+VoxelForge should use profiling to identify real bottlenecks and validate
+performance improvements while avoiding premature optimization and unnecessary
+architectural complexity.
+
+==============================================================================
+
+END OF PERFORMANCE PROFILING

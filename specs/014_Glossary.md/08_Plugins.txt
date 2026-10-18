@@ -1,0 +1,88 @@
+TITLE: Plugins
+
+PURPOSE:
+Defines terminology related to plugins and plugin-provided functionality in VoxelForge.
+
+DEFINITION:
+A plugin is an independently developed extension that interacts with VoxelForge through the supported Plugin API.
+
+PLUGIN:
+A packaged extension containing code and optional resources that add functionality without modifying the VoxelForge core directly.
+
+PLUGIN API:
+The public programming interface through which plugins access supported VoxelForge functionality.
+
+PLUGIN MANIFEST:
+Metadata describing a plugin, including its identity, version, compatibility information, dependencies, and required capabilities.
+
+PLUGIN ID:
+A stable unique identifier used to distinguish a plugin from other plugins.
+
+PLUGIN VERSION:
+The version assigned to a plugin. Version changes must follow the project's versioning rules.
+
+DEPENDENCY:
+Another plugin, API component, or system required for a plugin to function.
+
+PLUGIN LIFECYCLE:
+The sequence through which a plugin is discovered, validated, loaded, initialized, used, disabled, and unloaded.
+
+LOAD:
+The process of making a plugin's code and resources available to VoxelForge.
+
+INITIALIZATION:
+The process through which a loaded plugin registers its functionality and prepares its runtime state.
+
+UNLOAD:
+The process of safely removing a plugin and releasing resources it owns.
+
+REGISTRATION:
+The process through which a plugin exposes commands, tools, UI elements, event handlers, formats, or other supported extensions.
+
+CAPABILITY:
+A specific permission or API feature granted to a plugin.
+
+SECURITY:
+Plugins must only receive access explicitly supported and permitted by the Plugin API.
+
+ISOLATION:
+Plugin failures should not unnecessarily compromise unrelated core systems.
+
+ERROR HANDLING:
+Plugin exceptions and failures must be contained where possible and reported with sufficient diagnostic information.
+
+API COMPATIBILITY:
+Changes to public plugin interfaces must consider existing plugins. Breaking changes require an explicit compatibility strategy.
+
+EVENTS:
+Plugins may subscribe to supported application events through the Plugin API. Event handlers must not block critical application paths unnecessarily.
+
+COMMANDS:
+Plugins may register commands when supported. Commands should integrate with the application's undo/redo and permission mechanisms where applicable.
+
+TOOLS:
+Plugins may provide custom editing tools through the supported tool interface.
+
+UI:
+Plugins may provide supported UI components without directly manipulating private internal UI state.
+
+IMPORT/EXPORT:
+Plugins may provide additional format handlers through the supported import/export extension points.
+
+PERFORMANCE:
+Plugins must avoid unnecessary repeated processing, excessive allocations, blocking operations, and uncontrolled background work.
+
+RESOURCE OWNERSHIP:
+Plugins are responsible for resources they create and must release them during shutdown or when those resources are no longer required.
+
+DEPENDENCY VALIDATION:
+A plugin must not initialize if required dependencies or API capabilities are unavailable.
+
+RELATED SYSTEMS:
+- Plugin API
+- UI
+- Import/Export
+- Event System
+- Security
+- Versioning
+- Performance

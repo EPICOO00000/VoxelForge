@@ -1,0 +1,130 @@
+==============================================================================
+USER WORKFLOW
+==============================================================================
+
+VoxelForge should provide a smooth and intuitive workflow from project creation
+to final export.
+
+The workflow should minimize unnecessary user interactions while maintaining
+full control over editing operations.
+
+==============================================================================
+
+GENERAL WORKFLOW
+
+Create or Import World
+
+↓
+
+Edit Voxels
+
+↓
+
+Modify Selections
+
+↓
+
+Apply Brushes
+
+↓
+
+Save Progress
+
+↓
+
+Export World
+
+==============================================================================
+
+EDITING LOOP
+
+The primary editing loop consists of:
+
+Choose Tool.
+
+Configure Tool.
+
+Preview Operation.
+
+Execute Operation.
+
+Review Result.
+
+Repeat.
+
+==============================================================================
+
+NON-DESTRUCTIVE WORKFLOW
+
+Every editing operation should support:
+
+Undo.
+
+Redo.
+
+History Tracking.
+
+Project Recovery.
+
+==============================================================================
+
+LARGE PROJECTS
+
+The workflow should remain efficient regardless of world size.
+
+Chunk streaming and lazy updates should prevent workflow interruptions.
+
+==============================================================================
+
+IMPORT WORKFLOW
+
+Open File
+
+↓
+
+Validate
+
+↓
+
+Import
+
+↓
+
+Build World
+
+↓
+
+Refresh Viewport
+
+==============================================================================
+
+EXPORT WORKFLOW
+
+Prepare Export
+
+↓
+
+Validate World
+
+↓
+
+Serialize Data
+
+↓
+
+Write Files
+
+↓
+
+Report Result
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The User Workflow should allow users to focus entirely on creation rather than
+software operation.
+
+==============================================================================
+
+END OF USER WORKFLOW

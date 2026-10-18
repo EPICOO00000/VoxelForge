@@ -1,0 +1,183 @@
+==============================================================================
+MULTITHREADING
+==============================================================================
+
+VoxelForge may use multiple CPU threads to execute independent workloads and
+improve performance on large voxel operations.
+
+Multithreading must never compromise correctness, determinism, ownership or
+architectural boundaries.
+
+==============================================================================
+
+DESIGN OBJECTIVES
+
+Multithreading should provide:
+
+Higher Throughput.
+
+Responsive Interactive Editing.
+
+Efficient Background Processing.
+
+Controlled Resource Usage.
+
+Predictable Synchronization.
+
+==============================================================================
+
+TASK SYSTEM
+
+Long-running parallel work should be executed through the Task System.
+
+Systems should not create uncontrolled worker threads for individual operations.
+
+The Task System remains responsible for scheduling, prioritization and lifecycle
+management of background work.
+
+==============================================================================
+
+THREAD OWNERSHIP
+
+Every piece of mutable data accessed by multiple threads must have clearly
+defined ownership rules.
+
+A thread must not modify data owned by another subsystem without an explicitly
+supported synchronization mechanism.
+
+==============================================================================
+
+READ OPERATIONS
+
+Concurrent read access may be allowed when the underlying data is immutable or
+otherwise safe for concurrent access.
+
+Read-only operations should be preferred for parallel workloads whenever
+possible.
+
+==============================================================================
+
+WRITE OPERATIONS
+
+Concurrent writes require explicit synchronization or a partitioning strategy
+that guarantees that two workers cannot modify conflicting data simultaneously.
+
+==============================================================================
+
+DATA PARTITIONING
+
+Independent chunks, regions or tasks should be partitioned so workers can
+operate with minimal synchronization.
+
+Partitioning should reduce contention while maintaining correct results.
+
+==============================================================================
+
+RACE CONDITIONS
+
+Race conditions must be prevented.
+
+Shared mutable state must not rely on timing or execution order for correctness.
+
+==============================================================================
+
+LOCKS
+
+Locks may be used when necessary.
+
+Locks should:
+
+Protect Only Required State.
+
+Have Clearly Defined Ownership.
+
+Be Held For The Shortest Practical Duration.
+
+Avoid Blocking Unrelated Work.
+
+Global locks should be avoided when finer-grained synchronization is possible.
+
+==============================================================================
+
+DEADLOCK PREVENTION
+
+Systems using multiple locks must define a consistent acquisition strategy.
+
+Circular lock dependencies must not be introduced.
+
+==============================================================================
+
+ATOMIC OPERATIONS
+
+Atomic operations may be used for simple shared state when they provide a
+clearer and more efficient solution than locking.
+
+Atomic operations must not be used merely as a substitute for understanding
+ownership.
+
+==============================================================================
+
+THREAD POOLS
+
+Reusable worker threads should be preferred over repeatedly creating and
+destroying operating-system threads.
+
+Thread count should remain bounded and appropriate for the available hardware.
+
+==============================================================================
+
+MAIN THREAD
+
+Operations requiring UI, viewport or Renderer-thread access must return through
+the appropriate execution path defined by those systems.
+
+Background workers must not directly manipulate thread-confined resources.
+
+==============================================================================
+
+DETERMINISM
+
+Parallel execution must produce deterministic logical results whenever the
+underlying operation is defined as deterministic.
+
+The final world state must not depend on unpredictable worker scheduling.
+
+==============================================================================
+
+ERROR HANDLING
+
+Worker failures must be propagated through the Task System and established error
+handling mechanisms.
+
+A failed worker must not silently leave partially updated world state.
+
+==============================================================================
+
+CANCELLATION
+
+Long-running tasks should support cancellation when the operation can safely be
+cancelled.
+
+Cancellation must leave the system in a valid state.
+
+==============================================================================
+
+PERFORMANCE
+
+Multithreading should only be used when the workload benefits from parallel
+execution.
+
+Parallelization that introduces more synchronization overhead than useful work
+should be avoided.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+VoxelForge should use controlled parallel execution to increase throughput while
+maintaining safe ownership, deterministic behavior and predictable task
+execution.
+
+==============================================================================
+
+END OF MULTITHREADING

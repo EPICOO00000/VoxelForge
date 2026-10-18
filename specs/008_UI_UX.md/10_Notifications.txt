@@ -1,0 +1,104 @@
+==============================================================================
+NOTIFICATIONS
+==============================================================================
+
+Notifications communicate important information to users during editing,
+importing, exporting and system operations.
+
+==============================================================================
+
+PURPOSE
+
+Notifications provide useful feedback without unnecessarily interrupting the
+editing workflow.
+
+==============================================================================
+
+NOTIFICATION TYPES
+
+Information.
+
+Success.
+
+Warning.
+
+Error.
+
+Progress.
+
+==============================================================================
+
+INFORMATION
+
+Examples include:
+
+Project Loaded.
+
+Import Completed.
+
+Export Completed.
+
+Plugin Loaded.
+
+==============================================================================
+
+WARNINGS
+
+Warnings indicate recoverable situations.
+
+Examples:
+
+Unknown Block Replaced.
+
+Unsupported Metadata Ignored.
+
+Partial Compatibility.
+
+==============================================================================
+
+ERRORS
+
+Errors indicate operations that could not be completed.
+
+Examples:
+
+Import Failure.
+
+Export Failure.
+
+Corrupted File.
+
+Unsupported Version.
+
+==============================================================================
+
+PROGRESS
+
+Long-running operations should display progress indicators.
+
+Examples:
+
+Large Imports.
+
+Large Exports.
+
+Mesh Generation.
+
+Chunk Processing.
+
+==============================================================================
+
+LOGGING
+
+Warnings and Errors should also be written to the engine logging system.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Notifications should provide clear and useful feedback while allowing users to
+remain focused on editing.
+
+==============================================================================
+
+END OF NOTIFICATIONS

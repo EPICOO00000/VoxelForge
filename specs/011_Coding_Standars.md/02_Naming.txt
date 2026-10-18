@@ -1,0 +1,248 @@
+==============================================================================
+CODING STANDARDS — NAMING
+==============================================================================
+
+Naming must make the purpose and ownership of code immediately understandable.
+
+Names should be explicit enough to communicate intent without requiring the
+reader to inspect the implementation.
+
+==============================================================================
+
+GENERAL RULES
+
+Use descriptive names.
+
+Avoid unnecessary abbreviations.
+
+Prefer terminology already established by the VoxelForge architecture.
+
+Names referring to the same concept must use the same terminology throughout
+the project.
+
+Avoid names whose meaning changes depending on context.
+
+==============================================================================
+
+CLASSES AND TYPES
+
+Type names should describe the concept represented by the type.
+
+Use a consistent project-wide naming convention for classes, structures,
+interfaces and enumerations.
+
+Names should generally use nouns or noun phrases.
+
+Examples:
+
+VoxelWorld
+
+Chunk
+
+BlockDatabase
+
+Renderer
+
+BrushSystem
+
+PluginRegistry
+
+==============================================================================
+
+FUNCTIONS
+
+Function names should describe the operation performed.
+
+Prefer action-oriented names for operations.
+
+Examples:
+
+LoadWorld
+
+SaveWorld
+
+CreateChunk
+
+DeleteChunk
+
+RegisterPlugin
+
+ExportSchematic
+
+ValidateBlock
+
+==============================================================================
+
+BOOLEAN VALUES
+
+Boolean names should clearly communicate a condition.
+
+Prefer names such as:
+
+isVisible
+
+isLoaded
+
+isActive
+
+hasSelection
+
+supportsFormat
+
+Avoid ambiguous names such as:
+
+state
+
+flag
+
+value
+
+==============================================================================
+
+VARIABLES
+
+Variables should have names appropriate to their scope.
+
+Short names may be acceptable for very small local scopes when their meaning is
+obvious.
+
+Important state should use descriptive names.
+
+Avoid meaningless names such as:
+
+data
+
+thing
+
+temp
+
+object
+
+value
+
+unless the context makes the meaning completely obvious.
+
+==============================================================================
+
+CONSTANTS
+
+Constants should follow the project's established constant naming convention.
+
+Names should communicate what the value represents and, where necessary, its
+unit or limitation.
+
+For example, a constant representing the maximum number of chunks in a Bloxd.io
+schematic should clearly indicate that it is a chunk limit.
+
+==============================================================================
+
+COORDINATES AND DIMENSIONS
+
+Coordinate names must remain unambiguous.
+
+Use established coordinate terminology consistently:
+
+x
+
+y
+
+z
+
+chunkX
+
+chunkY
+
+chunkZ
+
+localX
+
+localY
+
+localZ
+
+width
+
+height
+
+depth
+
+Do not reuse coordinate variables for unrelated concepts.
+
+==============================================================================
+
+FILES AND MODULES
+
+File names should clearly describe their primary responsibility.
+
+Files should follow the naming conventions established by the repository.
+
+A file should not contain unrelated functionality simply because the names happen
+to be similar.
+
+==============================================================================
+
+API NAMES
+
+Public API names must be stable and descriptive.
+
+Changing a public name can break plugins and external integrations and therefore
+requires appropriate versioning and migration handling.
+
+==============================================================================
+
+EVENT NAMES
+
+Event names should describe something that happened or a state transition.
+
+Examples:
+
+WorldLoaded
+
+ChunkModified
+
+ImportStarted
+
+ExportCompleted
+
+PluginActivated
+
+==============================================================================
+
+PLUGIN IDENTIFIERS
+
+Plugin identifiers must be unique and stable.
+
+They must not depend on display names that users may change.
+
+==============================================================================
+
+FORMAT NAMES
+
+External format names must use their official or project-defined terminology
+consistently.
+
+For example, the Bloxd.io schematic format should consistently be referred to
+as `.bloxdschem` where the file format itself is being discussed.
+
+==============================================================================
+
+AVOID MISLEADING NAMES
+
+A name must not imply guarantees that the implementation does not provide.
+
+For example, a function named `SaveWorld` must not silently perform only a
+partial save unless that behavior is explicitly documented.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Good naming reduces the amount of code a developer must read to understand the
+system.
+
+Names should communicate intent, ownership and behavior consistently throughout
+VoxelForge.
+
+==============================================================================
+
+END OF CODING STANDARDS — NAMING

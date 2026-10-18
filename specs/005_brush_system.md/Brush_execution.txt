@@ -1,0 +1,212 @@
+==============================================================================
+BRUSH EXECUTION
+==============================================================================
+
+Brush Execution defines how an editing action is transformed into voxel
+modifications.
+
+Every editing tool executes through this specification.
+
+==============================================================================
+
+PURPOSE
+
+Brush Execution provides a deterministic workflow that guarantees identical
+results for identical inputs.
+
+Execution behavior must remain independent from rendering and exporting.
+
+==============================================================================
+
+EXECUTION TYPES
+
+The Brush System supports multiple execution modes.
+
+Single Click.
+
+Continuous Stroke.
+
+Continuous Drag.
+
+Tablet Input.
+
+Future Input Devices.
+
+All execution modes follow the same internal pipeline.
+
+==============================================================================
+
+EXECUTION LIFECYCLE
+
+Each execution follows the same lifecycle.
+
+Create Request.
+
+Validate Request.
+
+Create Execution Context.
+
+Generate Shape.
+
+Sample Voxels.
+
+Evaluate Falloff.
+
+Execute Behavior.
+
+Validate Modifications.
+
+Commit Changes.
+
+Create History Transaction.
+
+Dispatch Events.
+
+Finish Execution.
+
+==============================================================================
+
+ATOMIC EXECUTION
+
+Every execution is atomic.
+
+Either every valid modification is applied,
+or none of them are.
+
+Partial commits are forbidden.
+
+==============================================================================
+
+EXECUTION CONTEXT
+
+Each execution owns an immutable Execution Context.
+
+The context includes:
+
+Target World.
+
+Brush Identifier.
+
+Brush Parameters.
+
+Brush Radius.
+
+Brush Strength.
+
+Current Position.
+
+Previous Position.
+
+Input Device State.
+
+Random Seed.
+
+Execution Timestamp.
+
+Execution Flags.
+
+The context must remain unchanged during execution.
+
+==============================================================================
+
+STROKE CONTINUITY
+
+Continuous strokes consist of multiple execution samples.
+
+Each sample behaves as an independent execution while belonging to the same
+user stroke.
+
+==============================================================================
+
+SAMPLE INTERPOLATION
+
+When the cursor moves rapidly,
+intermediate execution samples must be generated automatically.
+
+Interpolation prevents gaps inside the edited volume.
+
+Interpolation spacing should depend on brush radius.
+
+==============================================================================
+
+EXECUTION FREQUENCY
+
+Brush execution frequency should remain independent from viewport frame rate.
+
+Input sampling should be stable across different hardware.
+
+==============================================================================
+
+DUPLICATE MODIFICATIONS
+
+If multiple samples affect the same voxel,
+the Brush Engine resolves conflicts deterministically.
+
+A voxel should never receive conflicting updates during one execution.
+
+==============================================================================
+
+CANCELLATION
+
+Execution may be cancelled before commit.
+
+Cancelled executions must leave the Voxel World unchanged.
+
+==============================================================================
+
+FAILURE RECOVERY
+
+Unexpected failures should invalidate the current execution.
+
+The Voxel World must remain internally consistent.
+
+==============================================================================
+
+HISTORY
+
+A continuous stroke produces exactly one History transaction.
+
+Individual samples must never generate separate Undo entries.
+
+==============================================================================
+
+EVENTS
+
+Events are dispatched only after successful commit.
+
+Failed executions generate no modification events.
+
+==============================================================================
+
+THREAD SAFETY
+
+Independent executions may run concurrently.
+
+Overlapping executions require synchronization.
+
+==============================================================================
+
+DETERMINISM
+
+Given identical:
+
+World State.
+
+Brush Parameters.
+
+Execution Context.
+
+Random Seed.
+
+The execution result must always be identical.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Brush Execution should remain predictable, deterministic and scalable for
+both small edits and extremely large voxel worlds.
+
+==============================================================================
+
+END OF BRUSH EXECUTION

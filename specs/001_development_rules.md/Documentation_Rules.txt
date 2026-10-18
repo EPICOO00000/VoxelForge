@@ -1,0 +1,185 @@
+==============================================================================
+DOCUMENTATION RULES
+==============================================================================
+
+Documentation is considered a core component of the VoxelForge project.
+
+A feature is not considered complete until its documentation has been
+updated.
+
+Documentation should always reflect the current implementation.
+
+==============================================================================
+
+GENERAL PRINCIPLES
+
+Documentation must be:
+
+accurate,
+
+clear,
+
+consistent,
+
+maintainable,
+
+and easy to understand.
+
+Documentation should describe why a system exists,
+not only how it works.
+
+==============================================================================
+
+SINGLE SOURCE OF TRUTH
+
+Every concept should have one official documentation source.
+
+Avoid documenting the same information in multiple places.
+
+When information changes,
+update the official source instead of duplicating it elsewhere.
+
+==============================================================================
+
+KEEP DOCUMENTATION UP TO DATE
+
+Whenever code behaviour changes,
+the corresponding documentation must be updated.
+
+Outdated documentation is considered a project defect.
+
+==============================================================================
+
+SPECIFICATIONS
+
+The specification documents inside the specs directory define the official
+behaviour of the project.
+
+Implementation must follow the specifications.
+
+Specifications should never be modified to justify incorrect code.
+
+==============================================================================
+
+LEVEL OF DETAIL
+
+Documentation should provide enough detail to allow another developer to
+understand the system without reading the implementation first.
+
+Important architectural decisions must always be documented.
+
+==============================================================================
+
+WRITE FOR HUMANS
+
+Documentation should be written for future contributors.
+
+Assume the reader has never seen the project before.
+
+Use simple and precise language.
+
+Avoid unnecessary technical jargon.
+
+==============================================================================
+
+CONSISTENCY
+
+Use consistent terminology throughout the project.
+
+A concept should always keep the same name.
+
+Avoid introducing multiple names for the same system.
+
+==============================================================================
+
+EXAMPLES
+
+Whenever appropriate,
+documentation should include practical examples.
+
+Examples should demonstrate the intended behaviour.
+
+Examples must remain synchronized with the actual implementation.
+
+==============================================================================
+
+ARCHITECTURAL DECISIONS
+
+Significant architectural decisions should always include:
+
+the problem,
+
+the chosen solution,
+
+the reason for the decision,
+
+the expected benefits,
+
+known limitations,
+
+possible future improvements.
+
+==============================================================================
+
+AVOID IMPLEMENTATION DETAILS
+
+Documentation should focus on concepts and behaviour.
+
+Avoid documenting temporary implementation details that are likely to change.
+
+Low-level implementation belongs in the source code.
+
+High-level behaviour belongs in the documentation.
+
+==============================================================================
+
+COMMENTS
+
+Comments should explain intent,
+not obvious code.
+
+Avoid comments that simply repeat the implementation.
+
+If code changes,
+associated comments must also be updated.
+
+==============================================================================
+
+FILE ORGANIZATION
+
+Each documentation file should have a clearly defined responsibility.
+
+Avoid mixing unrelated topics inside the same document.
+
+Large subjects should be separated into dedicated specification files.
+
+==============================================================================
+
+OBSOLETE DOCUMENTATION
+
+Remove or update obsolete documentation.
+
+Never keep documentation that no longer represents the project.
+
+Deprecated behaviour should be clearly identified.
+
+==============================================================================
+
+REVIEW
+
+Before completing a feature,
+verify that:
+
+documentation matches implementation,
+
+examples remain valid,
+
+terminology is consistent,
+
+references are still correct,
+
+no obsolete information remains.
+
+==============================================================================
+
+END OF DOCUMENTATION RULES

@@ -1,0 +1,192 @@
+==============================================================================
+CODING STANDARDS — ASSERTIONS
+==============================================================================
+
+Assertions are used to detect programmer errors and violated internal
+invariants.
+
+They are not a replacement for validation of external or untrusted input.
+
+==============================================================================
+
+GENERAL PRINCIPLE
+
+An assertion should express a condition that the program considers guaranteed
+to be true when the code is correct.
+
+Assertions should make internal assumptions explicit.
+
+==============================================================================
+
+APPROPRIATE USE
+
+Assertions are appropriate for conditions such as:
+
+Internal invariants.
+
+Impossible internal states.
+
+Required relationships between internal objects.
+
+Conditions guaranteed by an earlier validated operation.
+
+Development-time assumptions.
+
+Example:
+
+A chunk coordinate that has already passed validation should satisfy the
+internal coordinate constraints expected by the chunk subsystem.
+
+==============================================================================
+
+INVALID EXTERNAL INPUT
+
+Do not use assertions to validate:
+
+User input.
+
+Imported files.
+
+Plugin-provided untrusted data.
+
+Network data.
+
+Configuration supplied externally.
+
+Minecraft files.
+
+Bloxd.io schematic files.
+
+External data must be validated explicitly and handled through normal error
+handling.
+
+==============================================================================
+
+SIDE EFFECTS
+
+Assertions must not contain important side effects.
+
+Program correctness must not depend on whether assertions are enabled or
+disabled.
+
+Do not place required state changes, resource cleanup or file operations inside
+an assertion.
+
+==============================================================================
+
+RELEASE BUILDS
+
+The project must define whether assertions remain enabled in release builds.
+
+Code must remain correct regardless of assertion configuration unless the
+architecture explicitly guarantees otherwise.
+
+Assertions must therefore represent developer assumptions rather than required
+runtime validation.
+
+==============================================================================
+
+CLEAR CONDITIONS
+
+Assertion conditions should be simple and understandable.
+
+When an invariant is complex, use clearly named helper functions or validation
+logic rather than creating an unreadable assertion.
+
+==============================================================================
+
+ERROR INFORMATION
+
+Where the language or framework supports useful assertion messages, provide a
+message that explains the violated invariant.
+
+Prefer:
+
+"Chunk storage must contain exactly 32768 cells"
+
+over:
+
+"Invalid chunk"
+
+==============================================================================
+
+DATA STRUCTURES
+
+Assertions may verify internal structural invariants.
+
+Examples include:
+
+Expected array sizes.
+
+Valid internal state transitions.
+
+Non-null internal references where guaranteed.
+
+Consistent chunk dimensions.
+
+Valid registry relationships.
+
+==============================================================================
+
+VOXEL DATA
+
+VoxelForge may use fixed-size chunk structures.
+
+Internal code may assert expected dimensions after the relevant input has already
+been validated.
+
+Assertions must never be the only protection against malformed imported voxel
+data.
+
+==============================================================================
+
+IMPORT / EXPORT
+
+Imported schematic data must be validated before being treated as trusted
+internal state.
+
+Assertions may then verify that internal conversion code receives the expected
+validated structure.
+
+==============================================================================
+
+PLUGIN SYSTEM
+
+Plugin APIs must validate plugin-provided input normally.
+
+Assertions may verify assumptions established after successful API validation,
+but plugins must never be expected to satisfy undocumented internal assertions.
+
+==============================================================================
+
+THREADING
+
+Assertions may verify internal threading assumptions when those assumptions are
+part of the subsystem contract.
+
+They must not be used as the sole mechanism for preventing unsafe concurrent
+access to shared state.
+
+==============================================================================
+
+ASSERTION FAILURES
+
+An assertion failure indicates a programming or invariant violation.
+
+It should provide enough diagnostic information to identify the violated
+assumption.
+
+The application must not silently treat an assertion failure as a successful
+operation.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Assertions should make incorrect internal states obvious during development
+while normal runtime validation remains responsible for handling external
+data safely.
+
+==============================================================================
+
+END OF CODING STANDARDS — ASSERTIONS

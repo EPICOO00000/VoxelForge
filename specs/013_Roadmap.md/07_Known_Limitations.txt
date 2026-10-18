@@ -1,0 +1,221 @@
+VOXELFORGE — KNOWN LIMITATIONS
+
+Document ID: 013_Roadmap / 07_Known_Limitations
+Status: Active
+Purpose: Document known limitations and constraints that must be considered during development.
+
+============================================================
+1. OVERVIEW
+============================================================
+
+VoxelForge is designed as a desktop voxel editor compatible with Minecraft-oriented workflows and Bloxd.io workflows.
+
+Known limitations must be explicitly documented so that future development does not accidentally treat unsupported behavior as a requirement.
+
+A limitation described in this document is not necessarily a permanent restriction. It represents a constraint of the current architecture, target formats, external ecosystems, or planned implementation.
+
+============================================================
+2. IMPORT AND EXPORT LIMITATIONS
+============================================================
+
+VoxelForge must support the formats explicitly defined by the Import/Export specifications.
+
+Not every external voxel format can be expected to preserve every VoxelForge feature.
+
+When a format cannot represent a VoxelForge feature, the importer/exporter must:
+
+- preserve all information that the target format supports;
+- avoid silently corrupting supported information;
+- report information that cannot be represented when appropriate;
+- never invent incompatible block data;
+- maintain deterministic output.
+
+Minecraft compatibility must remain a primary consideration for supported Minecraft-oriented formats.
+
+Bloxd.io compatibility must be treated separately where the Bloxd schematic format has different constraints or semantics.
+
+============================================================
+3. BLOXD.IO SCHEMATIC SIZE LIMIT
+============================================================
+
+Bloxd.io schematic files have a maximum practical size of 200 chunks.
+
+VoxelForge must therefore NOT attempt to export a schematic larger than the supported 200-chunk limit as a single Bloxd schematic.
+
+Large structures must automatically be split into multiple schematic files.
+
+The splitting system must:
+
+- divide the source structure into deterministic regions;
+- ensure each generated schematic stays within the 200-chunk maximum;
+- preserve block coordinates correctly;
+- preserve chunk-local coordinates correctly;
+- provide stable names for generated schematic parts;
+- avoid losing blocks at region boundaries;
+- avoid duplicating blocks between parts;
+- make it possible to reconstruct the original structure from all generated parts.
+
+The 200-chunk limit applies specifically to Bloxd schematic export and must not be treated as a universal VoxelForge world-size limitation.
+
+============================================================
+4. RENDERING LIMITATIONS
+============================================================
+
+VoxelForge must be capable of handling large voxel worlds, but rendering cost increases with:
+
+- visible voxel count;
+- number of visible chunks;
+- geometry complexity;
+- transparent blocks;
+- animated or special blocks;
+- lighting calculations;
+- camera distance;
+- active editing operations.
+
+The renderer must therefore use the optimization strategies defined by the Renderer and Performance specifications.
+
+The editor must avoid requiring the GPU to render unnecessary geometry.
+
+============================================================
+5. MEMORY LIMITATIONS
+============================================================
+
+VoxelForge must avoid assuming that an entire world can always be held in memory simultaneously.
+
+Large worlds should be represented using chunk-based storage and appropriate loading/unloading mechanisms.
+
+Systems must avoid unnecessary duplication of:
+
+- voxel data;
+- mesh data;
+- block metadata;
+- undo/redo information;
+- temporary import/export buffers.
+
+Memory-intensive operations should use streaming or chunked processing whenever practical.
+
+============================================================
+6. EDITING LIMITATIONS
+============================================================
+
+Some operations can become expensive when applied to very large regions.
+
+Examples include:
+
+- massive selections;
+- large-scale fills;
+- replacement operations;
+- complex brush operations;
+- terrain generation;
+- large undo operations;
+- large copy/paste operations.
+
+VoxelForge must prefer incremental, chunk-aware processing rather than blocking the entire application whenever possible.
+
+Long operations should provide appropriate progress feedback.
+
+============================================================
+7. FORMAT FIDELITY
+============================================================
+
+Perfect round-trip fidelity is only guaranteed when both the source and destination formats support the same information.
+
+For example, a format may not support:
+
+- custom metadata;
+- unsupported block states;
+- editor-only information;
+- custom entities;
+- advanced lighting information;
+- proprietary VoxelForge data.
+
+Such information must not be falsely represented as native data in another format.
+
+VoxelForge should clearly distinguish between:
+
+- preserved data;
+- converted data;
+- approximated data;
+- discarded unsupported data.
+
+============================================================
+8. EXTERNAL SOFTWARE DEPENDENCIES
+============================================================
+
+VoxelForge cannot guarantee behavior of external applications.
+
+Minecraft versions, mod loaders, third-party tools, Bloxd.io behavior, and external schematic implementations may change independently of VoxelForge.
+
+Compatibility layers must therefore be version-aware where necessary.
+
+External format assumptions should be isolated from the core editor whenever practical.
+
+============================================================
+9. PLATFORM LIMITATIONS
+============================================================
+
+The primary development target is the supported desktop environment defined by the Architecture specification.
+
+Platform-specific behavior must not leak unnecessarily into platform-independent systems.
+
+File paths, graphics APIs, input handling, filesystem behavior, and native dialogs must be abstracted where appropriate.
+
+============================================================
+10. PERFORMANCE LIMITATIONS
+============================================================
+
+VoxelForge must not promise unlimited performance.
+
+Performance targets must be measured using defined benchmarks rather than subjective expectations.
+
+The Performance specification defines optimization requirements and benchmark methodology.
+
+When performance cannot meet a target, the implementation should identify the limiting subsystem rather than introducing arbitrary optimizations.
+
+============================================================
+11. USER EXPERIENCE LIMITATIONS
+============================================================
+
+The interface must remain responsive during normal editing operations.
+
+However, extremely large operations may require processing time.
+
+VoxelForge should provide:
+
+- progress indicators where appropriate;
+- cancellation where safe;
+- clear status information;
+- warnings for operations with significant resource requirements.
+
+The application must never appear frozen when a long operation can reasonably provide progress information.
+
+============================================================
+12. COMPATIBILITY PRINCIPLE
+============================================================
+
+Known limitations must never be used as an excuse to introduce silent incompatibilities.
+
+When a limitation affects an operation, the system should prefer:
+
+1. preserving the user's data;
+2. reporting the limitation;
+3. providing a safe fallback;
+4. continuing the operation only when data integrity can be maintained.
+
+Data corruption is considered worse than operation failure.
+
+============================================================
+13. FUTURE RESOLUTION
+============================================================
+
+Known limitations should be reviewed as the architecture evolves.
+
+A limitation may be removed when:
+
+- the required technology becomes available;
+- the architecture is updated;
+- an external format changes;
+- a more efficient implementation is introduced;
+- a previously unsupported use case becomes officially supported.
+
+Changes must be reflected in the appropriate specification rather than only in implementation code.

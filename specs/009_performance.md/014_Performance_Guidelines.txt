@@ -1,0 +1,185 @@
+==============================================================================
+PERFORMANCE GUIDELINES
+==============================================================================
+
+Performance optimization in VoxelForge must remain subordinate to correctness
+and must respect the established architecture.
+
+Optimization should reduce measurable cost without introducing unnecessary
+complexity.
+
+==============================================================================
+
+GENERAL RULE
+
+Do not optimize code without a measurable reason when the optimization adds
+significant complexity.
+
+==============================================================================
+
+CORRECTNESS
+
+Performance optimizations must never alter the required logical behavior of the
+system.
+
+The resulting voxel state must remain correct.
+
+History behavior must remain correct.
+
+Events must remain correct.
+
+Rendering state must remain correct.
+
+==============================================================================
+
+ARCHITECTURE
+
+Optimization must not bypass module ownership or dependency rules.
+
+A faster implementation that violates architectural boundaries is not considered
+a valid optimization.
+
+==============================================================================
+
+HOT PATHS
+
+Optimization effort should focus primarily on measured hot paths.
+
+Code that does not contribute meaningful execution cost should not receive
+unnecessary complexity solely for theoretical performance benefits.
+
+==============================================================================
+
+ALLOCATIONS
+
+Avoid unnecessary allocations in frequently executed paths.
+
+Prefer reuse when ownership and lifetime remain clear.
+
+Do not introduce complex memory pools without evidence that allocation cost
+requires them.
+
+==============================================================================
+
+DATA LOCALITY
+
+Data layouts should favor efficient access patterns when profiling demonstrates
+that memory access is a significant bottleneck.
+
+Data-oriented changes must remain compatible with the ownership model.
+
+==============================================================================
+
+BATCHING
+
+Independent operations may be batched when batching reduces overhead.
+
+Batching must preserve logical operation boundaries required by History, Events
+and other systems.
+
+==============================================================================
+
+CACHING
+
+Caches should only be used when their measured benefit justifies their memory
+cost and invalidation complexity.
+
+==============================================================================
+
+PARALLELISM
+
+Parallel execution should be introduced when the workload provides sufficient
+independent work.
+
+Synchronization overhead must be considered when evaluating the benefit.
+
+==============================================================================
+
+I/O
+
+Large file operations should avoid unnecessary intermediate copies.
+
+Streaming should be considered when data size makes full in-memory processing
+unnecessarily expensive.
+
+==============================================================================
+
+RENDERING
+
+The Renderer should avoid processing geometry that cannot contribute to the
+current frame.
+
+Rendering optimizations must preserve visual correctness.
+
+==============================================================================
+
+INTERACTIVE PERFORMANCE
+
+User interaction should receive appropriate priority.
+
+Long-running background operations should not unnecessarily prevent normal
+editing and viewport interaction.
+
+==============================================================================
+
+SCALABILITY
+
+Algorithms should be evaluated according to how their cost grows with:
+
+Voxel Count.
+
+Chunk Count.
+
+World Size.
+
+Selection Size.
+
+Mesh Complexity.
+
+==============================================================================
+
+SIMPLICITY
+
+When two implementations provide comparable measured performance, the simpler
+implementation should generally be preferred.
+
+Performance should not be used as a justification for unnecessary complexity
+without measurable benefit.
+
+==============================================================================
+
+MEASUREMENT
+
+Important optimization decisions should be supported by benchmarks or profiling
+when practical.
+
+The expected performance benefit should be identifiable.
+
+==============================================================================
+
+REVIEW
+
+Performance-sensitive changes should be reviewed for:
+
+Correctness.
+
+Memory Impact.
+
+Concurrency Impact.
+
+Architecture Compliance.
+
+Benchmark Results.
+
+Maintenance Cost.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+VoxelForge should achieve high performance through measured, targeted and
+architecturally compliant optimizations rather than uncontrolled complexity.
+
+==============================================================================
+
+END OF PERFORMANCE GUIDELINES

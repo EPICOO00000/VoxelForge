@@ -1,0 +1,235 @@
+ ==============================================================================
+PLUGIN API — UI API
+==============================================================================
+
+The UI API allows plugins to integrate user-facing functionality into VoxelForge
+without directly manipulating private UI implementation details.
+
+UI extensions must remain consistent with the application's existing UI
+architecture and lifecycle.
+
+==============================================================================
+
+PURPOSE
+
+The UI API may provide controlled extension points for:
+
+Panels.
+
+Toolbars.
+
+Menus.
+
+Commands.
+
+Dialogs.
+
+Property Controls.
+
+Status Information.
+
+Plugin Settings.
+
+Custom UI Elements.
+
+==============================================================================
+
+UI OWNERSHIP
+
+The main VoxelForge UI remains responsible for the application interface.
+
+Plugins extend the UI through documented APIs.
+
+Plugins must not directly manipulate private UI objects or internal layout
+structures.
+
+==============================================================================
+
+PANELS
+
+Plugins may register custom panels through the UI Registry.
+
+A panel should provide:
+
+Unique Identifier.
+
+Display Name.
+
+Optional Icon.
+
+Content.
+
+Visibility State where supported.
+
+The panel must be removable when its plugin is disabled.
+
+==============================================================================
+
+MENUS
+
+Plugins may contribute commands or entries to supported menus.
+
+Menu contributions must use documented registration mechanisms.
+
+A plugin must not directly modify menu implementation data.
+
+==============================================================================
+
+TOOLBARS
+
+Plugins may register toolbar actions when supported.
+
+Toolbar actions should reference documented commands or plugin operations.
+
+Icons and metadata must follow the UI API requirements.
+
+==============================================================================
+
+DIALOGS
+
+Plugin dialogs must use the supported UI framework.
+
+Dialogs must not directly access private Engine, Renderer or VoxelWorld state.
+
+World modifications initiated from a dialog must use the appropriate public API.
+
+==============================================================================
+
+COMMANDS
+
+Plugin commands may expose user actions.
+
+Commands that modify voxel data must pass through the normal application
+architecture.
+
+They must preserve:
+
+History.
+
+Events.
+
+World Ownership.
+
+Chunk State.
+
+Rendering Invalidation.
+
+==============================================================================
+
+PLUGIN SETTINGS
+
+Plugins may expose configuration through the supported settings mechanism when
+available.
+
+Settings must have stable identifiers and validated values.
+
+Invalid configuration must not corrupt application or world state.
+
+==============================================================================
+
+UI THREAD
+
+UI operations must execute on the UI thread or other execution context defined by
+the UI API.
+
+Background tasks must not directly modify UI objects unless the API explicitly
+provides a thread-safe mechanism.
+
+==============================================================================
+
+LONG-RUNNING OPERATIONS
+
+UI extensions must not block the interface unnecessarily.
+
+Long-running operations should use the Task System where appropriate.
+
+The UI should remain responsive while progress and cancellation are exposed
+through supported mechanisms.
+
+==============================================================================
+
+VOXELWORLD ACCESS
+
+UI extensions must not directly manipulate internal VoxelWorld or chunk data.
+
+If a UI action needs to modify the world, it must call the appropriate public
+world-editing API.
+
+==============================================================================
+
+BRUSH INTEGRATION
+
+A plugin UI may expose controls for plugin brushes.
+
+Brush configuration must be passed through the Brush API rather than directly
+modifying internal brush state.
+
+==============================================================================
+
+RENDERING INTEGRATION
+
+UI extensions may request supported viewport visualizations or overlays through
+the Render API.
+
+They must not directly manipulate private Renderer state.
+
+==============================================================================
+
+MINECRAFT AND BLOXD.IO
+
+UI extensions may expose controls for Minecraft and Bloxd.io workflows.
+
+Export-related UI must respect the underlying Export API rules.
+
+In particular, Bloxd.io `.bloxdschem` exports must be split into multiple files
+when the world exceeds the 200-chunk maximum per schematic.
+
+==============================================================================
+
+LIFECYCLE
+
+Every plugin UI element must belong to its plugin.
+
+When a plugin is disabled or unloaded, its UI elements must be removed or
+disabled according to the lifecycle contract.
+
+No dangling UI references may remain.
+
+==============================================================================
+
+ERROR HANDLING
+
+A plugin UI failure must not crash unrelated VoxelForge UI systems.
+
+Plugin errors should be reported through the appropriate diagnostic or
+notification mechanism.
+
+==============================================================================
+
+ACCESSIBILITY
+
+Plugin UI elements should use the accessibility facilities provided by VoxelForge.
+
+Plugins should provide meaningful labels, descriptions and keyboard interaction
+where the UI framework supports them.
+
+==============================================================================
+
+PERFORMANCE
+
+UI extensions should avoid unnecessary work during frequent UI updates.
+
+Expensive calculations should not run every frame unless required and justified.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The UI API provides a controlled and maintainable way for plugins to integrate
+with the VoxelForge interface while preserving UI ownership, responsiveness,
+accessibility and the architectural separation between UI, world and rendering
+systems.
+
+==============================================================================
+
+END OF UI API

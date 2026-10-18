@@ -1,0 +1,13 @@
+/* Complete block-native adaptations for every main editor tool. */
+.voxel-only{display:none}
+body.is-bloxd-mode .voxel-only{display:block}
+body.is-bloxd-mode .tool-palette [data-action="modifiers"],body.is-bloxd-mode .tool-palette [data-action="advanced"]{opacity:1;pointer-events:auto}
+body.is-bloxd-mode #advancedPanel>.control-group,body.is-bloxd-mode #advancedPanel>#selected-controls{display:none!important}
+body.is-bloxd-mode #modifierPanel>.field-title,body.is-bloxd-mode #modifierPanel>label,body.is-bloxd-mode #modifierPanel>.three-actions,body.is-bloxd-mode #modifierPanel>#applySubdivision,body.is-bloxd-mode #modifierPanel>.boolean-actions{display:none}
+body.is-bloxd-mode #materialPanel>label,body.is-bloxd-mode #materialPanel>#uploadTexture,body.is-bloxd-mode #materialPanel>#textureFileInput,body.is-bloxd-mode #materialPanel>#clearTexture{display:none}
+.voxel-advanced-controls,.voxel-modifier-controls,.voxel-material-controls{padding:10px;overflow:auto}
+.voxel-modifier-controls p,.voxel-material-controls p{font-size:11px;color:var(--text-muted);line-height:1.4;margin:4px 0 10px}
+.voxel-modifier-controls .boolean-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.is-bloxd-mode .sculpt-panel .sculpt-strength-adapted{display:none}
+body.is-bloxd-mode .edit-panel #faceActions{display:grid}
+body.is-bloxd-mode .measure-panel{display:block}

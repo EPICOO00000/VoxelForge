@@ -1,0 +1,261 @@
+==============================================================================
+PLUGIN API — OVERVIEW
+==============================================================================
+
+The VoxelForge Plugin API defines the official extension boundary for external
+plugins.
+
+Plugins may extend VoxelForge through documented APIs without modifying the
+core engine or directly accessing internal implementation details.
+
+The Plugin API exists to provide controlled extensibility while preserving
+VoxelForge architecture, stability, security and maintainability.
+
+==============================================================================
+
+PURPOSE
+
+The Plugin API allows plugins to provide additional functionality such as:
+
+Custom Brushes.
+
+Custom Block Definitions.
+
+Importers.
+
+Exporters.
+
+Render Extensions.
+
+UI Extensions.
+
+Event Listeners.
+
+Tools.
+
+Commands.
+
+Other explicitly supported extension points.
+
+==============================================================================
+
+CORE PRINCIPLE
+
+A plugin is an external extension of VoxelForge.
+
+It must interact with the application through documented Plugin API interfaces
+and registered extension points.
+
+Plugins must not depend on undocumented internal implementation details.
+
+==============================================================================
+
+PLUGIN ISOLATION
+
+A plugin must remain isolated from unrelated internal subsystems.
+
+A plugin must not directly manipulate internal engine state when an official API
+exists for the required operation.
+
+Plugins must use the same ownership and dependency principles as the main
+application.
+
+==============================================================================
+
+SUPPORTED EXTENSIONS
+
+The Plugin API may expose controlled extension points for:
+
+Brushes.
+
+Blocks.
+
+Import and Export.
+
+Rendering.
+
+UI.
+
+Events.
+
+Commands.
+
+Tools.
+
+Registries.
+
+Future extension points may be added without requiring existing plugins to
+access new internal systems directly.
+
+==============================================================================
+
+VOXEL WORLD ACCESS
+
+Plugins that need to interact with voxel data must use the API exposed for that
+purpose.
+
+Direct access to internal chunk storage is forbidden unless explicitly exposed
+as part of a documented API contract.
+
+Plugins must respect voxel coordinates, chunk boundaries and world ownership
+rules.
+
+==============================================================================
+
+BRUSH EXTENSIONS
+
+Plugins may register custom brushes through the Brush API.
+
+A custom brush must follow the same execution and history rules as built-in
+brushes.
+
+A plugin must not bypass History or Event processing to modify the world.
+
+==============================================================================
+
+BLOCK EXTENSIONS
+
+Plugins may interact with block definitions through the Block API and Block
+Registry.
+
+Block identifiers must remain stable according to the relevant block and
+versioning rules.
+
+==============================================================================
+
+IMPORT AND EXPORT EXTENSIONS
+
+Plugins may provide additional importers and exporters through the Import/Export
+API.
+
+Importers and exporters must remain independent from the Renderer.
+
+Import/export plugins must not directly control rendering.
+
+Large Bloxd.io exports must respect the maximum of 200 chunks per
+`.bloxdschem` file and must be split into multiple schematics when necessary.
+
+==============================================================================
+
+UI EXTENSIONS
+
+Plugins may extend the user interface through documented UI APIs.
+
+UI extensions must not directly manipulate internal rendering or world storage.
+
+==============================================================================
+
+EVENTS
+
+Plugins may subscribe to documented events through the Event API.
+
+Event subscriptions must not create hidden dependencies between unrelated
+subsystems.
+
+Plugins should unsubscribe when their lifecycle ends.
+
+==============================================================================
+
+LIFECYCLE
+
+Plugins have a controlled lifecycle.
+
+The Plugin API must provide explicit points for:
+
+Plugin Discovery.
+
+Plugin Loading.
+
+Plugin Initialization.
+
+Plugin Activation.
+
+Plugin Deactivation.
+
+Plugin Shutdown.
+
+Plugin Unloading where supported.
+
+A plugin must not assume that unrelated internal systems remain available outside
+the documented lifecycle guarantees.
+
+==============================================================================
+
+ERROR HANDLING
+
+A plugin failure must not silently corrupt VoxelForge state.
+
+Where practical, plugin errors should be isolated and reported through the
+appropriate diagnostics or notification mechanisms.
+
+==============================================================================
+
+VERSIONING
+
+The Plugin API is a public compatibility boundary.
+
+Breaking changes must follow the Plugin API versioning rules.
+
+Internal VoxelForge implementation details may change without requiring plugin
+changes when the documented API contract remains compatible.
+
+==============================================================================
+
+SECURITY
+
+Plugins execute as external extensions and must be treated as potentially
+untrusted code when the deployment environment requires it.
+
+The Plugin API must not expose sensitive internal data unless explicitly
+required by the documented extension contract.
+
+==============================================================================
+
+PERFORMANCE
+
+Plugin APIs should avoid unnecessary overhead in frequently executed paths.
+
+A plugin must not block critical interactive operations unnecessarily.
+
+Performance-sensitive extension points should provide appropriate APIs rather
+than requiring plugins to access internal implementation details.
+
+==============================================================================
+
+ARCHITECTURAL COMPLIANCE
+
+Plugins must respect:
+
+Module Ownership.
+
+Dependency Rules.
+
+Event Rules.
+
+History Rules.
+
+VoxelWorld Rules.
+
+Renderer Rules.
+
+Import/Export Rules.
+
+Threading Rules.
+
+Testing Rules.
+
+Security Rules.
+
+The Plugin API does not create an exception to the core architecture.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Plugin API provides a stable and controlled extension mechanism that allows
+VoxelForge to grow through external functionality without sacrificing
+architectural integrity, compatibility, correctness or maintainability.
+
+==============================================================================
+
+END OF PLUGIN API — OVERVIEW

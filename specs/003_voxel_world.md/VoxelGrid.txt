@@ -1,0 +1,204 @@
+==============================================================================
+VOXEL GRID
+==============================================================================
+
+The Voxel Grid is the primary data structure of the Voxel World.
+
+It provides a unified interface for accessing, modifying and managing voxel
+data regardless of the internal storage implementation.
+
+The Voxel Grid abstracts the complexity of chunk management and exposes a
+simple world-level API to the rest of the engine.
+
+==============================================================================
+
+PURPOSE
+
+The purpose of the Voxel Grid is to provide a single authoritative interface
+for every subsystem interacting with voxel data.
+
+Brushes.
+
+Selections.
+
+History.
+
+Renderer.
+
+Importers.
+
+Exporters.
+
+Plugins.
+
+Generators.
+
+All systems communicate with the world through the Voxel Grid.
+
+==============================================================================
+
+SOURCE OF TRUTH
+
+The Voxel Grid owns every voxel contained inside the world.
+
+Voxel data must never be duplicated as another authoritative structure.
+
+Any cached representation must always be considered temporary.
+
+==============================================================================
+
+RESPONSIBILITIES
+
+The Voxel Grid is responsible for:
+
+Managing chunk allocation.
+
+Creating new chunks.
+
+Destroying empty chunks.
+
+Voxel access.
+
+Voxel modification.
+
+Dirty chunk registration.
+
+World bounds computation.
+
+Palette access.
+
+Coordinate conversion.
+
+History notifications.
+
+Selection queries.
+
+==============================================================================
+
+PUBLIC INTERFACE
+
+The Voxel Grid exposes only high-level operations.
+
+Typical operations include:
+
+Get Voxel.
+
+Set Voxel.
+
+Replace Voxels.
+
+Fill Region.
+
+Iterate Chunks.
+
+Iterate Voxels.
+
+Query Bounds.
+
+Query Palette.
+
+Clear World.
+
+The internal storage implementation must remain hidden.
+
+==============================================================================
+
+CHUNK TRANSPARENCY
+
+Users of the Voxel Grid should not need to know where chunk boundaries are.
+
+Chunk creation.
+
+Chunk destruction.
+
+Chunk lookup.
+
+Chunk allocation.
+
+Chunk reuse.
+
+These operations are handled automatically.
+
+==============================================================================
+
+GLOBAL COORDINATES
+
+All public functions operate using global integer coordinates.
+
+Conversion into chunk-local coordinates is performed internally.
+
+No external subsystem should manually compute chunk indices.
+
+==============================================================================
+
+MODIFICATIONS
+
+Every modification passes through the Voxel Grid.
+
+Direct chunk manipulation is prohibited except for internal engine
+operations.
+
+The Voxel Grid validates every modification before applying it.
+
+==============================================================================
+
+DIRTY STATE
+
+Whenever voxel data changes, affected chunks are automatically marked dirty.
+
+Dirty tracking is entirely managed by the Voxel Grid.
+
+External systems must never modify dirty flags directly.
+
+==============================================================================
+
+HISTORY INTEGRATION
+
+The Voxel Grid reports modifications to the History system.
+
+History recording is centralized to ensure complete undo and redo
+consistency.
+
+==============================================================================
+
+SELECTION INTEGRATION
+
+Selection-aware operations are supported directly by the Voxel Grid.
+
+Brushes should not manually evaluate selections voxel by voxel whenever the
+Voxel Grid can perform the operation more efficiently.
+
+==============================================================================
+
+THREAD SAFETY
+
+Read-only operations should support concurrent execution whenever possible.
+
+Write operations must preserve data integrity.
+
+Synchronization mechanisms should remain internal to the Voxel Grid.
+
+==============================================================================
+
+PERFORMANCE
+
+Common operations should execute in constant or near-constant time whenever
+possible.
+
+Repeated coordinate conversions should be minimized.
+
+Memory allocations during editing should remain minimal.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Future storage optimizations should not require modifications to the public
+API.
+
+The Voxel Grid interface should remain stable even if its internal
+implementation evolves.
+
+==============================================================================
+
+END OF VOXEL GRID

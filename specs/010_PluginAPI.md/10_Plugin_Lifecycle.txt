@@ -1,0 +1,262 @@
+==============================================================================
+PLUGIN API — PLUGIN LIFECYCLE
+==============================================================================
+
+The Plugin Lifecycle defines how plugins are discovered, loaded, initialized,
+activated, deactivated, reloaded and unloaded by VoxelForge.
+
+Every plugin must follow this lifecycle and must release all owned resources
+when its lifecycle ends.
+
+==============================================================================
+
+PURPOSE
+
+The lifecycle provides controlled stages for:
+
+Plugin Discovery.
+
+Loading.
+
+Initialization.
+
+Activation.
+
+Runtime Operation.
+
+Deactivation.
+
+Shutdown.
+
+Unloading.
+
+Failure Handling.
+
+==============================================================================
+
+DISCOVERY
+
+During discovery, VoxelForge identifies available plugins and reads their
+metadata.
+
+Discovery must not execute arbitrary plugin functionality.
+
+Plugin metadata should provide enough information to determine:
+
+Plugin Identifier.
+
+Display Name.
+
+Version.
+
+Required API Version.
+
+Dependencies.
+
+Compatibility Information.
+
+==============================================================================
+
+LOADING
+
+Loading prepares the plugin for execution.
+
+The runtime must validate the plugin before allowing it to become active.
+
+A plugin must not assume that its dependencies are available until dependency
+resolution has completed successfully.
+
+==============================================================================
+
+INITIALIZATION
+
+Initialization prepares plugin-owned systems and registrations.
+
+Typical initialization tasks include:
+
+Registering Commands.
+
+Registering Brushes.
+
+Registering Blocks.
+
+Registering Importers.
+
+Registering Exporters.
+
+Registering UI Elements.
+
+Registering Event Handlers.
+
+Initialization should not perform unnecessary long-running operations.
+
+==============================================================================
+
+ACTIVATION
+
+After successful initialization, the plugin may become active.
+
+An active plugin may use the APIs permitted by its manifest and lifecycle state.
+
+The plugin must not expose functionality that depends on an unavailable
+subsystem.
+
+==============================================================================
+
+RUNTIME
+
+During normal operation, plugins must respect all API contracts concerning:
+
+Threading.
+
+Performance.
+
+Memory.
+
+World Access.
+
+Rendering.
+
+UI.
+
+Events.
+
+Security.
+
+==============================================================================
+
+DEACTIVATION
+
+When a plugin is deactivated, it must stop initiating new operations.
+
+Plugin-owned UI elements, event subscriptions and other runtime integrations
+must be disabled or removed according to their respective API contracts.
+
+In-progress operations must be handled according to the cancellation and task
+rules of the relevant subsystem.
+
+==============================================================================
+
+SHUTDOWN
+
+Shutdown releases resources owned by the plugin.
+
+This may include:
+
+Event Subscriptions.
+
+Brush Registrations.
+
+Block Registrations where supported.
+
+Importers.
+
+Exporters.
+
+Commands.
+
+UI Elements.
+
+Render Extensions.
+
+Tasks.
+
+Caches.
+
+External Resources.
+
+==============================================================================
+
+UNLOADING
+
+After shutdown completes, the plugin must no longer be referenced by active
+VoxelForge systems.
+
+The runtime must prevent dangling callbacks and references to unloaded plugin
+objects.
+
+==============================================================================
+
+FAILURE
+
+If initialization fails, the plugin must not become active.
+
+If a plugin fails during runtime, VoxelForge should isolate the failure where
+possible and report it through the diagnostic system.
+
+A plugin failure must not corrupt world data or crash unrelated subsystems.
+
+==============================================================================
+
+DEPENDENCIES
+
+Plugin dependencies must be resolved before activation.
+
+If a required dependency is unavailable or incompatible, the dependent plugin
+must not activate.
+
+Optional dependencies may be used only when their availability has been
+verified.
+
+==============================================================================
+
+RELOAD
+
+If plugin reload is supported, the lifecycle must safely perform the equivalent
+of:
+
+Deactivate.
+
+Shutdown.
+
+Unload.
+
+Load.
+
+Initialize.
+
+Activate.
+
+Plugin-owned resources must not survive a reload unless explicitly designed to
+do so by the API.
+
+==============================================================================
+
+THREADING
+
+Lifecycle operations must follow the execution context defined by the Plugin
+Runtime.
+
+Plugins must not assume that initialization or shutdown always occurs on the UI
+thread.
+
+==============================================================================
+
+WORLD SAFETY
+
+Plugin lifecycle transitions must not leave partially modified worlds.
+
+If a plugin is disabled while an operation is active, the operation must follow
+the documented cancellation and transaction rules.
+
+==============================================================================
+
+MINECRAFT AND BLOXD.IO
+
+Lifecycle transitions must not invalidate imported or exported world data.
+
+Plugins involved in Bloxd.io export must correctly finish, cancel or safely
+dispose of multi-file exports when the 200-chunk-per-schematic limit requires
+splitting the output.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Plugin Lifecycle ensures predictable plugin ownership, dependency handling,
+resource cleanup, failure isolation and safe integration with the VoxelForge
+runtime.
+
+==============================================================================
+
+END OF PLUGIN LIFECYCLE

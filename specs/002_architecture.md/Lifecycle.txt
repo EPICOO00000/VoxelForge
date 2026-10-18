@@ -1,0 +1,398 @@
+==============================================================================
+SYSTEM LIFECYCLE
+==============================================================================
+
+The VoxelForge Engine follows a deterministic lifecycle.
+
+Every subsystem is created, initialized, used and destroyed according to a
+strict execution order.
+
+The lifecycle guarantees that every subsystem is available when required
+and properly released when no longer needed.
+
+==============================================================================
+
+GENERAL PRINCIPLES
+
+Every subsystem has a clearly defined lifecycle.
+
+Subsystems must never be used before initialization.
+
+Subsystems must always release their resources before destruction.
+
+Initialization and shutdown must always occur in a predictable order.
+
+==============================================================================
+
+APPLICATION STARTUP
+
+Starting VoxelForge follows this sequence.
+
+Launch Blender
+
+↓
+
+Load Add-on
+
+↓
+
+Register Classes
+
+↓
+
+Initialize Engine
+
+↓
+
+Initialize Core Systems
+
+↓
+
+Initialize Secondary Systems
+
+↓
+
+Initialize User Interface
+
+↓
+
+Engine Ready
+
+==============================================================================
+
+ENGINE INITIALIZATION
+
+The Engine is responsible for initializing every subsystem.
+
+Initialization should always occur in the same order.
+
+Each subsystem verifies that its required dependencies are available before
+becoming operational.
+
+Initialization must stop immediately if a critical subsystem fails.
+
+==============================================================================
+
+PROJECT CREATION
+
+Creating a new project follows this sequence.
+
+Create Empty Project
+
+↓
+
+Create Voxel World
+
+↓
+
+Initialize Managers
+
+↓
+
+Create Initial History State
+
+↓
+
+Create Empty Scene Representation
+
+↓
+
+Ready For Editing
+
+==============================================================================
+
+PROJECT LOADING
+
+Loading an existing project follows this sequence.
+
+Open Project
+
+↓
+
+Read Project Data
+
+↓
+
+Create Voxel World
+
+↓
+
+Load Assets
+
+↓
+
+Restore Settings
+
+↓
+
+Initialize Runtime Systems
+
+↓
+
+Generate Meshes
+
+↓
+
+Viewport Ready
+
+==============================================================================
+
+EDITING SESSION
+
+During editing the Engine continuously performs the following cycle.
+
+Receive User Input
+
+↓
+
+Execute Operation
+
+↓
+
+Modify Voxel World
+
+↓
+
+Record History
+
+↓
+
+Mark Dirty Chunks
+
+↓
+
+Dispatch Events
+
+↓
+
+Update Renderer
+
+↓
+
+Refresh Viewport
+
+This cycle repeats for every user interaction.
+
+==============================================================================
+
+BACKGROUND TASKS
+
+Background tasks execute independently of the editing loop.
+
+Task Creation
+
+↓
+
+Task Scheduling
+
+↓
+
+Background Execution
+
+↓
+
+Progress Reporting
+
+↓
+
+Completion Event
+
+↓
+
+Main Thread Synchronization
+
+Background tasks must never interrupt the editing workflow.
+
+==============================================================================
+
+AUTOSAVE
+
+When enabled, autosave follows this sequence.
+
+Check Autosave Interval
+
+↓
+
+Verify Project State
+
+↓
+
+Save Project
+
+↓
+
+Resume Editing
+
+Autosave must never modify project data.
+
+==============================================================================
+
+PROJECT SAVING
+
+Saving follows this sequence.
+
+Validate Project
+
+↓
+
+Prepare Save Data
+
+↓
+
+Serialize Project
+
+↓
+
+Write Files
+
+↓
+
+Confirm Success
+
+The save operation must preserve every persistent project state.
+
+==============================================================================
+
+PROJECT CLOSING
+
+Closing a project follows this sequence.
+
+Stop Active Tasks
+
+↓
+
+Release Temporary Resources
+
+↓
+
+Clear Runtime Data
+
+↓
+
+Destroy Active World
+
+↓
+
+Reset Managers
+
+↓
+
+Return To Idle State
+
+==============================================================================
+
+ENGINE SHUTDOWN
+
+Shutting down the Engine follows the reverse initialization order.
+
+Stop Background Tasks
+
+↓
+
+Release Plugins
+
+↓
+
+Release Renderer
+
+↓
+
+Release Managers
+
+↓
+
+Release Core Systems
+
+↓
+
+Destroy Engine
+
+All allocated resources must be released.
+
+==============================================================================
+
+FAILURE RECOVERY
+
+If initialization fails:
+
+Abort Startup
+
+↓
+
+Release Initialized Resources
+
+↓
+
+Report Error
+
+↓
+
+Return To Safe State
+
+The Engine should never remain partially initialized.
+
+==============================================================================
+
+RESOURCE MANAGEMENT
+
+Temporary resources should exist only for as long as necessary.
+
+Resources should be released immediately after they are no longer needed.
+
+Memory leaks must be avoided.
+
+==============================================================================
+
+STATE TRANSITIONS
+
+The Engine should always remain in a valid state.
+
+Allowed transitions include:
+
+Uninitialized
+
+↓
+
+Initialized
+
+↓
+
+Project Loaded
+
+↓
+
+Editing
+
+↓
+
+Saving
+
+↓
+
+Closing
+
+↓
+
+Idle
+
+↓
+
+Shutdown
+
+Invalid transitions must be prevented.
+
+==============================================================================
+
+LIFECYCLE CONSISTENCY
+
+Every subsystem should follow the same lifecycle philosophy.
+
+Initialization should always be deterministic.
+
+Shutdown should always be complete.
+
+No subsystem should survive beyond the lifetime of the Engine.
+
+==============================================================================
+
+END OF SYSTEM LIFECYCLE

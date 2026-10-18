@@ -1,0 +1,389 @@
+==============================================================================
+DATA FLOW
+==============================================================================
+
+The VoxelForge engine follows a deterministic data flow.
+
+Every operation passes through a defined execution pipeline.
+
+No subsystem may modify another subsystem without following the official
+data flow.
+
+==============================================================================
+
+GENERAL PRINCIPLE
+
+Data always flows through the engine.
+
+No subsystem should directly modify the internal state of another subsystem.
+
+Communication should occur through public interfaces.
+
+==============================================================================
+
+USER ACTION FLOW
+
+Every user action follows the same sequence.
+
+User Input
+
+↓
+
+User Interface
+
+↓
+
+Operator
+
+↓
+
+Engine
+
+↓
+
+Target Subsystem
+
+↓
+
+Voxel World
+
+↓
+
+Event System
+
+↓
+
+Renderer
+
+↓
+
+Viewport Update
+
+Each stage has a single responsibility.
+
+==============================================================================
+
+BRUSH EXECUTION FLOW
+
+Brush execution follows this sequence.
+
+User Input
+
+↓
+
+Brush Operator
+
+↓
+
+Brush Engine
+
+↓
+
+Voxel World
+
+↓
+
+History Manager
+
+↓
+
+Event System
+
+↓
+
+Renderer
+
+↓
+
+Viewport Refresh
+
+Brushes never communicate directly with the renderer.
+
+==============================================================================
+
+VOXEL MODIFICATION FLOW
+
+Voxel modifications always follow the same process.
+
+Validate operation.
+
+↓
+
+Compute voxel modifications.
+
+↓
+
+Apply modifications to the Voxel World.
+
+↓
+
+Record history information.
+
+↓
+
+Mark affected chunks as dirty.
+
+↓
+
+Dispatch modification events.
+
+↓
+
+Update rendered meshes.
+
+==============================================================================
+
+IMPORT FLOW
+
+Import operations follow this sequence.
+
+User Request
+
+↓
+
+Import Operator
+
+↓
+
+Importer
+
+↓
+
+Voxel World
+
+↓
+
+History Initialization
+
+↓
+
+Renderer
+
+↓
+
+Viewport Refresh
+
+Imported data immediately becomes native VoxelForge data.
+
+==============================================================================
+
+EXPORT FLOW
+
+Export operations never modify project data.
+
+The workflow is:
+
+User Request
+
+↓
+
+Export Operator
+
+↓
+
+Exporter
+
+↓
+
+Read Voxel World
+
+↓
+
+Generate Output File
+
+↓
+
+Finish
+
+The exporter operates in read-only mode.
+
+==============================================================================
+
+UNDO FLOW
+
+Undo operations follow this sequence.
+
+Undo Request
+
+↓
+
+History Manager
+
+↓
+
+Restore Previous State
+
+↓
+
+Voxel World
+
+↓
+
+Dirty Chunk Detection
+
+↓
+
+Event System
+
+↓
+
+Renderer
+
+↓
+
+Viewport Refresh
+
+==============================================================================
+
+REDO FLOW
+
+Redo operations follow the same process.
+
+Redo Request
+
+↓
+
+History Manager
+
+↓
+
+Restore Next State
+
+↓
+
+Voxel World
+
+↓
+
+Dirty Chunk Detection
+
+↓
+
+Event System
+
+↓
+
+Renderer
+
+↓
+
+Viewport Refresh
+
+==============================================================================
+
+TASK FLOW
+
+Long-running operations should never block the interface.
+
+Task Request
+
+↓
+
+Task Scheduler
+
+↓
+
+Background Execution
+
+↓
+
+Progress Updates
+
+↓
+
+Completion Event
+
+↓
+
+Main Thread Synchronization
+
+↓
+
+Viewport Update
+
+==============================================================================
+
+EVENT FLOW
+
+Events notify systems about changes.
+
+Producer
+
+↓
+
+Event Manager
+
+↓
+
+Registered Listeners
+
+↓
+
+Reaction
+
+Events never contain business logic.
+
+==============================================================================
+
+PLUGIN FLOW
+
+Plugins communicate only through public interfaces.
+
+Plugin
+
+↓
+
+Plugin API
+
+↓
+
+Engine
+
+↓
+
+Target Subsystem
+
+Plugins must never bypass the official execution flow.
+
+==============================================================================
+
+ERROR FLOW
+
+Errors propagate upward.
+
+Subsystem
+
+↓
+
+Engine
+
+↓
+
+User Interface
+
+Subsystems should never directly display user messages.
+
+==============================================================================
+
+DATA OWNERSHIP
+
+Each subsystem owns its own data.
+
+Only the owning subsystem may modify that data.
+
+Other subsystems access information through public interfaces.
+
+==============================================================================
+
+FLOW CONSISTENCY
+
+Every operation should follow a predictable execution order.
+
+Unexpected shortcuts should be avoided.
+
+Maintaining a consistent execution flow improves debugging,
+testing and long-term maintainability.
+
+==============================================================================
+
+END OF DATA FLOW

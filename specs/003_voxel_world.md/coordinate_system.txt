@@ -1,0 +1,151 @@
+==============================================================================
+COORDINATE SYSTEM
+==============================================================================
+
+The Coordinate System defines how every voxel position is represented inside
+the engine.
+
+All subsystems must use the same coordinate conventions.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Coordinates must remain:
+
+Integer-based.
+
+Deterministic.
+
+Engine-independent.
+
+Consistent across all systems.
+
+==============================================================================
+
+GLOBAL COORDINATES
+
+Global coordinates identify voxel positions inside the entire world.
+
+Every voxel has exactly one unique global position.
+
+Global coordinates are expressed as:
+
+(X, Y, Z)
+
+==============================================================================
+
+LOCAL COORDINATES
+
+Each chunk maintains its own local coordinate system.
+
+Local coordinates always remain inside chunk boundaries.
+
+They are derived automatically from global coordinates.
+
+==============================================================================
+
+CHUNK COORDINATES
+
+Chunks also use integer coordinates.
+
+Chunk coordinates identify chunk locations rather than voxel locations.
+
+Chunk coordinates remain independent from local voxel coordinates.
+
+==============================================================================
+
+COORDINATE CONVERSION
+
+The Voxel Grid performs every coordinate conversion.
+
+External systems should never manually compute:
+
+Chunk indices.
+
+Local voxel positions.
+
+Chunk offsets.
+
+==============================================================================
+
+NEGATIVE COORDINATES
+
+The world supports negative coordinates.
+
+Positive and negative space must behave identically.
+
+No subsystem may assume that coordinates are always positive.
+
+==============================================================================
+
+WORLD ORIGIN
+
+The world origin is located at:
+
+(0, 0, 0)
+
+The origin has no special behavior beyond being the coordinate reference.
+
+==============================================================================
+
+WORLD BOUNDS
+
+The world is conceptually unbounded.
+
+Practical limits depend only on available system memory.
+
+No fixed world size is imposed by the engine.
+
+==============================================================================
+
+COORDINATE PRECISION
+
+Voxel coordinates always represent exact integer positions.
+
+Floating-point coordinates are used only temporarily during interaction,
+such as raycasting or viewport picking.
+
+Voxel storage never relies on floating-point values.
+
+==============================================================================
+
+CONSISTENCY
+
+Every subsystem must interpret coordinates identically.
+
+Renderer.
+
+Brushes.
+
+Selections.
+
+History.
+
+Importers.
+
+Exporters.
+
+Plugins.
+
+Any inconsistency would lead to corrupted world data.
+
+==============================================================================
+
+FUTURE EXTENSIONS
+
+Future spatial optimizations may be implemented internally without changing
+the public coordinate system.
+
+The external coordinate interface should remain stable.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Coordinate System should remain simple, deterministic and completely
+independent from rendering or file formats.
+
+==============================================================================
+
+END OF COORDINATE SYSTEM

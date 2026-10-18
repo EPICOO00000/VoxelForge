@@ -1,0 +1,110 @@
+==============================================================================
+CUSTOM BLOCKS
+==============================================================================
+
+Custom Blocks allow users and plugins to extend the Block Database without
+modifying the engine source code.
+
+==============================================================================
+
+PURPOSE
+
+The Block Database must remain open to extension.
+
+New blocks should integrate through the same registration system used by
+built-in blocks.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Custom Blocks must remain:
+
+Data Driven.
+
+Validated.
+
+Serializable.
+
+Version Compatible.
+
+Game Independent.
+
+==============================================================================
+
+REGISTRATION
+
+Every Custom Block must be registered through the Block Registry.
+
+Registration includes:
+
+Universal Block ID.
+
+Internal Name.
+
+Display Name.
+
+Properties.
+
+Tags.
+
+States.
+
+Metadata Schema.
+
+Game Mappings.
+
+==============================================================================
+
+VALIDATION
+
+Registration must reject:
+
+Duplicate IDs.
+
+Duplicate Names.
+
+Invalid Properties.
+
+Missing Required Fields.
+
+==============================================================================
+
+PLUGIN SUPPORT
+
+Plugins may register complete Block Libraries.
+
+Removing a plugin should safely unregister its blocks.
+
+==============================================================================
+
+EDITOR SUPPORT
+
+Custom Blocks should behave exactly like built-in blocks.
+
+No engine feature should distinguish between built-in and custom blocks.
+
+==============================================================================
+
+IMPORT AND EXPORT
+
+Importers and Exporters access Custom Blocks through standard Game Mappings.
+
+No special conversion pipeline should exist.
+
+==============================================================================
+
+VERSIONING
+
+Custom Blocks should expose version information to support future migration.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Custom Blocks should extend the engine while remaining fully compatible with
+every existing system.
+
+==============================================================================
+
+END OF CUSTOM BLOCKS

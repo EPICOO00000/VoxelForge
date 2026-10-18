@@ -1,0 +1,193 @@
+==============================================================================
+BLOCK DATABASE OVERVIEW
+==============================================================================
+
+The Block Database is the central repository describing every block that can
+exist inside VoxelForge.
+
+It defines the universal representation of blocks independently from any
+specific game, rendering system, importer or exporter.
+
+The Block Database never stores voxel instances.
+
+It stores only block definitions.
+
+==============================================================================
+
+PURPOSE
+
+The Block Database provides a universal abstraction layer between voxel data
+and game-specific formats.
+
+Instead of manipulating Minecraft blocks, Bloxd blocks or future game blocks
+directly, the engine manipulates Universal Block Definitions.
+
+Every external format is translated through the Block Database.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+The Block Database must remain:
+
+Game Independent.
+
+Renderer Independent.
+
+Importer Independent.
+
+Exporter Independent.
+
+Data Driven.
+
+Deterministic.
+
+Extensible.
+
+Version Stable.
+
+==============================================================================
+
+RESPONSIBILITIES
+
+The Block Database is responsible for:
+
+Defining Universal Block IDs.
+
+Registering Block Definitions.
+
+Managing Block Properties.
+
+Managing Block Tags.
+
+Managing Block States.
+
+Managing Block Metadata Definitions.
+
+Managing Game Mappings.
+
+Providing Block Lookup Services.
+
+Providing Validation Rules.
+
+==============================================================================
+
+NON RESPONSIBILITIES
+
+The Block Database must never:
+
+Store voxel instances.
+
+Store chunk data.
+
+Render geometry.
+
+Generate meshes.
+
+Import files.
+
+Export files.
+
+Modify the Voxel World.
+
+Perform editing operations.
+
+==============================================================================
+
+ARCHITECTURAL ROLE
+
+The Block Database acts as the translation layer between the engine and every
+supported voxel game.
+
+The Core manipulates only Universal Block IDs.
+
+Importers translate external identifiers into Universal Block IDs.
+
+Exporters translate Universal Block IDs into external identifiers.
+
+The Renderer queries visual properties but never modifies Block Definitions.
+
+==============================================================================
+
+UNIVERSAL REPRESENTATION
+
+Every block existing inside the engine is represented by a single Universal
+Block Definition.
+
+This definition remains constant regardless of the target game.
+
+Example:
+
+Minecraft Stone
+
+↓
+
+Universal Block ID
+
+↓
+
+Bloxd Stone
+
+↓
+
+Future Game Stone
+
+The Universal Block Definition is the only representation known by the Core.
+
+==============================================================================
+
+DATA DRIVEN DESIGN
+
+The Block Database should be entirely data driven.
+
+Block Definitions should be loaded from external configuration files whenever
+possible.
+
+Adding support for new games should require adding mapping data rather than
+modifying engine code.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Future games, custom block packs and plugin-defined blocks should integrate
+through the same registration mechanism.
+
+The architecture should support thousands of block definitions without
+requiring structural changes.
+
+==============================================================================
+
+DEPENDENCY RULES
+
+The Block Database may depend on:
+
+Utilities.
+
+Configuration Files.
+
+Plugin API.
+
+The Block Database must never depend on:
+
+Voxel World.
+
+Renderer.
+
+Brush System.
+
+Importers.
+
+Exporters.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Block Database should provide a stable, universal and extensible
+representation of every block used by VoxelForge while remaining completely
+independent from the rest of the engine.
+
+==============================================================================
+
+END OF BLOCK DATABASE OVERVIEW

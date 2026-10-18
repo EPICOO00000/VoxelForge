@@ -1,0 +1,146 @@
+==============================================================================
+IMPORT / EXPORT PERFORMANCE
+==============================================================================
+
+The Import / Export System processes potentially massive voxel worlds.
+
+Performance must scale efficiently while preserving correctness and data
+integrity.
+
+==============================================================================
+
+DESIGN OBJECTIVES
+
+The system should prioritize:
+
+Linear scalability.
+
+Low memory consumption.
+
+Streaming operations.
+
+Deterministic execution.
+
+Predictable performance.
+
+==============================================================================
+
+IMPORT PERFORMANCE
+
+Importers should process files sequentially whenever possible.
+
+The complete file should never be loaded into memory unless required by the
+format.
+
+Streaming parsers are preferred.
+
+==============================================================================
+
+EXPORT PERFORMANCE
+
+Exporters should serialize voxel data incrementally.
+
+Large worlds should be exported chunk by chunk.
+
+Streaming writers are strongly recommended.
+
+==============================================================================
+
+CHUNK PROCESSING
+
+Chunk-based processing minimizes memory usage.
+
+Each chunk should be processed independently whenever possible.
+
+Independent chunks may be processed concurrently.
+
+==============================================================================
+
+BLOCK CONVERSION
+
+Block ID lookup should execute in constant time.
+
+Repeated conversion of identical Block IDs should reuse cached mappings when
+possible.
+
+==============================================================================
+
+METADATA
+
+Metadata processing should remain sparse.
+
+Only voxels containing metadata should require metadata conversion.
+
+==============================================================================
+
+MULTITHREADING
+
+Future implementations may process independent chunks using multiple worker
+threads.
+
+Synchronization should occur only during world assembly or final file writing.
+
+==============================================================================
+
+MEMORY MANAGEMENT
+
+Temporary allocations should remain minimal.
+
+Reusable buffers are preferred over repeated allocations.
+
+Large intermediate copies should be avoided.
+
+==============================================================================
+
+BLOXD.IO OPTIMIZATION
+
+The Bloxd.io exporter should:
+
+Serialize chunks independently.
+
+Generate RLE data incrementally.
+
+Write Avro data as a stream.
+
+Automatically split exports exceeding approximately 200 chunks.
+
+Never require the entire world to exist inside a contiguous export buffer.
+
+==============================================================================
+
+MINECRAFT OPTIMIZATION
+
+Palette generation should occur only once per export.
+
+Palette lookups should remain constant-time.
+
+Duplicate palette entries must be eliminated automatically.
+
+==============================================================================
+
+PROFILING
+
+Performance evaluation should measure:
+
+Import time.
+
+Export time.
+
+Peak memory usage.
+
+Chunk throughput.
+
+Serialization throughput.
+
+Block conversion throughput.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Import and Export operations should scale efficiently from small creations to
+very large voxel worlds without unnecessary memory consumption.
+
+==============================================================================
+
+END OF IMPORT / EXPORT PERFORMANCE

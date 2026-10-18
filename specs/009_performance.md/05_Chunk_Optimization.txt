@@ -1,0 +1,174 @@
+==============================================================================
+CHUNK OPTIMIZATION
+==============================================================================
+
+Chunks are one of the primary units of voxel processing in VoxelForge.
+
+Chunk-oriented optimization must minimize unnecessary processing while preserving
+correct world state and compatibility with the VoxelWorld architecture.
+
+==============================================================================
+
+CHUNK PROCESSING
+
+Operations should process only the chunks affected by the requested operation.
+
+Unaffected chunks should not be rebuilt or recalculated unnecessarily.
+
+==============================================================================
+
+DIRTY CHUNKS
+
+A chunk should be considered dirty when an operation changes data that requires
+a downstream update.
+
+Dirty state must be tracked explicitly.
+
+Examples of downstream work may include:
+
+Mesh Rebuild.
+
+Lighting Update.
+
+Collision Update.
+
+Export Update.
+
+Other Registered Processing.
+
+==============================================================================
+
+DIRTY REGION
+
+When practical, systems should track the affected region inside a chunk rather
+than treating the entire chunk as changed.
+
+This can reduce unnecessary voxel processing.
+
+==============================================================================
+
+NEIGHBOR DEPENDENCIES
+
+Some chunk operations depend on neighboring chunks.
+
+Examples include:
+
+Mesh Generation.
+
+Boundary Visibility.
+
+Lighting.
+
+Cross-Chunk Queries.
+
+Neighbor-dependent processing must correctly detect affected neighboring chunks.
+
+==============================================================================
+
+CHUNK BOUNDARIES
+
+Operations crossing chunk boundaries must preserve correct coordinates.
+
+Local chunk coordinates and world coordinates must never be confused.
+
+Boundary handling should remain deterministic.
+
+==============================================================================
+
+CHUNK ITERATION
+
+Chunk iteration should use predictable traversal patterns.
+
+Repeated conversion between coordinate systems should be avoided inside hot
+loops whenever practical.
+
+==============================================================================
+
+CHUNK UPDATES
+
+Multiple modifications affecting the same chunk during a single logical
+operation should be consolidated whenever possible.
+
+A chunk should not be rebuilt repeatedly when one final rebuild can produce the
+same correct result.
+
+==============================================================================
+
+MESH REBUILD CONTROL
+
+Chunk mesh generation should only be requested when the chunk's rendered state
+actually requires an update.
+
+Neighbor changes that affect visible geometry must also be considered.
+
+==============================================================================
+
+LOADING AND UNLOADING
+
+Chunk loading and unloading should avoid unnecessary repeated allocations.
+
+Streaming decisions should respect world ownership and lifecycle rules.
+
+==============================================================================
+
+PARALLEL CHUNK PROCESSING
+
+Independent chunks may be processed concurrently through the Task System.
+
+Parallel chunk processing must respect:
+
+Data Ownership.
+
+Task Dependencies.
+
+Thread Safety.
+
+Determinism.
+
+==============================================================================
+
+LARGE WORLDS
+
+The implementation must avoid algorithms whose cost grows unnecessarily with
+the total number of chunks.
+
+Operations should scale primarily with the amount of data actually affected.
+
+==============================================================================
+
+CHUNK CACHE
+
+Frequently accessed chunks may be retained in an appropriate cache.
+
+Cache policies must have explicit memory limits and invalidation behavior.
+
+==============================================================================
+
+PERFORMANCE MEASUREMENT
+
+Chunk optimization should be evaluated using representative workloads.
+
+Important measurements include:
+
+Chunks Processed Per Second.
+
+Average Chunk Processing Time.
+
+Peak Chunk Processing Time.
+
+Memory Used Per Chunk.
+
+Mesh Rebuild Count.
+
+Unnecessary Chunk Updates.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Chunk processing should remain efficient and scalable while ensuring that every
+affected chunk and neighboring dependency receives the required updates.
+
+==============================================================================
+
+END OF CHUNK OPTIMIZATION

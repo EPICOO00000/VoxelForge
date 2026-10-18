@@ -1,0 +1,328 @@
+VOXELFORGE — RESEARCH
+=====================
+
+Purpose
+-------
+This document defines research areas that may inform future VoxelForge
+development.
+
+Research items are not automatically implementation requirements.
+
+A research result must be evaluated against the existing architecture,
+performance requirements, compatibility requirements, testing strategy, and
+project goals before becoming an implementation task.
+
+1. Large-world storage
+----------------------
+Investigate storage architectures suitable for very large voxel worlds.
+
+Areas of investigation:
+
+- chunk-based storage;
+- region-based storage;
+- sparse voxel storage;
+- compressed chunk storage;
+- memory-mapped data;
+- incremental persistence;
+- lazy loading;
+- background loading;
+- background saving.
+
+The selected approach must minimize unnecessary memory usage while keeping
+random and sequential access practical.
+
+2. Chunk streaming
+------------------
+Investigate efficient loading and unloading of chunks according to camera
+position, editing operations, and active regions.
+
+Research should measure:
+
+- loading latency;
+- memory consumption;
+- cache hit rates;
+- disk throughput;
+- impact on rendering;
+- impact on editing operations.
+
+Chunk streaming must not cause visible corruption or inconsistent world state.
+
+3. Multithreaded voxel operations
+----------------------------------
+Research which voxel operations can safely execute in parallel.
+
+Potential candidates include:
+
+- chunk generation;
+- block conversion;
+- import processing;
+- export processing;
+- compression;
+- validation;
+- large-area transformations;
+- procedural generation.
+
+Research must identify dependencies between chunks and operations.
+
+Parallel execution must preserve deterministic results.
+
+4. Task scheduling
+------------------
+Investigate task scheduling strategies for expensive operations.
+
+The system should be able to distinguish between:
+
+- interactive high-priority work;
+- background work;
+- export work;
+- import work;
+- maintenance work.
+
+The UI should remain responsive while background work is performed.
+
+Task scheduling must integrate with the performance and Plugin API
+specifications.
+
+5. Memory optimization
+----------------------
+Research memory-efficient representations for voxel data.
+
+Potential areas include:
+
+- palette-based storage;
+- compact block identifiers;
+- bit packing;
+- sparse representations;
+- compressed chunks;
+- temporary-buffer reuse;
+- memory pooling.
+
+Any optimization must be benchmarked against the existing representation.
+
+Memory savings alone are not sufficient if access becomes impractically slow.
+
+6. Rendering research
+---------------------
+Investigate future rendering improvements for large voxel scenes.
+
+Potential areas include:
+
+- improved meshing;
+- greedy meshing;
+- mesh caching;
+- visibility determination;
+- occlusion techniques;
+- level-of-detail strategies;
+- GPU-assisted generation;
+- incremental mesh updates.
+
+Research must respect the renderer architecture and avoid introducing
+unnecessary coupling between rendering and world storage.
+
+7. Large export research
+------------------------
+Investigate reliable export strategies for very large structures.
+
+Particular attention must be given to Bloxd.io schematic exports.
+
+A single Bloxd schematic must not exceed 200 chunks.
+
+Research should investigate:
+
+- optimal split algorithms;
+- spatial partitioning;
+- balanced chunk grouping;
+- deterministic naming;
+- export manifests;
+- reconstruction metadata;
+- partial export recovery;
+- parallel export;
+- progress estimation.
+
+A split operation must preserve all supported voxel data.
+
+8. Minecraft format research
+----------------------------
+Investigate additional Minecraft-compatible formats and conversion methods.
+
+Research should consider:
+
+- block states;
+- palettes;
+- entity data;
+- metadata;
+- coordinate conventions;
+- version differences;
+- unsupported blocks;
+- conversion warnings.
+
+The Block Database must remain the central source for block identity and
+mapping decisions.
+
+9. Bloxd.io compatibility research
+----------------------------------
+Continue investigating the exact behavior of Bloxd.io schematic files and
+their compatibility requirements.
+
+Research should validate:
+
+- schema versions;
+- chunk encoding;
+- block identifier mapping;
+- coordinate behavior;
+- size limitations;
+- import behavior;
+- export behavior;
+- edge cases.
+
+The currently supported implementation must remain compatible with the
+documented .bloxdschem schema.
+
+Any newly discovered format behavior must be tested before being adopted.
+
+10. Compression research
+------------------------
+Investigate compression methods appropriate for voxel data.
+
+Potential goals include:
+
+- reduced project size;
+- faster loading;
+- faster saving;
+- efficient transfer;
+- low memory overhead.
+
+Compression must not make interactive editing impractical.
+
+11. Undo/redo research
+----------------------
+Investigate scalable history systems for large voxel operations.
+
+Potential approaches include:
+
+- operation logs;
+- delta storage;
+- chunk snapshots;
+- compressed deltas;
+- hybrid approaches.
+
+Research should compare:
+
+- memory consumption;
+- execution speed;
+- undo speed;
+- redo speed;
+- implementation complexity;
+- crash recovery behavior.
+
+12. Procedural generation research
+----------------------------------
+Investigate deterministic procedural generation.
+
+Potential areas include:
+
+- seeded noise;
+- terrain generation;
+- structure generation;
+- procedural patterns;
+- parameterized shapes;
+- rule-based generation.
+
+Procedural systems must produce reproducible results when supplied with the
+same seed and parameters.
+
+13. Plugin research
+-------------------
+Investigate how the Plugin API can support increasingly advanced extensions
+without exposing unstable internal implementation details.
+
+Research areas include:
+
+- plugin isolation;
+- permissions;
+- lifecycle management;
+- API versioning;
+- asynchronous operations;
+- custom tools;
+- custom import/export formats;
+- custom UI components.
+
+Security and stability must be considered before expanding plugin capabilities.
+
+14. Automated validation
+------------------------
+Research automated validation systems capable of detecting invalid or
+inconsistent voxel data before it reaches the renderer or exporter.
+
+Potential validation layers include:
+
+- world validation;
+- chunk validation;
+- block validation;
+- schematic validation;
+- project validation;
+- plugin validation.
+
+Validation should provide actionable error messages.
+
+15. Benchmarking methodology
+----------------------------
+Research and maintain representative benchmarks for the main performance
+critical systems.
+
+Benchmarks should include:
+
+- small worlds;
+- medium worlds;
+- large worlds;
+- large brush operations;
+- large selections;
+- import;
+- export;
+- schematic splitting;
+- rendering;
+- chunk loading;
+- memory usage.
+
+Benchmark results should be reproducible and comparable between versions.
+
+16. Failure recovery
+--------------------
+Research methods for safely recovering from:
+
+- interrupted saves;
+- interrupted imports;
+- interrupted exports;
+- application crashes;
+- corrupted project data;
+- incomplete schematic generation.
+
+Recovery mechanisms must never silently replace valid user data with
+potentially corrupted data.
+
+17. Research decision process
+----------------------------
+Research findings should follow this process:
+
+1. Identify the problem.
+2. Define measurable objectives.
+3. Investigate possible solutions.
+4. Build a minimal prototype when appropriate.
+5. Benchmark the alternatives.
+6. Test correctness.
+7. Evaluate architectural impact.
+8. Evaluate compatibility impact.
+9. Document the result.
+10. Decide whether the feature should become an implementation requirement.
+
+Research must not automatically become production code.
+
+18. Core research principle
+---------------------------
+Research exists to reduce technical uncertainty.
+
+When an existing, tested, simple solution is sufficient, VoxelForge should
+prefer that solution over introducing experimental complexity.
+
+Correctness, compatibility, maintainability, and measurable performance remain
+the primary criteria for adopting research results.

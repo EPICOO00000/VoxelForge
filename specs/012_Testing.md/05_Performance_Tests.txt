@@ -1,0 +1,221 @@
+# Performance Tests
+
+## Purpose
+
+Performance tests verify that VoxelForge remains responsive and scalable when processing increasingly large voxel worlds.
+
+Performance testing must measure real editor workloads rather than only isolated microbenchmarks.
+
+The primary objectives are:
+
+- Maintain responsive editing.
+- Avoid unnecessary memory usage.
+- Scale correctly with world size.
+- Keep import and export predictable.
+- Detect performance regressions.
+
+Performance optimizations must never reduce correctness or format compatibility.
+
+## Measurement Rules
+
+Performance tests should record:
+
+- Execution time.
+- Number of affected blocks.
+- Number of affected chunks.
+- Memory usage where measurable.
+- Number of generated output files.
+- Import/export throughput where applicable.
+
+Each benchmark must clearly identify its input size and workload.
+
+## Interactive Editing
+
+Interactive operations must remain responsive for normal editing workloads.
+
+Benchmarks must include:
+
+- Single block placement.
+- Single block deletion.
+- Small brush operations.
+- Medium brush operations.
+- Block replacement.
+- Undo.
+- Redo.
+
+The performance of a normal editing operation must not degrade significantly because the world contains unrelated distant chunks.
+
+## Brush Performance
+
+Brush performance must be measured at different sizes.
+
+Tests should include:
+
+- Small brushes.
+- Medium brushes.
+- Large brushes.
+- Brushes crossing one chunk boundary.
+- Brushes crossing multiple chunk boundaries.
+- Large-area replacement operations.
+
+The amount of work should scale primarily with the affected region rather than the total world size.
+
+## Chunk Performance
+
+Chunk operations must be benchmarked independently.
+
+Tests must measure:
+
+- Chunk creation.
+- Chunk loading.
+- Chunk modification.
+- Chunk mesh generation.
+- Chunk unloading.
+- Chunk reload.
+
+Neighboring chunks must only be rebuilt when their state is actually affected.
+
+## Rendering Performance
+
+Rendering benchmarks must measure representative scenes containing different numbers of visible chunks and different block densities.
+
+Tests should include:
+
+- Empty areas.
+- Dense voxel structures.
+- Large connected structures.
+- Many visible chunks.
+- Frequent chunk modifications.
+
+Renderer performance must not require rebuilding unaffected chunks.
+
+## Import Performance
+
+Import performance must be measured using progressively larger structures.
+
+Tests should include:
+
+- Small structures.
+- Multi-chunk structures.
+- Large structures.
+- Structures containing many different block types.
+- Structures containing large empty regions.
+
+Import must avoid unnecessary duplication of the complete source structure in memory.
+
+## Export Performance
+
+Export performance must be measured for:
+
+- Small selections.
+- Medium selections.
+- Large selections.
+- Multi-chunk structures.
+- Large structures requiring schematic splitting.
+
+Export must process data incrementally where possible.
+
+## Bloxd.io Export Limit
+
+Bloxd.io schematic export has a maximum of 200 chunks per schematic.
+
+Performance tests must verify the boundary conditions:
+
+- 199 chunks.
+- 200 chunks.
+- 201 chunks.
+- 400 chunks.
+- More than 400 chunks.
+
+At 200 chunks, the export must remain a single valid schematic.
+
+At 201 chunks, the exporter must create multiple valid schematic files.
+
+For exports exceeding 200 chunks, splitting must not require loading unnecessary duplicate copies of the complete structure into memory.
+
+## Memory Usage
+
+Large operations must avoid unnecessary full-world copies.
+
+The implementation should prefer:
+
+- Chunk-level processing.
+- Streaming where possible.
+- Reusable buffers.
+- Incremental serialization.
+- Lazy loading where appropriate.
+
+Memory usage must remain reasonably proportional to the amount of data actively being processed.
+
+## Save / Load Performance
+
+Save and load operations must be tested with progressively larger worlds.
+
+Tests must measure:
+
+- Small worlds.
+- Medium worlds.
+- Large worlds.
+- Worlds containing many modified chunks.
+- Worlds containing large empty regions.
+
+Loading must not unnecessarily process chunks that are not required for the requested operation.
+
+## Undo / Redo Performance
+
+Undo and redo performance must be tested for:
+
+- Small edits.
+- Large brush operations.
+- Multi-chunk operations.
+- Repeated undo operations.
+- Repeated redo operations.
+
+Undo history must not cause uncontrolled memory growth.
+
+## Scalability
+
+The same workload should be tested at multiple sizes.
+
+Example:
+
+1 chunk
+4 chunks
+16 chunks
+64 chunks
+200 chunks
+400 chunks
+
+The purpose is to identify unexpected nonlinear performance degradation.
+
+Particular attention must be given to:
+
+- Chunk processing.
+- Brush operations.
+- Rendering.
+- Import.
+- Export.
+- Schematic splitting.
+- Undo history.
+
+## Performance Regression
+
+Important benchmarks must have recorded baselines.
+
+A significant unexplained increase in execution time or memory usage must be treated as a performance regression.
+
+Performance baselines must be updated intentionally when an architectural change legitimately changes expected performance.
+
+## Correctness During Benchmarks
+
+A performance test is valid only if the operation also produces the expected result.
+
+For export benchmarks, validation must include:
+
+- Correct number of files.
+- Correct chunk count.
+- Valid schematic structure.
+- Correct block data.
+- Correct split boundaries.
+
+Performance must never be improved by silently dropping, merging, or corrupting voxel data.

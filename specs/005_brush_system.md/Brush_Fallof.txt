@@ -1,0 +1,199 @@
+==============================================================================
+BRUSH FALLOFF
+==============================================================================
+
+Brush Falloff defines how the influence of a Brush decreases from its center
+towards its boundary.
+
+Falloff determines the strength applied to each sampled voxel.
+
+It never determines which voxels are sampled.
+
+==============================================================================
+
+PURPOSE
+
+A Brush rarely applies uniform influence.
+
+Falloff creates smooth transitions between fully affected voxels and
+unaffected voxels.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Falloff must remain:
+
+Deterministic.
+
+Continuous.
+
+Configurable.
+
+Independent from Brush Behaviors.
+
+==============================================================================
+
+INPUT
+
+The Falloff stage receives:
+
+Execution Context.
+
+Brush Parameters.
+
+Influence Mask.
+
+Normalized Distance.
+
+==============================================================================
+
+OUTPUT
+
+The Falloff stage produces one normalized influence value for every sampled
+voxel.
+
+Influence values range from:
+
+0.0
+
+to
+
+1.0
+
+The resulting values are passed to the Brush Behavior.
+
+==============================================================================
+
+NORMALIZED DISTANCE
+
+Distance is normalized using the Brush radius.
+
+Center of Brush:
+
+Distance = 0
+
+Outer Boundary:
+
+Distance = 1
+
+Normalized distances remain independent from actual Brush size.
+
+==============================================================================
+
+BUILT-IN CURVES
+
+The engine should provide several predefined falloff curves.
+
+Constant.
+
+Linear.
+
+Smooth.
+
+Smoothstep.
+
+Sphere.
+
+Sharp.
+
+Inverse.
+
+Gaussian.
+
+Bell.
+
+Future curves may be added.
+
+==============================================================================
+
+CUSTOM CURVES
+
+Users may define custom falloff curves.
+
+Custom curves should expose the same public interface as built-in curves.
+
+==============================================================================
+
+PRESSURE
+
+Future pressure-sensitive devices may multiply the final influence.
+
+Pressure modifies strength.
+
+Pressure never modifies Brush Shape.
+
+==============================================================================
+
+MODIFIERS
+
+Future Falloff modifiers may include:
+
+Noise.
+
+Texture Masks.
+
+Height Masks.
+
+Angle Masks.
+
+Curvature Masks.
+
+Distance Fields.
+
+==============================================================================
+
+DETERMINISM
+
+Identical normalized distances must always produce identical influence values.
+
+==============================================================================
+
+NUMERICAL STABILITY
+
+Influence calculations should remain stable.
+
+Floating-point precision errors should never produce visible artifacts.
+
+==============================================================================
+
+PERFORMANCE
+
+Falloff calculations should operate on contiguous arrays.
+
+Vectorized computation is preferred.
+
+Repeated function evaluation should be minimized.
+
+==============================================================================
+
+VISUAL CONTINUITY
+
+The resulting influence field should remain continuous.
+
+Visible discontinuities should be avoided.
+
+==============================================================================
+
+FUTURE EXTENSIONS
+
+Future implementations may introduce:
+
+User-defined mathematical curves.
+
+Node-based falloff graphs.
+
+Animation-driven falloff.
+
+Procedural masks.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Brush Falloff should provide smooth, predictable and highly configurable
+influence distribution while remaining computationally efficient.
+
+==============================================================================
+
+END OF BRUSH FALLOFF

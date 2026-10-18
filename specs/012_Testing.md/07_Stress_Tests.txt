@@ -1,0 +1,221 @@
+# Stress Tests
+
+## Purpose
+
+Stress tests verify that VoxelForge remains stable when exposed to workloads significantly larger or more demanding than normal use.
+
+Stress testing focuses on stability, resource usage, data integrity, recovery behavior, and scalability.
+
+Stress tests must never be used as a substitute for normal correctness tests.
+
+## Large World Stress
+
+VoxelForge must be tested with progressively larger worlds.
+
+Tests should increase the number of loaded and modified chunks while monitoring:
+
+- Memory usage.
+- Processing time.
+- Chunk loading.
+- Chunk unloading.
+- Rendering stability.
+- Save performance.
+- World integrity.
+
+The test must stop or fail safely when a configured resource limit is reached.
+
+## Large Brush Operations
+
+Large-area editing operations must be tested with progressively increasing sizes.
+
+Tests should include:
+
+- Large fill operations.
+- Large erase operations.
+- Large replacement operations.
+- Large selections.
+- Operations crossing many chunk boundaries.
+
+The operation must not create uncontrolled memory usage or leave partially modified chunks after failure.
+
+## Import Stress
+
+Import stress tests must use progressively larger structures.
+
+Tests should include:
+
+- Large Minecraft-compatible structures.
+- Large Bloxd.io-compatible structures.
+- Structures containing many different block types.
+- Structures containing large empty regions.
+- Structures crossing many chunk boundaries.
+
+The importer must either complete successfully or fail explicitly.
+
+It must never report a successful import while silently omitting part of the source structure.
+
+## Export Stress
+
+Export stress tests must process increasingly large structures.
+
+Tests must verify:
+
+- Correct output.
+- Stable memory usage.
+- Correct chunk coordinates.
+- Correct block data.
+- Correct dimensions.
+- Correct handling of very large selections.
+
+Large exports must not require unnecessary duplication of the complete world in memory.
+
+## Bloxd.io Schematic Stress
+
+Bloxd.io schematic exports have a maximum of 200 chunks per `.bloxdschem` file.
+
+Stress tests must explicitly cover:
+
+- 199 chunks.
+- 200 chunks.
+- 201 chunks.
+- 400 chunks.
+- 401 chunks.
+- Larger structures where practical.
+
+At 200 chunks, one valid schematic must be produced.
+
+Above 200 chunks, the export must be split into multiple schematic files.
+
+Every generated file must contain no more than 200 chunks.
+
+The complete collection of generated files must preserve the complete source structure.
+
+No chunk may be:
+
+- Lost.
+- Silently skipped.
+- Accidentally duplicated.
+- Assigned an incorrect coordinate.
+
+## Repeated Operations
+
+The same operation should be repeated many times to detect gradual failures.
+
+Examples include:
+
+- Repeated block placement.
+- Repeated brush operations.
+- Repeated chunk loading and unloading.
+- Repeated import/export.
+- Repeated save/load.
+- Repeated undo/redo.
+- Repeated schematic generation.
+
+The test must monitor for:
+
+- Memory leaks.
+- Resource leaks.
+- Gradual performance degradation.
+- Increasing temporary-file usage.
+- State corruption.
+
+## Memory Stress
+
+Memory usage must be monitored during operations involving large amounts of voxel data.
+
+Particular attention should be given to:
+
+- Loaded chunks.
+- Large selections.
+- Undo history.
+- Import buffers.
+- Export buffers.
+- Render meshes.
+- Multi-file schematic generation.
+
+Temporary data must be released once it is no longer required.
+
+## Concurrency Stress
+
+Systems using parallel processing must be tested under heavy workloads.
+
+Tests should verify:
+
+- No lost modifications.
+- No duplicated operations.
+- No corrupted chunks.
+- Correct task completion.
+- Correct cancellation.
+- Correct synchronization.
+- Correct final world state.
+
+Tests must not depend on a specific thread scheduling order unless that ordering is part of the documented behavior.
+
+## Rendering Stress
+
+Rendering must be tested with increasingly complex scenes.
+
+Tests should include:
+
+- Many visible chunks.
+- Dense voxel structures.
+- Large connected structures.
+- Many different block types.
+- Frequent chunk modifications.
+- Camera movement through large worlds.
+
+The renderer must remain stable and must not modify authoritative world data.
+
+## Long-Running Stress
+
+VoxelForge should be tested under extended workloads.
+
+During long-running tests, monitor:
+
+- Memory usage.
+- CPU usage where available.
+- Operation latency.
+- Loaded chunk count.
+- Renderer stability.
+- File-system usage.
+- World integrity.
+
+A stable workload should not continuously become slower or consume progressively more memory without an expected reason.
+
+## Failure Recovery
+
+When a stress test exceeds a supported limit, VoxelForge must fail safely.
+
+The application should:
+
+- Remain stable whenever possible.
+- Preserve previously valid world data.
+- Release temporary resources.
+- Report the failure clearly.
+- Avoid corrupting saved worlds.
+- Allow the failed operation to be retried where appropriate.
+
+## Data Integrity
+
+Stress tests must include validation after major operations.
+
+Validation should check:
+
+- Chunk coordinates.
+- Block IDs.
+- Block counts where applicable.
+- World dimensions.
+- Saved data.
+- Exported data.
+- Schematic part count.
+- Schematic chunk counts.
+
+A stress test that completes without crashing but loses or corrupts voxel data is a failure.
+
+## Unsupported Workloads
+
+Stress tests may intentionally exceed supported limits.
+
+Unsupported workloads must result in controlled failure rather than undefined behavior.
+
+The implementation must not silently corrupt data in an attempt to complete an unsupported operation.

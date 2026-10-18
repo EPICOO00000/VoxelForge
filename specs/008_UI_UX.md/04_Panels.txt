@@ -1,0 +1,163 @@
+==============================================================================
+PANELS
+==============================================================================
+
+Panels organize VoxelForge functionality into logical categories inside the
+Blender interface.
+
+Each panel exposes a coherent group of tools while keeping the interface clean
+and easy to navigate.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Panels must remain:
+
+Simple.
+
+Consistent.
+
+Context Aware.
+
+Expandable.
+
+Easy to discover.
+
+==============================================================================
+
+MAIN PANELS
+
+VoxelForge should provide dedicated panels for:
+
+Project.
+
+World.
+
+Blocks.
+
+Brushes.
+
+Selections.
+
+Import / Export.
+
+Rendering.
+
+Performance.
+
+Plugins.
+
+Settings.
+
+==============================================================================
+
+PROJECT PANEL
+
+Displays:
+
+Project Name.
+
+World Dimensions.
+
+Loaded Format.
+
+Statistics.
+
+Recent Files.
+
+==============================================================================
+
+WORLD PANEL
+
+Provides access to:
+
+Chunk Information.
+
+World Size.
+
+World Origin.
+
+Coordinate Display.
+
+==============================================================================
+
+BLOCK PANEL
+
+Displays:
+
+Current Block.
+
+Favorite Blocks.
+
+Search.
+
+Categories.
+
+Tags.
+
+Block Preview.
+
+==============================================================================
+
+BRUSH PANEL
+
+Displays:
+
+Current Brush.
+
+Radius.
+
+Strength.
+
+Shape.
+
+Brush Options.
+
+==============================================================================
+
+SELECTION PANEL
+
+Provides:
+
+Selection Information.
+
+Selection Tools.
+
+Transform Operations.
+
+Selection Statistics.
+
+==============================================================================
+
+IMPORT / EXPORT PANEL
+
+Contains:
+
+Import Actions.
+
+Export Actions.
+
+Format Selection.
+
+Compatibility Information.
+
+==============================================================================
+
+SETTINGS PANEL
+
+Contains user-configurable options affecting the interface and editor
+behavior.
+
+Engine configuration remains outside the UI whenever possible.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Panels should organize the complete VoxelForge workflow into intuitive,
+discoverable and consistent interface sections.
+
+==============================================================================
+
+END OF PANELS

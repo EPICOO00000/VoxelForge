@@ -1,0 +1,381 @@
+VOXELFORGE GLOSSARY — CORE
+
+Document ID: 014_Glossary / 01_Core
+Status: Reference
+Purpose: Define the core terminology used throughout VoxelForge.
+
+============================================================
+1. VOXEL
+============================================================
+
+A voxel is the fundamental volumetric unit of a voxel world.
+
+In VoxelForge, a voxel represents one discrete position in the world and stores the block/material state assigned to that position.
+
+============================================================
+2. BLOCK
+============================================================
+
+A block is the logical content occupying a voxel position.
+
+A block may include:
+
+- block identifier;
+- block state;
+- orientation;
+- properties;
+- optional metadata supported by the target format.
+
+The terms "voxel" and "block" are related but should not be treated as identical:
+
+- voxel = spatial cell;
+- block = data occupying that cell.
+
+============================================================
+3. WORLD
+============================================================
+
+A world is the complete voxel environment being edited.
+
+A world contains voxel data organized into chunks and may additionally contain:
+
+- block information;
+- entities where supported;
+- world metadata;
+- regions;
+- editor-specific information.
+
+============================================================
+4. CHUNK
+============================================================
+
+A chunk is a fixed-size spatial subdivision of a voxel world.
+
+VoxelForge uses chunk-based organization to improve:
+
+- memory management;
+- rendering;
+- editing;
+- streaming;
+- import/export;
+- scalability.
+
+Chunk coordinates identify a chunk independently from its local voxel coordinates.
+
+============================================================
+5. CHUNK COORDINATES
+============================================================
+
+Chunk coordinates identify the position of a chunk in world space.
+
+They are distinct from local voxel coordinates inside the chunk.
+
+A conversion between world coordinates and chunk/local coordinates must remain deterministic and consistent across all systems.
+
+============================================================
+6. LOCAL COORDINATES
+============================================================
+
+Local coordinates identify a voxel inside its containing chunk.
+
+They are relative to the chunk origin.
+
+Local coordinates must never be confused with absolute world coordinates.
+
+============================================================
+7. WORLD COORDINATES
+============================================================
+
+World coordinates identify a voxel position in the complete world coordinate system.
+
+They are used by editing tools, selections, camera interaction, world storage and import/export systems.
+
+============================================================
+8. REGION
+============================================================
+
+A region is a larger logical grouping of chunks.
+
+Regions may be used for:
+
+- storage;
+- streaming;
+- organization;
+- processing;
+- export partitioning.
+
+A region is not necessarily equivalent to a chunk.
+
+============================================================
+9. BLOCK ID
+============================================================
+
+A Block ID is the identifier used to reference a particular block type.
+
+The Block Database is responsible for defining and resolving supported block identifiers.
+
+Block IDs must remain stable within the context where they are defined.
+
+============================================================
+10. BLOCK STATE
+============================================================
+
+Block state describes additional properties of a block beyond its base identity.
+
+Examples may include:
+
+- orientation;
+- variant;
+- facing direction;
+- powered state;
+- waterlogged state;
+- age;
+- connection state.
+
+Block state handling must follow the rules of the relevant target format.
+
+============================================================
+11. BLOCK DATABASE
+============================================================
+
+The Block Database is the authoritative system used by VoxelForge to store and resolve block definitions.
+
+It may contain:
+
+- block IDs;
+- names;
+- states;
+- properties;
+- rendering information;
+- compatibility information;
+- import/export mappings.
+
+============================================================
+12. SELECTION
+============================================================
+
+A selection is a defined spatial area chosen by the user.
+
+Selections are used by operations such as:
+
+- copy;
+- paste;
+- fill;
+- replace;
+- delete;
+- transform;
+- export.
+
+Selections must use the same coordinate conventions as the world system.
+
+============================================================
+13. BRUSH
+============================================================
+
+A brush is an editing tool that modifies voxels according to a defined shape, behavior and set of parameters.
+
+Brushes are defined in detail by the Brush System specification.
+
+============================================================
+14. EDIT OPERATION
+============================================================
+
+An edit operation is a discrete modification applied to world data.
+
+Examples include:
+
+- placing blocks;
+- deleting blocks;
+- filling an area;
+- replacing blocks;
+- painting;
+- transforming a selection.
+
+Edit operations should integrate with the undo/redo system where applicable.
+
+============================================================
+15. UNDO / REDO
+============================================================
+
+Undo reverses a previous user operation.
+
+Redo reapplies an operation that was previously undone.
+
+Undo/redo must preserve data integrity and should avoid unnecessary duplication of large voxel datasets.
+
+============================================================
+16. PROJECT
+============================================================
+
+A project is the collection of data required to work on a VoxelForge creation.
+
+Depending on the project type, it may include:
+
+- world data;
+- project metadata;
+- configuration;
+- imported assets;
+- editor state;
+- plugin-related information.
+
+============================================================
+17. SCHEMATIC
+============================================================
+
+A schematic is a portable representation of a structure or selected portion of voxel data.
+
+VoxelForge may import and export schematic formats according to the Import/Export specification.
+
+A schematic does not necessarily represent an entire world.
+
+============================================================
+18. BLOXD SCHEMATIC
+============================================================
+
+A Bloxd schematic is a `.bloxdschem` structure compatible with the Bloxd.io schematic workflow.
+
+VoxelForge must respect the documented format and its size constraints.
+
+A single Bloxd schematic is limited to a maximum of 200 chunks.
+
+Structures exceeding this limit must be split into multiple schematic files.
+
+============================================================
+19. MINECRAFT COMPATIBILITY
+============================================================
+
+Minecraft compatibility refers to VoxelForge's ability to exchange supported voxel data with Minecraft-oriented formats and workflows.
+
+Compatibility depends on the specific Minecraft version and format involved.
+
+============================================================
+20. DATA INTEGRITY
+============================================================
+
+Data integrity means that VoxelForge must preserve voxel information correctly during:
+
+- editing;
+- storage;
+- loading;
+- importing;
+- exporting;
+- conversion;
+- transformations.
+
+When information cannot be represented by a target format, the system must not silently corrupt or invent data.
+
+============================================================
+21. DETERMINISM
+============================================================
+
+A deterministic operation produces the same result when given the same inputs and configuration.
+
+Determinism is particularly important for:
+
+- procedural generation;
+- exports;
+- conversions;
+- tests;
+- benchmarks;
+- automated processing.
+
+============================================================
+22. COORDINATE SYSTEM
+============================================================
+
+The coordinate system defines how positions are represented in the VoxelForge world.
+
+All systems that manipulate spatial data must use consistent coordinate conventions.
+
+Coordinate conversions must be centralized where practical to prevent inconsistent behavior between subsystems.
+
+============================================================
+23. METADATA
+============================================================
+
+Metadata is additional information associated with a project, world, block, object or operation that is not necessarily part of the basic voxel value.
+
+Metadata must only be preserved when supported by the relevant data model or format.
+
+============================================================
+24. SERIALIZATION
+============================================================
+
+Serialization is the process of converting in-memory project or world data into a persistent representation.
+
+Deserialization is the reverse process.
+
+Serialization must be deterministic and must preserve all supported information.
+
+============================================================
+25. VALIDATION
+============================================================
+
+Validation is the process of checking data or operations against the rules defined by VoxelForge.
+
+Validation may occur during:
+
+- import;
+- export;
+- editing;
+- project loading;
+- plugin execution;
+- testing.
+
+============================================================
+26. COMPATIBILITY LAYER
+============================================================
+
+A compatibility layer translates between VoxelForge's internal representation and an external system or file format.
+
+Compatibility layers should isolate external format-specific behavior from the core systems.
+
+============================================================
+27. CORE SYSTEM
+============================================================
+
+A core system is a fundamental subsystem required by the application architecture.
+
+Core systems should have minimal unnecessary dependencies on optional features.
+
+============================================================
+28. SOURCE OF TRUTH
+============================================================
+
+The source of truth is the authoritative specification or data source for a given piece of information.
+
+When multiple systems reference the same information, they should avoid maintaining conflicting independent definitions.
+
+============================================================
+29. SPECIFICATION
+============================================================
+
+A specification is a formal project document describing required behavior, architecture, constraints or interfaces.
+
+Specifications are authoritative implementation references unless explicitly superseded.
+
+============================================================
+30. REQUIREMENT
+============================================================
+
+A requirement is a behavior or constraint that the implementation must satisfy.
+
+Requirements differ from future ideas, suggestions or optional improvements.
+
+============================================================
+31. LIMITATION
+============================================================
+
+A limitation is a known constraint of the current system, external format, platform or architecture.
+
+Limitations must be documented rather than hidden.
+
+============================================================
+32. COMPATIBILITY RULE
+============================================================
+
+When terminology differs between VoxelForge, Minecraft, Bloxd.io or another external system, the implementation must use the terminology appropriate to the relevant subsystem while maintaining a clear mapping between concepts.
+
+============================================================
+END OF DOCUMENT
+============================================================

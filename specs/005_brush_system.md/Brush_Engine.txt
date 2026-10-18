@@ -1,0 +1,235 @@
+==============================================================================
+BRUSH ENGINE
+==============================================================================
+
+The Brush Engine is the central coordinator of every brush operation.
+
+It is responsible for transforming a brush request into deterministic voxel
+modifications while coordinating all supporting systems.
+
+The Brush Engine owns the brush execution pipeline.
+
+==============================================================================
+
+PURPOSE
+
+The Brush Engine guarantees that every brush executes using the same workflow,
+regardless of its type or complexity.
+
+Individual brushes only describe behavior.
+
+The Engine performs execution.
+
+==============================================================================
+
+RESPONSIBILITIES
+
+The Brush Engine is responsible for:
+
+Validating requests.
+
+Preparing execution.
+
+Calling the Brush Shape.
+
+Calling the Brush Sampling stage.
+
+Calling the Brush Behavior.
+
+Collecting voxel modifications.
+
+Creating History entries.
+
+Dispatching modification events.
+
+Returning execution results.
+
+==============================================================================
+
+NON RESPONSIBILITIES
+
+The Brush Engine must never:
+
+Store voxel data.
+
+Generate meshes.
+
+Interact with Blender objects.
+
+Import worlds.
+
+Export worlds.
+
+Schedule rendering.
+
+Own block definitions.
+
+==============================================================================
+
+EXECUTION MODEL
+
+Every brush execution follows exactly the same sequence.
+
+Brush Request
+
+↓
+
+Validation
+
+↓
+
+Shape Generation
+
+↓
+
+Voxel Sampling
+
+↓
+
+Behavior Execution
+
+↓
+
+Modification Collection
+
+↓
+
+Voxel World Update
+
+↓
+
+History Recording
+
+↓
+
+Event Dispatch
+
+↓
+
+Execution Result
+
+No brush may bypass this pipeline.
+
+==============================================================================
+
+REQUEST VALIDATION
+
+Before execution the engine validates:
+
+Brush existence.
+
+Brush parameters.
+
+Brush radius.
+
+Target world.
+
+Target position.
+
+Permissions.
+
+Cancellation state.
+
+Invalid requests must terminate immediately.
+
+==============================================================================
+
+EXECUTION CONTEXT
+
+Each execution creates an immutable Brush Context.
+
+The context contains:
+
+Brush identifier.
+
+Current parameters.
+
+Execution timestamp.
+
+Target world.
+
+Target position.
+
+Random seed.
+
+Execution options.
+
+The context remains constant throughout execution.
+
+==============================================================================
+
+RESULT COLLECTION
+
+Brush Behaviors never modify the world directly.
+
+Instead they generate a list of voxel modifications.
+
+The Brush Engine validates this list before applying it.
+
+==============================================================================
+
+HISTORY
+
+If execution modifies voxels:
+
+A single History transaction is created.
+
+All modifications belonging to one user action must belong to one History
+entry.
+
+==============================================================================
+
+EVENTS
+
+Successful executions dispatch modification events.
+
+Interested systems include:
+
+Renderer.
+
+Statistics.
+
+Autosave.
+
+Future plugins.
+
+==============================================================================
+
+ERROR HANDLING
+
+Execution failures must never corrupt the Voxel World.
+
+Partial execution should be rolled back whenever possible.
+
+==============================================================================
+
+THREAD SAFETY
+
+Independent brush executions may execute simultaneously provided they do not
+modify overlapping voxel regions.
+
+Shared resources require synchronization.
+
+==============================================================================
+
+DETERMINISM
+
+Identical execution contexts must always generate identical results.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Future brush categories must integrate without modifying the execution
+pipeline.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Brush Engine should remain the single authority responsible for executing
+every editing operation performed inside VoxelForge.
+
+==============================================================================
+
+END OF BRUSH ENGINE

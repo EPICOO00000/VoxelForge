@@ -1,0 +1,231 @@
+==============================================================================
+ARCHITECTURE OVERVIEW
+==============================================================================
+
+The VoxelForge architecture is designed around one central objective:
+
+Represent, manipulate and export voxel worlds independently of any specific
+game or rendering technology.
+
+Every subsystem exists to support this objective.
+
+==============================================================================
+
+ARCHITECTURAL PHILOSOPHY
+
+VoxelForge follows a layered architecture.
+
+Each layer has a single responsibility.
+
+Higher layers orchestrate lower layers.
+
+Lower layers never depend on higher layers.
+
+Communication always follows clearly defined interfaces.
+
+==============================================================================
+
+HIGH LEVEL ARCHITECTURE
+
+The engine is composed of several independent subsystems.
+
+Core Engine
+
+↓
+
+Voxel World
+
+↓
+
+Brush Engine
+
+↓
+
+Renderer
+
+↓
+
+Import / Export
+
+↓
+
+User Interface
+
+Each subsystem is responsible for one domain only.
+
+==============================================================================
+
+THE CORE ENGINE
+
+The Core Engine is the heart of VoxelForge.
+
+It owns the project state.
+
+It coordinates all major systems.
+
+It does not perform rendering.
+
+It does not export files.
+
+It does not contain Blender-specific logic.
+
+Its responsibility is orchestration.
+
+==============================================================================
+
+THE VOXEL WORLD
+
+The Voxel World stores every voxel.
+
+It represents the authoritative state of the project.
+
+All modifications ultimately affect the Voxel World.
+
+No other subsystem owns persistent voxel data.
+
+==============================================================================
+
+THE BRUSH ENGINE
+
+The Brush Engine transforms user actions into voxel modifications.
+
+It computes which voxels should change.
+
+It never renders geometry.
+
+It never exports files.
+
+Its responsibility ends once voxel data has been updated.
+
+==============================================================================
+
+THE RENDERER
+
+The Renderer observes voxel changes.
+
+Its responsibility is to transform voxel data into Blender meshes.
+
+Meshes are temporary representations.
+
+The renderer never becomes the source of truth.
+
+==============================================================================
+
+IMPORTERS
+
+Importers convert external formats into the internal voxel representation.
+
+After import, all data becomes native VoxelForge data.
+
+The importer has no further responsibility.
+
+==============================================================================
+
+EXPORTERS
+
+Exporters convert the internal voxel representation into external formats.
+
+Exporters never modify the project.
+
+They only read voxel data.
+
+Each exporter remains independent.
+
+==============================================================================
+
+USER INTERFACE
+
+The User Interface is responsible only for user interaction.
+
+Buttons.
+
+Panels.
+
+Hotkeys.
+
+Viewport tools.
+
+The UI never contains business logic.
+
+User actions are delegated to the engine.
+
+==============================================================================
+
+INTERNAL COMMUNICATION
+
+Subsystems communicate through well-defined interfaces.
+
+No subsystem should directly manipulate another subsystem's internal state.
+
+Information flows through controlled APIs.
+
+==============================================================================
+
+SOURCE OF TRUTH
+
+Only the Voxel World stores persistent voxel data.
+
+Everything else is generated.
+
+Meshes are generated.
+
+Selections are generated.
+
+Exports are generated.
+
+Previews are generated.
+
+Nothing replaces the voxel database.
+
+==============================================================================
+
+SCALABILITY
+
+Every subsystem must support future expansion.
+
+New renderers.
+
+New exporters.
+
+New generators.
+
+New brushes.
+
+New plugins.
+
+The architecture should accommodate these additions without requiring major
+modifications.
+
+==============================================================================
+
+DESIGN OBJECTIVES
+
+The architecture prioritizes:
+
+Correctness
+
+↓
+
+Modularity
+
+↓
+
+Maintainability
+
+↓
+
+Scalability
+
+↓
+
+Performance
+
+↓
+
+Ease of implementation
+
+Short-term implementation speed must never compromise the architecture.
+
+==============================================================================
+
+END OF ARCHITECTURE OVERVIEW

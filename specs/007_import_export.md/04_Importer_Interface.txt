@@ -1,0 +1,142 @@
+==============================================================================
+IMPORTER INTERFACE
+==============================================================================
+
+Every Importer implements the common Importer Interface.
+
+The interface defines the contract between the engine and every supported
+import format.
+
+==============================================================================
+
+PURPOSE
+
+The Importer Interface allows new file formats to integrate into VoxelForge
+without modifying existing engine code.
+
+Every importer follows the same lifecycle and exposes the same public API.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Every Importer must be:
+
+Independent.
+
+Stateless.
+
+Reusable.
+
+Deterministic.
+
+Version Aware.
+
+==============================================================================
+
+GENERAL WORKFLOW
+
+Receive Import Request
+
+↓
+
+Validate File
+
+↓
+
+Read File Structure
+
+↓
+
+Parse Format
+
+↓
+
+Convert Blocks
+
+↓
+
+Convert States
+
+↓
+
+Convert Metadata
+
+↓
+
+Build Voxel World
+
+↓
+
+Return Completed World
+
+==============================================================================
+
+PUBLIC RESPONSIBILITIES
+
+Every Importer must be capable of:
+
+Detecting supported versions.
+
+Reading format headers.
+
+Reading dimensions.
+
+Reading chunk data.
+
+Reading block information.
+
+Reading metadata.
+
+Reporting validation errors.
+
+==============================================================================
+
+BLOCK CONVERSION
+
+Importers never create Block Definitions.
+
+Every external block identifier must be resolved through the Block Database.
+
+==============================================================================
+
+ERROR REPORTING
+
+Importers should distinguish between:
+
+Warnings.
+
+Recoverable Errors.
+
+Fatal Errors.
+
+Fatal errors terminate the import safely.
+
+==============================================================================
+
+MULTI-THREADING
+
+Importers should be designed so parsing and conversion may execute on worker
+threads.
+
+Only world creation should interact with the engine.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Adding support for a new file format should require implementing only a new
+Importer.
+
+Existing Importers must remain unchanged.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Importer Interface provides a stable and reusable foundation for every
+future voxel format supported by VoxelForge.
+
+==============================================================================
+
+END OF IMPORTER INTERFACE

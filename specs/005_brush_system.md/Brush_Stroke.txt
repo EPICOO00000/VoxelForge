@@ -1,0 +1,228 @@
+==============================================================================
+BRUSH STROKE
+==============================================================================
+
+Brush Stroke defines how continuous user movement generates multiple Brush
+executions.
+
+The Stroke System transforms input motion into a continuous editing
+operation.
+
+==============================================================================
+
+PURPOSE
+
+Without Stroke processing, rapid cursor movement would create discontinuous
+editing.
+
+The Stroke System guarantees continuous and predictable voxel modification.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Stroke processing must remain:
+
+Deterministic.
+
+Continuous.
+
+Frame-rate Independent.
+
+Input Device Independent.
+
+==============================================================================
+
+STROKE LIFECYCLE
+
+Every stroke follows the same lifecycle.
+
+Stroke Begin.
+
+↓
+
+Sample Generation.
+
+↓
+
+Interpolation.
+
+↓
+
+Brush Executions.
+
+↓
+
+History Collection.
+
+↓
+
+Stroke End.
+
+==============================================================================
+
+STROKE BEGIN
+
+A stroke begins when the input device starts an editing action.
+
+Examples:
+
+Mouse Button Press.
+
+Tablet Pen Contact.
+
+Future VR Controllers.
+
+==============================================================================
+
+STROKE END
+
+The stroke ends when the editing action finishes.
+
+Examples:
+
+Mouse Button Release.
+
+Pen Lift.
+
+Cancelled Input.
+
+==============================================================================
+
+CONTROL POINTS
+
+Every stroke consists of Control Points.
+
+Each Control Point records:
+
+World Position.
+
+Timestamp.
+
+Pressure.
+
+Tilt.
+
+Orientation.
+
+Future Device Data.
+
+==============================================================================
+
+INTERPOLATION
+
+Neighboring Control Points are connected through interpolation.
+
+Intermediate Brush executions are automatically generated.
+
+Interpolation prevents visible gaps.
+
+==============================================================================
+
+SPACING
+
+Brush executions occur according to configurable spacing.
+
+Spacing is expressed as a percentage of Brush radius.
+
+Typical values:
+
+5%
+
+10%
+
+25%
+
+50%
+
+Smaller spacing increases quality but also increases computation.
+
+==============================================================================
+
+FRAME RATE INDEPENDENCE
+
+Stroke quality must never depend on rendering frame rate.
+
+Sampling frequency must remain stable on both slow and fast hardware.
+
+==============================================================================
+
+PRESSURE
+
+Pressure-sensitive devices may dynamically modify:
+
+Strength.
+
+Radius.
+
+Opacity.
+
+Other Brush parameters.
+
+Pressure handling remains optional.
+
+==============================================================================
+
+SMOOTHING
+
+Optional stroke smoothing may reduce small hand movements.
+
+Smoothing must preserve the overall stroke shape.
+
+==============================================================================
+
+CANCELLATION
+
+Cancelled strokes produce no committed voxel modifications.
+
+==============================================================================
+
+HISTORY
+
+One complete stroke generates exactly one Undo entry.
+
+Intermediate executions must never create additional History entries.
+
+==============================================================================
+
+THREADING
+
+Stroke generation may execute independently from rendering.
+
+Voxel commits remain synchronized through the Brush Engine.
+
+==============================================================================
+
+PERFORMANCE
+
+Interpolation should generate only the minimum number of required Brush
+executions.
+
+==============================================================================
+
+FUTURE FEATURES
+
+Future implementations may support:
+
+Predictive interpolation.
+
+Bezier strokes.
+
+Spline strokes.
+
+Stroke replay.
+
+Stroke recording.
+
+Network synchronization.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Stroke System should provide fluid, continuous and professional editing
+behavior independent of hardware performance or input device.
+
+==============================================================================
+
+END OF BRUSH STROKE

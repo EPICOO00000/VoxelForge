@@ -1,0 +1,211 @@
+==============================================================================
+RENDER THREADING
+==============================================================================
+
+Render Threading defines how rendering work is distributed across multiple
+CPU cores.
+
+The objective is to maximize rendering performance while respecting Blender's
+threading limitations.
+
+==============================================================================
+
+PURPOSE
+
+Modern processors provide multiple execution cores.
+
+Independent rendering work should execute in parallel whenever practical.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Render Threading must remain:
+
+Deterministic.
+
+Safe.
+
+Scalable.
+
+Recoverable.
+
+Transparent.
+
+==============================================================================
+
+THREADING MODEL
+
+Rendering work is divided into two categories.
+
+Worker-safe tasks.
+
+Main-thread-only tasks.
+
+Only worker-safe tasks may execute concurrently.
+
+==============================================================================
+
+WORKER THREADS
+
+Worker threads may perform:
+
+Face Culling.
+
+Greedy Meshing.
+
+Visibility Analysis.
+
+Vertex Generation.
+
+Index Generation.
+
+Normal Generation.
+
+UV Generation.
+
+Temporary buffer construction.
+
+These operations do not require Blender API access.
+
+==============================================================================
+
+MAIN THREAD
+
+Only the Blender main thread may perform:
+
+Mesh datablock creation.
+
+Mesh modification.
+
+Object creation.
+
+Object deletion.
+
+Material assignment.
+
+GPU synchronization.
+
+Any Blender API interaction.
+
+==============================================================================
+
+TASK DISTRIBUTION
+
+Each Dirty Chunk becomes an independent rendering task.
+
+Independent tasks may execute simultaneously.
+
+==============================================================================
+
+TASK QUEUE
+
+Rendering tasks enter a scheduling queue.
+
+The scheduler distributes tasks across available workers.
+
+Completed tasks are returned to the main thread.
+
+==============================================================================
+
+SYNCHRONIZATION
+
+Worker threads never directly modify Blender data.
+
+Workers produce temporary mesh buffers only.
+
+The main thread performs final mesh construction.
+
+==============================================================================
+
+FAILURE ISOLATION
+
+Failure of one rendering task must not terminate unrelated tasks.
+
+Individual chunk failures remain isolated.
+
+==============================================================================
+
+LOAD BALANCING
+
+Future schedulers may balance work according to:
+
+Chunk complexity.
+
+Estimated polygon count.
+
+Distance from camera.
+
+Previous execution time.
+
+==============================================================================
+
+CANCELLATION
+
+Obsolete rendering tasks should be cancellable.
+
+If a chunk becomes dirty again before completion,
+the outdated task may be discarded.
+
+==============================================================================
+
+THREAD SAFETY
+
+Shared resources require synchronization.
+
+Thread contention should remain minimal.
+
+Lock duration should be minimized.
+
+==============================================================================
+
+NUMPY
+
+NumPy vectorized operations may internally utilize optimized native code.
+
+The renderer should leverage these optimizations whenever practical.
+
+==============================================================================
+
+DEBUGGING
+
+Diagnostics may include:
+
+Worker utilization.
+
+Queue length.
+
+Average task duration.
+
+Longest task.
+
+Idle workers.
+
+Cancelled tasks.
+
+==============================================================================
+
+FUTURE IMPROVEMENTS
+
+Future implementations may introduce:
+
+Task stealing.
+
+Dynamic scheduling.
+
+Priority queues.
+
+SIMD preprocessing.
+
+GPU compute preprocessing.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Render Threading should maximize CPU utilization while ensuring that every
+Blender API interaction remains confined to the main thread.
+
+==============================================================================
+
+END OF RENDER THREADING

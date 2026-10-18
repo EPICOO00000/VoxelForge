@@ -1,0 +1,157 @@
+==============================================================================
+BLOCK DEFINITION
+==============================================================================
+
+A Block Definition describes every immutable property shared by all
+instances of a block.
+
+Block Definitions contain metadata describing the block itself.
+
+They never store voxel instance data.
+
+==============================================================================
+
+PURPOSE
+
+The Block Definition acts as the canonical description of a Universal Block.
+
+Every voxel referencing the same Universal Block ID shares the same Block
+Definition.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Block Definitions must remain:
+
+Immutable.
+
+Data Driven.
+
+Serializable.
+
+Game Independent.
+
+Reusable.
+
+==============================================================================
+
+BLOCK CONTENT
+
+A Block Definition may contain:
+
+Universal Block ID.
+
+Internal Name.
+
+Display Name.
+
+Category.
+
+Physical Properties.
+
+Visual Properties.
+
+State Definitions.
+
+Metadata Definitions.
+
+Tags.
+
+Game Mappings.
+
+==============================================================================
+
+IDENTITY
+
+Every Block Definition owns exactly one Universal Block ID.
+
+Identifiers are globally unique.
+
+==============================================================================
+
+DISPLAY INFORMATION
+
+Definitions may expose:
+
+Localized Name.
+
+Description.
+
+Icon.
+
+Preview Image.
+
+Editor Category.
+
+==============================================================================
+
+PHYSICAL PROPERTIES
+
+Possible properties include:
+
+Solid.
+
+Transparent.
+
+Liquid.
+
+Replaceable.
+
+Gravity Affected.
+
+Emissive.
+
+Interactable.
+
+==============================================================================
+
+VISUAL PROPERTIES
+
+Possible properties include:
+
+Material.
+
+Texture Set.
+
+Tint.
+
+Transparency Mode.
+
+Render Layer.
+
+==============================================================================
+
+STATE SUPPORT
+
+A Block Definition specifies which Block States are valid.
+
+Invalid state combinations must be rejected during validation.
+
+==============================================================================
+
+METADATA
+
+Optional metadata definitions describe additional information supported by
+the block.
+
+Metadata is stored separately from the definition itself.
+
+==============================================================================
+
+VERSIONING
+
+Definitions should remain backward compatible whenever possible.
+
+Deprecated properties should not invalidate existing projects.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+A Block Definition should completely describe a block while remaining
+independent from voxel instances and game-specific implementations.
+
+==============================================================================
+
+END OF BLOCK DEFINITION

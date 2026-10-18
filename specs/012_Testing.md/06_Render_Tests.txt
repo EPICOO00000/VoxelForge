@@ -1,0 +1,244 @@
+# Render Tests
+
+## Purpose
+
+Render tests verify that the VoxelForge renderer correctly converts the authoritative voxel world state into the expected visual representation.
+
+Render tests must validate both visual correctness and renderer/world integration.
+
+The renderer must never modify the authoritative voxel data while performing rendering operations.
+
+## Basic Block Rendering
+
+Tests must verify that supported block types render correctly.
+
+Each test should verify:
+
+- Correct block geometry.
+- Correct block texture or material.
+- Correct orientation where applicable.
+- Correct visibility.
+- Correct handling of transparent blocks.
+- Correct handling of non-solid blocks.
+- Correct handling of empty/air cells.
+
+A block that exists in the world must not disappear from the rendered result unless its visibility rules explicitly require it.
+
+## Chunk Rendering
+
+Tests must verify that individual chunks are rendered correctly.
+
+Tests must cover:
+
+- Empty chunks.
+- Fully occupied chunks.
+- Partially occupied chunks.
+- Chunks containing multiple block types.
+- Chunks with transparent blocks.
+- Chunks containing blocks at their boundaries.
+
+The rendered result must correspond exactly to the blocks stored in the chunk.
+
+## Chunk Boundary Tests
+
+Chunk boundaries are critical for voxel rendering.
+
+Tests must verify:
+
+- Adjacent chunks connect without visible gaps.
+- Faces between two solid blocks are correctly culled.
+- Faces touching air are correctly generated.
+- Transparent block boundaries are handled correctly.
+- Block visibility is correct when a neighboring chunk is unloaded.
+- Block visibility is updated when a neighboring chunk becomes loaded.
+
+Changing a block at the edge of one chunk must update any affected geometry in the neighboring chunk.
+
+## World Updates
+
+Render tests must verify that modifications to the world are reflected correctly.
+
+Tests must cover:
+
+- Adding a block.
+- Removing a block.
+- Replacing a block.
+- Modifying multiple blocks.
+- Modifying a complete region.
+- Modifying blocks across chunk boundaries.
+
+After a world modification, only the necessary render data should be invalidated and rebuilt.
+
+## Mesh Rebuilds
+
+Tests must verify that chunk meshes are rebuilt correctly after changes.
+
+The renderer must:
+
+- Detect modified chunks.
+- Rebuild affected geometry.
+- Update neighboring geometry when required.
+- Remove obsolete geometry.
+- Preserve unaffected chunk meshes.
+
+Rebuilding a chunk must produce the same result as generating that chunk from the current authoritative world state.
+
+## Visibility and Face Culling
+
+Render tests must verify correct visibility decisions.
+
+Tests should include:
+
+- Isolated blocks.
+- Adjacent solid blocks.
+- Large solid surfaces.
+- Internal blocks completely surrounded by solid blocks.
+- Transparent blocks.
+- Blocks adjacent to transparent blocks.
+- Blocks adjacent to unloaded chunks.
+
+Hidden faces must not be rendered when they are not visible.
+
+Visible faces must never be incorrectly culled.
+
+## Transparency
+
+Transparent and partially transparent blocks require dedicated tests.
+
+Tests must verify:
+
+- Correct rendering order where required.
+- Correct visibility through transparent blocks.
+- Correct interaction with neighboring solid blocks.
+- Correct chunk-boundary behavior.
+- Correct updates after adding or removing transparent blocks.
+
+Transparency behavior must remain consistent when the camera moves or when chunks are rebuilt.
+
+## Lighting
+
+Where lighting is supported by the renderer, tests must verify:
+
+- Correct lighting for exposed blocks.
+- Correct lighting changes after block placement.
+- Correct lighting changes after block removal.
+- Correct lighting across chunk boundaries.
+- Correct behavior after chunk reload.
+
+Lighting updates must not alter the underlying voxel data.
+
+## Camera and Visibility
+
+Render tests must verify that camera movement does not change world state.
+
+Tests should cover:
+
+- Moving the camera.
+- Rotating the camera.
+- Zooming where supported.
+- Moving through large voxel structures.
+- Moving across chunk boundaries.
+- Entering and leaving loaded regions.
+
+Visible chunks must be selected correctly according to the renderer's visibility rules.
+
+## Large Rendered Areas
+
+The renderer must be tested with progressively larger visible regions.
+
+Tests should include:
+
+- Small scenes.
+- Multiple visible chunks.
+- Large structures.
+- Dense voxel structures.
+- Large empty regions surrounding structures.
+
+The renderer must not render chunks that are outside the required visibility range unless explicitly configured to do so.
+
+## Minecraft Compatibility
+
+When importing Minecraft-compatible structures, render tests must verify that the resulting internal block representation produces the expected VoxelForge rendering.
+
+Tests should include:
+
+- Common solid blocks.
+- Transparent blocks.
+- Different block shapes where supported.
+- Structures containing multiple block types.
+- Structures crossing chunk boundaries.
+
+Unsupported Minecraft-specific visual properties must be handled according to the project's documented conversion rules.
+
+## Bloxd.io Compatibility
+
+When importing Bloxd.io-compatible schematics, render tests must verify that the resulting blocks render correctly in VoxelForge.
+
+Tests must include:
+
+- Single-chunk schematics.
+- Multi-chunk schematics.
+- Schematics containing different block types.
+- Schematics crossing multiple chunk boundaries.
+- Schematics produced by a multi-file export.
+
+Bloxd `.bloxdschem` files are based on 32×32×32 voxel chunks.
+
+When a large structure has been split into multiple schematic files because of the 200-chunk-per-schematic limit, importing the parts must produce the same combined rendered structure as the original world.
+
+## Render Cache
+
+If render caching is used, tests must verify:
+
+- Cache entries correspond to the correct chunk state.
+- Modified chunks invalidate stale entries.
+- Unmodified chunks can reuse valid cached data.
+- Cache invalidation occurs across affected chunk boundaries.
+- Reloading a chunk does not display stale geometry.
+
+A stale cache must never override newer authoritative world data.
+
+## Renderer and World Separation
+
+The renderer must remain a consumer of world data.
+
+Tests must verify that:
+
+- Rendering does not modify block IDs.
+- Mesh generation does not modify chunks.
+- Camera operations do not modify the world.
+- Visibility calculations do not modify voxel data.
+- Cache operations do not modify authoritative state.
+
+## Regression Coverage
+
+Every previously discovered rendering bug should receive a dedicated regression test.
+
+Regression tests should cover:
+
+- Incorrect chunk-boundary faces.
+- Missing block faces.
+- Extra internal faces.
+- Stale chunk meshes.
+- Incorrect transparency.
+- Incorrect block orientation.
+- Incorrect updates after world edits.
+- Incorrect rendering after import.
+- Incorrect rendering after save/load.
+
+## Render Test Validation
+
+Render tests must compare the produced result against an expected result using the project's supported render-testing method.
+
+Where exact pixel comparison is appropriate, the test must use a deterministic camera, world state, render settings, and environment.
+
+Where exact pixel comparison is not appropriate, tests should validate renderer-level structures such as:
+
+- Generated faces.
+- Mesh vertex counts.
+- Material assignments.
+- Visible chunk sets.
+- Block visibility decisions.
+- Mesh invalidation state.
+
+Tests must distinguish genuine rendering differences from expected differences caused by supported platform or hardware variation.

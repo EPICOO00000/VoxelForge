@@ -1,0 +1,260 @@
+==============================================================================
+BRUSH PIPELINE
+==============================================================================
+
+The Brush Pipeline defines the ordered sequence of processing stages executed
+during every brush operation.
+
+Each stage has one clearly defined responsibility.
+
+Stages communicate only through well-defined data structures.
+
+==============================================================================
+
+PURPOSE
+
+A fixed execution pipeline guarantees deterministic behavior, simplifies
+debugging and allows future optimization without changing brush behavior.
+
+==============================================================================
+
+PIPELINE OVERVIEW
+
+User Input
+
+↓
+
+Brush Operator
+
+↓
+
+Brush Engine
+
+↓
+
+Brush Shape
+
+↓
+
+Sampling
+
+↓
+
+Falloff
+
+↓
+
+Behavior
+
+↓
+
+Modification Validation
+
+↓
+
+Voxel World
+
+↓
+
+History
+
+↓
+
+Event System
+
+↓
+
+Renderer
+
+==============================================================================
+
+STAGE 1
+
+USER INPUT
+
+The user initiates an editing action.
+
+Examples include:
+
+Mouse Click.
+
+Mouse Drag.
+
+Tablet Input.
+
+Future VR Controllers.
+
+==============================================================================
+
+STAGE 2
+
+BRUSH OPERATOR
+
+The Operator converts user input into a Brush Request.
+
+The Operator performs no voxel modification.
+
+==============================================================================
+
+STAGE 3
+
+BRUSH ENGINE
+
+The Engine validates the request.
+
+Creates the execution context.
+
+Coordinates every following stage.
+
+==============================================================================
+
+STAGE 4
+
+BRUSH SHAPE
+
+The Shape defines the geometric influence volume.
+
+Examples include:
+
+Sphere.
+
+Cube.
+
+Cylinder.
+
+Cone.
+
+Custom shapes.
+
+==============================================================================
+
+STAGE 5
+
+SAMPLING
+
+Sampling converts the abstract shape into concrete voxel coordinates.
+
+Sampling never modifies voxels.
+
+==============================================================================
+
+STAGE 6
+
+FALLOFF
+
+Each sampled voxel receives an influence value.
+
+Influence may depend on:
+
+Distance.
+
+Curves.
+
+Pressure.
+
+Future modifiers.
+
+==============================================================================
+
+STAGE 7
+
+BEHAVIOR
+
+The Behavior computes voxel modifications.
+
+Examples include:
+
+Paint.
+
+Replace.
+
+Smooth.
+
+Noise.
+
+Flatten.
+
+Fill.
+
+Erase.
+
+==============================================================================
+
+STAGE 8
+
+VALIDATION
+
+The generated modifications are verified.
+
+Invalid changes are discarded.
+
+The Voxel World must never receive invalid data.
+
+==============================================================================
+
+STAGE 9
+
+WORLD UPDATE
+
+Validated modifications are applied atomically.
+
+Affected chunks become Dirty.
+
+==============================================================================
+
+STAGE 10
+
+HISTORY
+
+The entire operation becomes one History transaction.
+
+==============================================================================
+
+STAGE 11
+
+EVENTS
+
+Modification events notify subscribed systems.
+
+==============================================================================
+
+STAGE 12
+
+RENDERER
+
+Dirty chunks are rebuilt.
+
+Viewport updates become visible.
+
+==============================================================================
+
+PIPELINE GUARANTEES
+
+Every execution must:
+
+Follow identical stages.
+
+Produce deterministic results.
+
+Remain independent from rendering.
+
+Remain independent from export systems.
+
+==============================================================================
+
+FUTURE EXTENSIONS
+
+New stages may be inserted provided existing interfaces remain compatible.
+
+The execution order should remain stable whenever practical.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Brush Pipeline should provide a predictable and extensible execution model
+for every present and future editing tool.
+
+==============================================================================
+
+END OF BRUSH PIPELINE

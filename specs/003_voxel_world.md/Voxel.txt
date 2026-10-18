@@ -1,0 +1,164 @@
+==============================================================================
+VOXELS
+==============================================================================
+
+A voxel represents the smallest editable unit of the Voxel World.
+
+Every voxel contains only the information required to describe a single
+location in space.
+
+The voxel format must remain compact, deterministic and efficient.
+
+==============================================================================
+
+PURPOSE
+
+Voxels represent the contents of the world.
+
+Terrain.
+
+Structures.
+
+Decoration.
+
+Blocks.
+
+Everything visible inside the world ultimately consists of voxels.
+
+==============================================================================
+
+VOXEL DATA
+
+Each voxel stores only engine-independent information.
+
+Typical voxel attributes include:
+
+Universal Block Identifier.
+
+Rotation.
+
+Flags.
+
+Optional Metadata Reference.
+
+Game-specific information must never be stored directly.
+
+==============================================================================
+
+BLOCK IDENTIFIER
+
+Every voxel references a Universal Block Identifier.
+
+The identifier represents a logical block type.
+
+Translation into game-specific block names is handled by the Block Database.
+
+==============================================================================
+
+ROTATION
+
+Voxel rotation is stored independently from the block identifier.
+
+Rotation information should remain compact.
+
+The engine must support arbitrary future rotation systems without changing
+the voxel interface.
+
+==============================================================================
+
+FLAGS
+
+Flags represent lightweight boolean properties.
+
+Typical examples include:
+
+Selected.
+
+Locked.
+
+Hidden.
+
+Protected.
+
+Temporary.
+
+Flags should remain compact and easily extensible.
+
+==============================================================================
+
+OPTIONAL METADATA
+
+Most voxels require no metadata.
+
+Metadata should therefore remain optional.
+
+Only voxels requiring additional information allocate metadata storage.
+
+==============================================================================
+
+AIR
+
+Air is a valid voxel.
+
+Air occupies space inside allocated chunks.
+
+Removing a voxel replaces it with Air rather than deleting storage.
+
+==============================================================================
+
+IMMUTABILITY
+
+Voxel values should behave as immutable logical values whenever practical.
+
+Voxel modification should occur through replacement rather than mutation.
+
+==============================================================================
+
+MEMORY EFFICIENCY
+
+The voxel representation should remain as compact as possible.
+
+Large worlds may contain hundreds of millions of voxels.
+
+Every byte saved per voxel has significant impact.
+
+==============================================================================
+
+ENGINE INDEPENDENCE
+
+Voxels never reference:
+
+Blender objects.
+
+Meshes.
+
+Materials.
+
+Textures.
+
+Nodes.
+
+Game-specific identifiers.
+
+Renderer data.
+
+==============================================================================
+
+FUTURE EXTENSIONS
+
+Future versions may extend voxel capabilities without breaking existing
+interfaces.
+
+Additional information should remain optional whenever possible.
+
+==============================================================================
+
+DESIGN PRINCIPLE
+
+A voxel should describe only what exists at one position.
+
+Everything else belongs to higher-level systems.
+
+==============================================================================
+
+END OF VOXELS

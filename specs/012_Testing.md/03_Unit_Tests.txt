@@ -1,0 +1,300 @@
+==============================================================================
+VOXELFORGE TESTING — UNIT TESTS
+==============================================================================
+
+PURPOSE
+
+Unit tests validate small, isolated pieces of VoxelForge logic.
+
+They should execute quickly and avoid unnecessary dependencies on the UI,
+renderer, filesystem, network or external applications.
+
+==============================================================================
+
+UNIT TEST PRINCIPLES
+
+Each unit test should:
+
+- Test one clear behavior.
+- Use deterministic input.
+- Be independent of other tests.
+- Avoid relying on execution order.
+- Verify both expected output and important side effects.
+- Cover normal, boundary and invalid cases where applicable.
+
+Tests should preferably interact with public or stable internal interfaces
+rather than implementation details that are expected to change.
+
+==============================================================================
+
+COORDINATE TESTS
+
+Coordinate conversion functions must be tested thoroughly.
+
+Tests should cover:
+
+- Origin coordinates.
+- Positive coordinates.
+- Negative coordinates where supported.
+- Chunk boundaries.
+- First voxel of a chunk.
+- Last voxel of a chunk.
+- Adjacent chunk transitions.
+
+For a coordinate mapping system, converting a coordinate to a chunk/local
+coordinate representation and reconstructing the original coordinate should
+return the original value.
+
+==============================================================================
+
+CHUNK INDEXING
+
+Chunk indexing logic must be tested independently.
+
+Verify:
+
+- Correct local index calculation.
+- Correct inverse conversion where supported.
+- No collisions between distinct voxel coordinates.
+- Correct handling of chunk boundaries.
+- Correct handling of all valid local coordinates.
+
+For a 32×32×32 chunk representation, every valid local coordinate must map to
+one unique cell.
+
+==============================================================================
+
+BLOCK DATABASE
+
+Block database unit tests should verify:
+
+- Known block lookup.
+- Unknown block handling.
+- Stable block identifiers.
+- Name-to-ID conversion where supported.
+- ID-to-definition conversion where supported.
+- Metadata validation.
+- Default behavior for missing optional properties.
+
+Tests should ensure that invalid block definitions are rejected rather than
+silently producing inconsistent database state.
+
+==============================================================================
+
+RLE ENCODING
+
+The Bloxd.io block payload encoder must be tested independently from file I/O.
+
+Given a sequence of block IDs, verify that the generated RLE pairs contain the
+correct run lengths and block IDs.
+
+Test cases should include:
+
+- Empty input where the encoder permits it.
+- One block.
+- Multiple identical blocks.
+- Alternating block IDs.
+- Long runs.
+- Single-element runs.
+- Maximum valid chunk payload.
+
+A full 32×32×32 chunk contains 32768 cells.
+
+For a valid chunk, the RLE runs must collectively represent exactly 32768 cells.
+
+==============================================================================
+
+RLE DECODING
+
+The decoder must reconstruct the exact original block sequence.
+
+Round-trip property:
+
+encode(input) -> decode(result) == input
+
+Test both highly repetitive and highly varied data.
+
+Malformed RLE data must be rejected when it cannot represent a valid chunk.
+
+==============================================================================
+
+BLOXD SCHEMATIC BOUNDARIES
+
+Unit tests should verify the chunk-limit logic independently from the actual
+file writer.
+
+Required cases:
+
+- 0 chunks.
+- 1 chunk.
+- 199 chunks.
+- 200 chunks.
+- 201 chunks.
+
+A single Bloxd.io `.bloxdschem` file must never be produced with more than
+200 chunks.
+
+The partitioning logic must divide larger collections into valid groups.
+
+For example:
+
+201 chunks -> 200 + 1
+
+400 chunks -> 200 + 200
+
+401 chunks -> 200 + 200 + 1
+
+==============================================================================
+
+BRUSH CALCULATIONS
+
+Brush logic should be tested without requiring the renderer.
+
+Depending on supported brush types, test:
+
+- Single voxel.
+- Box.
+- Sphere.
+- Cylinder.
+- Replace operations.
+- Add/remove operations.
+- Boundary clipping.
+- Selection masks.
+
+The calculated affected voxel set must match the brush definition.
+
+==============================================================================
+
+WORLD MODIFICATION LOGIC
+
+World modification functions should be tested with small deterministic worlds.
+
+Verify:
+
+- Setting a block.
+- Reading a block.
+- Replacing a block.
+- Clearing a block.
+- Editing chunk boundaries.
+- Creating previously empty chunks.
+- Updating existing chunks.
+
+Invalid operations must produce the documented result.
+
+==============================================================================
+
+VALIDATION
+
+Validation helpers should be tested with both valid and invalid data.
+
+Examples:
+
+- Valid dimensions.
+- Zero dimensions where allowed.
+- Negative dimensions where prohibited.
+- Valid block IDs.
+- Invalid block IDs.
+- Valid chunk coordinates.
+- Invalid serialized values.
+- Missing required fields.
+
+==============================================================================
+
+SERIALIZATION HELPERS
+
+Low-level serialization functions should have direct tests.
+
+Tests should verify:
+
+- Correct integer encoding.
+- Correct string encoding.
+- Correct byte-array encoding.
+- Correct handling of zero.
+- Correct handling of positive values.
+- Correct handling of negative values where the format permits them.
+- Correct length prefixes.
+
+For Avro-based data, tests must verify the exact encoding required by the
+supported schema rather than merely testing that the data can be written.
+
+==============================================================================
+
+PLUGIN API HELPERS
+
+Small plugin API utilities should be unit-tested independently where possible.
+
+Examples:
+
+- Version comparison.
+- Capability validation.
+- Registration checks.
+- Event filtering.
+- Lifecycle state transitions.
+- Invalid API arguments.
+
+==============================================================================
+
+RENDERER HELPERS
+
+Renderer-related calculations that do not require an actual GPU should be
+unit-tested.
+
+Examples:
+
+- Face visibility decisions.
+- Coordinate conversion.
+- Mesh index generation.
+- Frustum-related calculations where deterministic.
+- Block-to-render-data mapping.
+
+GPU-dependent behavior belongs in dedicated render tests rather than ordinary
+unit tests.
+
+==============================================================================
+
+ERROR CONDITIONS
+
+Unit tests must verify that invalid states fail safely.
+
+Tests should ensure that functions do not:
+
+- Produce silently corrupted data.
+- Return misleading success values.
+- Access invalid memory.
+- Accept impossible dimensions.
+- Generate invalid schematic chunks.
+
+==============================================================================
+
+DETERMINISM
+
+Repeated execution with identical input must produce identical results for
+deterministic functions.
+
+This is particularly important for:
+
+- Serialization.
+- RLE encoding.
+- Coordinate conversion.
+- Brush calculations.
+- Mesh generation.
+- Partitioning.
+
+==============================================================================
+
+UNIT TEST QUALITY
+
+Avoid tests that only reproduce implementation details.
+
+A test should answer:
+
+"What behavior must remain correct?"
+
+rather than:
+
+"Does the current implementation contain these exact internal statements?"
+
+==============================================================================
+
+END OF TESTING — UNIT TESTS
+==============================================================================

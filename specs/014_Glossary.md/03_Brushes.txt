@@ -1,0 +1,389 @@
+VOXELFORGE GLOSSARY — BRUSHES
+
+Document ID: 014_Glossary / 03_Brushes
+Status: Reference
+Purpose: Define brush and voxel-editing terminology used throughout VoxelForge.
+
+============================================================
+1. BRUSH
+============================================================
+
+A brush is an interactive tool used to modify voxel data according to a defined shape and set of editing rules.
+
+A brush may place, remove, replace, paint or otherwise modify blocks.
+
+============================================================
+2. BRUSH STROKE
+============================================================
+
+A brush stroke is one continuous interaction in which the user applies a brush across one or more positions.
+
+A stroke may produce multiple voxel modifications while remaining one logical user action.
+
+============================================================
+3. BRUSH SIZE
+============================================================
+
+Brush size determines the spatial extent of a brush's influence.
+
+Depending on the brush type, size may represent:
+
+- radius;
+- diameter;
+- width;
+- height;
+- another shape-specific dimension.
+
+============================================================
+4. BRUSH SHAPE
+============================================================
+
+Brush shape defines the geometric area affected by a brush.
+
+Possible shapes include:
+
+- sphere;
+- cube;
+- cylinder;
+- plane;
+- custom shape.
+
+The exact supported shapes are defined by the Brush System specification.
+
+============================================================
+5. BRUSH FALLOFF
+============================================================
+
+Falloff controls how brush influence changes from the center of the brush toward its boundary.
+
+A hard falloff applies a uniform effect across the active area.
+
+A soft falloff gradually reduces the effect near the boundary.
+
+============================================================
+6. HARD BRUSH
+============================================================
+
+A hard brush applies its operation uniformly across its active volume, subject to the operation's rules.
+
+It does not normally provide a gradual strength transition.
+
+============================================================
+7. SOFT BRUSH
+============================================================
+
+A soft brush applies a variable influence across its active volume.
+
+Influence generally decreases toward the edge according to the selected falloff function.
+
+============================================================
+8. BRUSH STRENGTH
+============================================================
+
+Brush strength controls the intensity of an operation where the operation supports variable strength.
+
+Not every brush operation necessarily uses strength.
+
+============================================================
+9. BRUSH MASK
+============================================================
+
+A brush mask determines which voxels are eligible to be affected by the brush.
+
+A mask may restrict editing based on:
+
+- block type;
+- block state;
+- existing material;
+- spatial conditions;
+- selection boundaries.
+
+============================================================
+10. BRUSH FILTER
+============================================================
+
+A brush filter is a condition used to determine whether a voxel should be modified.
+
+Filters allow brushes to target specific classes of blocks without affecting unrelated blocks.
+
+============================================================
+11. TARGET BLOCK
+============================================================
+
+The target block is the block that a brush operation intends to place, paint or otherwise apply.
+
+============================================================
+12. SOURCE BLOCK
+============================================================
+
+The source block is the existing block being inspected or modified by a brush operation.
+
+For replacement operations, the source block identifies what should be replaced.
+
+============================================================
+13. REPLACE OPERATION
+============================================================
+
+A replace operation changes selected source blocks into a specified target block.
+
+It should respect masks, selections and other brush constraints.
+
+============================================================
+14. PAINT OPERATION
+============================================================
+
+A paint operation modifies block information according to the selected painting rules.
+
+Depending on the implementation, painting may replace an existing block or modify a property while preserving other information.
+
+============================================================
+15. PLACE OPERATION
+============================================================
+
+A place operation inserts a selected block into eligible empty or target positions.
+
+The exact definition of "empty" depends on the block/world model.
+
+============================================================
+16. ERASE OPERATION
+============================================================
+
+An erase operation removes or replaces existing block data according to the world's representation of empty space.
+
+============================================================
+17. FILL OPERATION
+============================================================
+
+A fill operation applies a block or operation across an entire defined area.
+
+Large fill operations should use efficient chunk-aware processing.
+
+============================================================
+18. CONTINUOUS EDITING
+============================================================
+
+Continuous editing means that the brush remains active while the user moves the cursor or pointer through the world.
+
+The system must avoid unnecessary repeated processing of the same voxel positions.
+
+============================================================
+19. SNAP
+============================================================
+
+Snapping constrains a brush position or operation to a defined spatial increment.
+
+For voxel editing, snapping normally aligns the operation with the voxel grid.
+
+============================================================
+20. GRID
+============================================================
+
+The voxel grid represents the discrete spatial structure of the world.
+
+Brush operations must remain aligned with the appropriate voxel coordinate system.
+
+============================================================
+21. MIRRORING
+============================================================
+
+Mirroring duplicates brush changes across a defined symmetry plane or axis.
+
+A mirrored operation must maintain deterministic coordinate mapping.
+
+============================================================
+22. SYMMETRY
+============================================================
+
+Symmetry is the rule that causes edits on one side of a defined plane or axis to be reproduced on another.
+
+Symmetry may be used for construction and terrain editing.
+
+============================================================
+23. BRUSH PREVIEW
+============================================================
+
+A brush preview is the visual representation showing where and how a brush would affect the world before the operation is committed.
+
+The preview should reflect the active:
+
+- shape;
+- size;
+- position;
+- mask;
+- orientation;
+- falloff;
+- other relevant parameters.
+
+============================================================
+24. BRUSH PARAMETERS
+============================================================
+
+Brush parameters are the configurable values controlling brush behavior.
+
+Examples include:
+
+- size;
+- shape;
+- strength;
+- falloff;
+- target block;
+- mask;
+- orientation;
+- symmetry.
+
+============================================================
+25. BRUSH PRESET
+============================================================
+
+A brush preset is a saved collection of brush parameters representing a reusable configuration.
+
+Presets allow users to switch quickly between common editing configurations.
+
+============================================================
+26. CUSTOM BRUSH
+============================================================
+
+A custom brush is a brush whose behavior or configuration can be defined beyond the standard built-in brush configurations.
+
+Custom brush support must follow the Plugin API and Brush System rules when applicable.
+
+============================================================
+27. BRUSH HISTORY
+============================================================
+
+Brush history refers to stored information about previously used brush configurations or operations.
+
+It may allow users to quickly restore previous settings.
+
+============================================================
+28. BRUSH HIT
+============================================================
+
+A brush hit is the spatial point where the user's cursor or interaction intersects the editable voxel environment and determines the effective brush location.
+
+The hit result must be converted consistently into world and local coordinates.
+
+============================================================
+29. RAYCAST
+============================================================
+
+A raycast projects a ray from the camera or interaction point into the world to determine what geometry or voxel position is being targeted.
+
+Raycasting is commonly used to determine brush placement and selection targets.
+
+============================================================
+30. EDIT PREVIEW
+============================================================
+
+An edit preview shows the expected result of an operation before it is committed to world data.
+
+A preview must not permanently modify the world.
+
+============================================================
+31. COMMIT
+============================================================
+
+Commit is the point at which a pending brush operation becomes an actual modification to world data.
+
+A committed operation should participate in undo/redo according to the editing rules.
+
+============================================================
+32. CANCEL
+============================================================
+
+Cancel discards a pending brush operation or preview without applying its modifications to the world.
+
+============================================================
+33. BRUSH CONTEXT
+============================================================
+
+Brush context is the collection of information required to evaluate a brush operation.
+
+It may include:
+
+- current world;
+- cursor position;
+- selected block;
+- brush parameters;
+- active selection;
+- masks;
+- editing mode;
+- coordinate information.
+
+============================================================
+34. CHUNK-AWARE BRUSHING
+============================================================
+
+Chunk-aware brushing means that brush operations are processed according to the chunk structure of the world.
+
+This is important for:
+
+- performance;
+- memory management;
+- mesh invalidation;
+- large brush operations;
+- multithreaded processing.
+
+============================================================
+35. DIRTY REGION
+============================================================
+
+A dirty region is an area affected by an editing operation and therefore requiring one or more downstream updates.
+
+A dirty region may include:
+
+- modified voxels;
+- neighboring voxels;
+- affected chunks;
+- affected meshes.
+
+============================================================
+36. NEIGHBOR UPDATE
+============================================================
+
+A neighbor update occurs when changing one voxel can affect the state or appearance of nearby voxels.
+
+Rendering and block-state systems must account for relevant neighboring dependencies.
+
+============================================================
+37. ATOMIC EDIT
+============================================================
+
+An atomic edit is treated as one logical operation from the user's perspective.
+
+If the operation is undoable, the complete atomic edit should normally be reversible as one unit.
+
+============================================================
+38. BRUSH VALIDATION
+============================================================
+
+Brush validation checks whether a requested brush operation is valid before committing changes.
+
+Validation may verify:
+
+- coordinates;
+- world bounds;
+- block validity;
+- selection restrictions;
+- permissions;
+- operation-specific constraints.
+
+============================================================
+39. LARGE BRUSH OPERATION
+============================================================
+
+A large brush operation affects a significant number of voxels.
+
+Large operations must be handled efficiently and should avoid unnecessary blocking of the user interface.
+
+============================================================
+40. BRUSH DATA INTEGRITY
+============================================================
+
+Brush operations must never intentionally corrupt voxel data.
+
+If an operation cannot be completed safely, it should fail cleanly or partially only when the specification explicitly permits partial execution.
+
+============================================================
+END OF DOCUMENT
+============================================================

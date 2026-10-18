@@ -1,0 +1,79 @@
+TITLE: UI
+
+PURPOSE:
+Defines terminology related to the VoxelForge user interface.
+
+DEFINITION:
+The UI is the interactive layer through which users create, inspect, modify, import, export, and manage voxel content.
+
+WORKSPACE:
+The main editing environment containing the viewport, tools, panels, menus, status information, and other interactive components.
+
+VIEWPORT:
+The primary visual area displaying the current voxel world or structure.
+
+TOOL:
+An interactive editing operation exposed to the user, such as selection, brush, erase, move, fill, or transform.
+
+PANEL:
+A UI container presenting controls or information related to a specific subsystem.
+
+DOCK:
+A panel that can be positioned within the application layout and attached to predefined docking regions.
+
+GIZMO:
+An interactive visual control used to manipulate an object, selection, transform, or other editable element directly within the viewport.
+
+SELECTION:
+A user-defined set of voxels, blocks, regions, or objects targeted by an operation.
+
+CONTEXT:
+The current UI state determining which actions, tools, properties, and shortcuts are applicable.
+
+COMMAND:
+A discrete user action that can be executed, undone, or potentially triggered through the UI, keyboard, plugin API, or other input source.
+
+UNDO/REDO:
+The history mechanism allowing reversible user operations. UI actions that modify persistent world data should be represented as commands whenever practical.
+
+NOTIFICATION:
+A non-blocking UI message communicating information, warnings, progress, or errors.
+
+DIALOG:
+A temporary UI element requiring user interaction before continuing an operation.
+
+STATUS:
+Information describing the current application or editing state, such as selected blocks, coordinates, operation progress, or warnings.
+
+THEME:
+A consistent collection of visual properties controlling the appearance of the application UI.
+
+ACCESSIBILITY:
+UI components must provide appropriate keyboard navigation, readable labels, sufficient visual distinction, and compatibility with supported accessibility mechanisms.
+
+UI STATE:
+Transient interface information such as panel positions, active tools, selections, camera state, and user preferences. UI state must be separated from world data unless explicitly persisted.
+
+WORLD DATA:
+Persistent voxel content and associated metadata. World data must not depend on a particular UI layout or session state.
+
+PLUGIN UI:
+Plugins may expose UI components through the Plugin API where supported. Plugin UI must follow the same lifecycle, security, and accessibility rules as native UI components.
+
+PERFORMANCE:
+UI rendering and interaction must remain responsive during large-world operations. Expensive world operations should not block the UI thread unnecessarily.
+
+ERROR HANDLING:
+Errors must be presented in a way that identifies the affected operation and provides enough information for the user to recover when possible.
+
+CONSISTENCY:
+Equivalent actions should use consistent terminology, controls, shortcuts, feedback, and visual behavior throughout the application.
+
+RELATED SYSTEMS:
+- Renderer
+- Brush System
+- Import/Export
+- Plugin API
+- Undo/Redo
+- Accessibility
+- Performance

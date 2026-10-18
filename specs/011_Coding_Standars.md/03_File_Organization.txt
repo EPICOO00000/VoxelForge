@@ -1,0 +1,188 @@
+==============================================================================
+CODING STANDARDS — FILE ORGANIZATION
+==============================================================================
+
+VoxelForge source files must be organized according to clear ownership and
+responsibility.
+
+The purpose of file organization is to keep the project navigable and prevent
+unrelated systems from becoming tightly coupled.
+
+==============================================================================
+
+GENERAL PRINCIPLE
+
+Each file should have a clear primary responsibility.
+
+A file may contain closely related declarations or implementations when doing
+so improves cohesion.
+
+Unrelated functionality must be separated into appropriate files or modules.
+
+==============================================================================
+
+MODULE OWNERSHIP
+
+Files should belong to the subsystem responsible for the functionality they
+implement.
+
+Examples include:
+
+VoxelWorld.
+
+Renderer.
+
+BrushSystem.
+
+BlockDatabase.
+
+ImportExport.
+
+UI.
+
+Performance.
+
+PluginAPI.
+
+Tests.
+
+Tools.
+
+==============================================================================
+
+SUBSYSTEM BOUNDARIES
+
+File placement must not be used to bypass architectural boundaries.
+
+Moving code into another directory does not make private dependencies
+acceptable.
+
+Subsystem interactions must use the documented interfaces.
+
+==============================================================================
+
+HEADER / INTERFACE FILES
+
+Where the language and project structure use separate interface and
+implementation files, interfaces should contain the public contract while
+implementation files contain the corresponding implementation details.
+
+Private implementation details should remain private whenever possible.
+
+==============================================================================
+
+IMPLEMENTATION FILES
+
+Implementation files should avoid accumulating unrelated helper functionality.
+
+Helpers shared by multiple components should be placed in an appropriate
+shared module rather than duplicated across many files.
+
+==============================================================================
+
+TEST FILES
+
+Tests should be organized so that their relationship to the functionality being
+tested is clear.
+
+Tests must not become the primary location for undocumented production
+behavior.
+
+==============================================================================
+
+PLUGIN FILES
+
+Plugin code should remain isolated within the plugin's defined structure.
+
+Plugin-specific implementation must not be inserted into VoxelForge core files
+unless the architecture explicitly requires it.
+
+==============================================================================
+
+IMPORT / EXPORT FILES
+
+Format-specific importers and exporters should remain separated from generic
+import/export infrastructure where practical.
+
+Minecraft-specific and Bloxd.io-specific conversion logic should not be mixed
+with unrelated format implementations.
+
+==============================================================================
+
+BLOXD.IO FILE ORGANIZATION
+
+Bloxd.io schematic handling should remain within the Import/Export subsystem.
+
+The `.bloxdschem` implementation must account for the 200-chunk maximum per
+schematic.
+
+If an export exceeds this limit, splitting into multiple schematic files should
+be handled by the export workflow rather than duplicated independently by UI,
+Renderer or other unrelated modules.
+
+==============================================================================
+
+RESOURCE FILES
+
+Assets, configuration files and other resources should be stored in the
+appropriate project directories.
+
+Source code should not embed large external resources unnecessarily.
+
+==============================================================================
+
+FILE SIZE
+
+Files should remain reasonably focused.
+
+Large files should be split when they contain multiple independent
+responsibilities.
+
+However, files should not be fragmented artificially when doing so makes the
+architecture harder to understand.
+
+==============================================================================
+
+DEPENDENCY DIRECTION
+
+File organization should support the intended dependency direction.
+
+Low-level systems should not unexpectedly depend on high-level UI or plugin
+implementation.
+
+==============================================================================
+
+INCLUDES / IMPORTS
+
+Imports should be kept minimal and organized according to the project's
+language-specific conventions.
+
+Unused imports must be removed.
+
+Circular dependencies should be avoided.
+
+==============================================================================
+
+NAMING CONSISTENCY
+
+File names must follow the naming rules defined by the project.
+
+The file name should make it possible to identify its purpose without opening
+the file.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The repository structure should make it easy for a developer to answer three
+questions:
+
+Where does this functionality belong?
+
+Who owns it?
+
+What other systems is it allowed to depend on?
+
+==============================================================================
+
+END OF CODING STANDARDS — FILE ORGANIZATION

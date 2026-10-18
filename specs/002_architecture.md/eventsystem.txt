@@ -1,0 +1,257 @@
+==============================================================================
+EVENT SYSTEM
+==============================================================================
+
+The Event System provides a standardized communication mechanism between
+independent subsystems.
+
+Its primary objective is to reduce coupling while allowing systems to react
+to changes occurring elsewhere in the engine.
+
+The Event System never contains business logic.
+
+==============================================================================
+
+PURPOSE
+
+The Event System allows modules to notify other modules when an action has
+occurred.
+
+Events communicate information.
+
+Events do not perform work.
+
+==============================================================================
+
+GENERAL PRINCIPLES
+
+Events are notifications.
+
+They are not commands.
+
+Events describe something that has already happened.
+
+The receiving subsystem decides how to react.
+
+==============================================================================
+
+EVENT FLOW
+
+Every event follows the same lifecycle.
+
+Event Created
+
+↓
+
+Event Dispatched
+
+↓
+
+Event Queue
+
+↓
+
+Interested Listeners
+
+↓
+
+Event Processed
+
+↓
+
+Event Disposed
+
+==============================================================================
+
+EVENT OWNERSHIP
+
+Every subsystem may emit events.
+
+Any subsystem may subscribe to events through the public Event System.
+
+No subsystem should directly invoke another subsystem because an event
+occurred.
+
+==============================================================================
+
+EVENT TYPES
+
+Examples of events include:
+
+Voxel Modified
+
+Chunk Created
+
+Chunk Removed
+
+Chunk Updated
+
+Selection Changed
+
+Brush Started
+
+Brush Finished
+
+Project Loaded
+
+Project Saved
+
+Project Closed
+
+Task Started
+
+Task Finished
+
+Task Failed
+
+Renderer Updated
+
+Plugin Loaded
+
+Plugin Unloaded
+
+Future versions may introduce additional event types.
+
+==============================================================================
+
+EVENT PAYLOAD
+
+Each event should contain only the information required by listeners.
+
+Avoid unnecessary data.
+
+Avoid passing large datasets whenever possible.
+
+Whenever practical, events should reference data rather than duplicate it.
+
+==============================================================================
+
+EVENT SUBSCRIPTIONS
+
+Subsystems should subscribe only to events relevant to their
+responsibility.
+
+Unused subscriptions should be removed.
+
+Subscriptions must be released during shutdown.
+
+==============================================================================
+
+EVENT ORDER
+
+Events should be processed in the order they are dispatched.
+
+The execution order should remain deterministic.
+
+Event processing should be predictable across every execution.
+
+==============================================================================
+
+EVENT ISOLATION
+
+An event must never assume that another subsystem exists.
+
+Events simply describe what happened.
+
+Listeners decide independently whether action is required.
+
+==============================================================================
+
+EVENT FAILURES
+
+A listener failure must not prevent other listeners from receiving the same
+event.
+
+Errors should be reported to the Engine.
+
+The Event System should remain operational after listener failures.
+
+==============================================================================
+
+EVENT PERFORMANCE
+
+Events should remain lightweight.
+
+Creating an event should require minimal overhead.
+
+Avoid generating unnecessary events.
+
+Avoid event flooding.
+
+Repeated identical events should be minimized whenever possible.
+
+==============================================================================
+
+EVENT NAMING
+
+Event names should clearly describe completed actions.
+
+Examples:
+
+VoxelModified
+
+ChunkGenerated
+
+SelectionChanged
+
+ProjectLoaded
+
+Avoid ambiguous names.
+
+Avoid implementation-specific terminology.
+
+==============================================================================
+
+EVENT RESPONSIBILITY
+
+Events communicate state changes.
+
+They must never:
+
+perform calculations,
+
+modify voxel data,
+
+generate meshes,
+
+export files,
+
+execute brushes.
+
+These responsibilities belong to dedicated subsystems.
+
+==============================================================================
+
+EXTENSIBILITY
+
+New event types should integrate naturally into the existing Event System.
+
+Adding new events should not require modifications to existing events.
+
+The Event System should remain scalable as the project grows.
+
+==============================================================================
+
+DEBUGGING
+
+The Event System should support debugging and logging.
+
+During development it should be possible to inspect:
+
+Event source
+
+Event type
+
+Dispatch time
+
+Receiving listeners
+
+Execution duration
+
+Errors
+
+Such information greatly simplifies debugging of complex workflows.
+
+==============================================================================
+
+END OF EVENT SYSTEM

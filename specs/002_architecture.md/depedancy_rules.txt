@@ -1,0 +1,332 @@
+==============================================================================
+DEPENDENCY RULES
+==============================================================================
+
+The VoxelForge architecture follows a strict dependency hierarchy.
+
+Dependencies must remain predictable, unidirectional and easy to understand.
+
+Every module may only depend on explicitly authorized modules.
+
+==============================================================================
+
+GENERAL PRINCIPLES
+
+Dependencies always flow from higher-level systems to lower-level systems.
+
+Lower-level modules must never depend on higher-level modules.
+
+Circular dependencies are strictly prohibited.
+
+Hidden dependencies are strictly prohibited.
+
+==============================================================================
+
+CORE
+
+The Core module is the foundation of the engine.
+
+The Core may depend only on:
+
+Utilities
+
+Internal data structures
+
+The Core must never depend on:
+
+Brush Engine
+
+Renderer
+
+Import System
+
+Export System
+
+Plugin System
+
+User Interface
+
+==============================================================================
+
+BRUSH ENGINE
+
+The Brush Engine may depend on:
+
+Core
+
+Utilities
+
+The Brush Engine must never depend on:
+
+Renderer
+
+Import System
+
+Export System
+
+User Interface
+
+Plugin System
+
+==============================================================================
+
+RENDERER
+
+The Renderer may depend on:
+
+Core
+
+Utilities
+
+The Renderer may read voxel data.
+
+The Renderer must never modify voxel data.
+
+The Renderer must never depend on:
+
+Brush Engine
+
+Export System
+
+Import System
+
+==============================================================================
+
+IMPORT SYSTEM
+
+Importers may depend on:
+
+Core
+
+Block Database
+
+Utilities
+
+Importers must never depend on:
+
+Renderer
+
+Brush Engine
+
+Export System
+
+==============================================================================
+
+EXPORT SYSTEM
+
+Exporters may depend on:
+
+Core
+
+Block Database
+
+Utilities
+
+Exporters read voxel data only.
+
+Exporters must never modify the voxel world.
+
+Exporters must never depend on:
+
+Renderer
+
+Brush Engine
+
+Importers
+
+==============================================================================
+
+BLOCK DATABASE
+
+The Block Database may depend on:
+
+Utilities
+
+The Block Database must never depend on:
+
+Core
+
+Renderer
+
+Brush Engine
+
+Importers
+
+Exporters
+
+User Interface
+
+==============================================================================
+
+TASK SYSTEM
+
+The Task System may depend on:
+
+Utilities
+
+Tasks may access engine systems only through their public interfaces.
+
+The Task System must never manipulate private implementation details.
+
+==============================================================================
+
+EVENT SYSTEM
+
+The Event System is responsible only for event dispatching.
+
+It does not contain business logic.
+
+It does not own application state.
+
+It must remain independent from every functional subsystem.
+
+==============================================================================
+
+PLUGIN SYSTEM
+
+Plugins communicate exclusively through the official Plugin API.
+
+Plugins must never import internal engine modules directly.
+
+Plugins must remain isolated from internal implementations.
+
+==============================================================================
+
+USER INTERFACE
+
+The User Interface is the highest-level module.
+
+It may communicate with every subsystem through public interfaces.
+
+The User Interface must never manipulate internal data structures directly.
+
+Business logic belongs to engine modules, never to the interface.
+
+==============================================================================
+
+UTILITIES
+
+Utility modules provide generic functionality.
+
+Utilities should not depend on project-specific modules.
+
+Utilities should remain reusable across the project.
+
+==============================================================================
+
+ALLOWED DEPENDENCIES
+
+User Interface
+
+↓
+
+Engine
+
+↓
+
+Brush Engine
+
+↓
+
+Core
+
+↓
+
+Utilities
+
+Renderer
+
+↓
+
+Core
+
+↓
+
+Utilities
+
+Importers
+
+↓
+
+Core
+
+↓
+
+Block Database
+
+↓
+
+Utilities
+
+Exporters
+
+↓
+
+Core
+
+↓
+
+Block Database
+
+↓
+
+Utilities
+
+==============================================================================
+
+FORBIDDEN DEPENDENCIES
+
+Core → Renderer
+
+Core → UI
+
+Core → Plugins
+
+Core → Exporters
+
+Core → Importers
+
+Renderer → Brush Engine
+
+Renderer → Exporters
+
+Brush Engine → Renderer
+
+Brush Engine → Exporters
+
+Importers → Renderer
+
+Exporters → Renderer
+
+Utilities → Engine
+
+Utilities → UI
+
+==============================================================================
+
+DEPENDENCY VALIDATION
+
+Before introducing a new dependency, verify that:
+
+The dependency is necessary.
+
+The dependency follows the architectural hierarchy.
+
+The dependency does not introduce coupling between unrelated systems.
+
+The dependency does not create circular references.
+
+The dependency can be justified by the module's responsibility.
+
+==============================================================================
+
+LONG-TERM MAINTAINABILITY
+
+Dependencies should remain stable throughout the lifetime of the project.
+
+If a dependency weakens modularity or makes future maintenance more
+difficult, it should be reconsidered before implementation.
+
+==============================================================================
+
+END OF DEPENDENCY RULES

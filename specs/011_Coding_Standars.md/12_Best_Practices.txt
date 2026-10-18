@@ -1,0 +1,245 @@
+==============================================================================
+CODING STANDARDS — BEST PRACTICES
+=================================
+
+This document defines general practices that should guide VoxelForge
+development when more specific subsystem rules do not apply.
+
+==============================================================================
+
+CLARITY FIRST
+
+Prefer code that is easy to understand and maintain.
+
+A simple implementation is generally preferable to a clever implementation when
+both satisfy the same requirements.
+
+Names should communicate intent.
+
+==============================================================================
+
+SINGLE RESPONSIBILITY
+
+Functions, classes and modules should have focused responsibilities.
+
+Avoid components that simultaneously manage unrelated concerns such as rendering,
+file I/O, UI state and world modification.
+
+==============================================================================
+
+EXPLICIT DATA FLOW
+
+Prefer clear ownership and data flow.
+
+Avoid hidden global state and unnecessary implicit dependencies.
+
+Subsystem interactions should occur through defined interfaces.
+
+==============================================================================
+
+VALIDATE AT BOUNDARIES
+
+Validate external data when it enters the system.
+
+This includes:
+
+User input.
+
+Configuration.
+
+Imported files.
+
+Plugin input.
+
+Serialized data.
+
+Network or external service data.
+
+After validation, internal code may rely on documented invariants.
+
+==============================================================================
+
+ERROR HANDLING
+
+Handle expected failures explicitly.
+
+Do not silently ignore errors.
+
+Do not catch exceptions merely to suppress them.
+
+Errors should retain enough context to determine what operation failed.
+
+==============================================================================
+
+RESOURCE MANAGEMENT
+
+Resources must have clear ownership and lifetime.
+
+This includes:
+
+Files.
+
+Streams.
+
+Buffers.
+
+Threads.
+
+Tasks.
+
+GPU resources.
+
+Temporary storage.
+
+Resources should be released deterministically according to the language and
+framework conventions.
+
+==============================================================================
+
+PERFORMANCE
+
+Correctness comes before premature optimization.
+
+When performance matters, prefer measurable improvements over assumptions.
+
+Particular attention should be given to:
+
+Voxel iteration.
+
+Chunk processing.
+
+Rendering.
+
+World loading.
+
+World saving.
+
+Import/export.
+
+Memory allocation.
+
+Parallel task scheduling.
+
+==============================================================================
+
+MEMORY EFFICIENCY
+
+Avoid unnecessary copies of large voxel structures.
+
+Prefer appropriate views, references or streaming approaches where supported and
+safe.
+
+Large worlds should not require loading unnecessary data into memory solely for
+convenience.
+
+==============================================================================
+
+CONCURRENCY
+
+Concurrent code must have clearly defined ownership and synchronization rules.
+
+Avoid shared mutable state when practical.
+
+Thread safety should be documented for APIs that may be called concurrently.
+
+==============================================================================
+
+TESTABILITY
+
+New functionality should be designed so that important behavior can be tested.
+
+Prefer deterministic logic where practical.
+
+Separate pure transformations from side effects when doing so improves
+testability without creating unnecessary abstraction.
+
+==============================================================================
+
+COMPATIBILITY
+
+Changes must respect supported ecosystems.
+
+VoxelForge must remain compatible with Minecraft-related workflows and the
+documented Bloxd.io workflow.
+
+Bloxd.io schematic exports must respect the 200-chunk maximum per schematic and
+split larger exports into multiple files.
+
+==============================================================================
+
+PLUGIN SAFETY
+
+Plugin code must be isolated from core failures where the architecture requires
+it.
+
+Plugin APIs should expose only the capabilities necessary for their intended
+purpose.
+
+Core systems must not assume that third-party plugins are perfectly behaved.
+
+==============================================================================
+
+DOCUMENTATION
+
+Document decisions and contracts that are not obvious from the implementation.
+
+Avoid documenting trivial code in excessive detail.
+
+Documentation must remain synchronized with actual behavior.
+
+==============================================================================
+
+LOGGING
+
+Use structured, meaningful logging rather than scattered debug output.
+
+Avoid excessive logging in high-frequency voxel, rendering or chunk-processing
+loops.
+
+Never log secrets or unnecessary private data.
+
+==============================================================================
+
+COMMENTS
+
+Comments should explain intent, constraints or non-obvious reasoning.
+
+Do not use comments to compensate for unclear code when the code itself can be
+made clearer.
+
+Remove comments that become incorrect after refactoring.
+
+==============================================================================
+
+DEPENDENCIES
+
+Prefer existing project dependencies when they already solve the required
+problem adequately.
+
+Avoid introducing a dependency for a trivial feature that can be implemented
+reliably with existing facilities.
+
+New dependencies should have a clear maintenance and compatibility justification.
+
+==============================================================================
+
+SECURITY
+
+Treat external data as untrusted until validated.
+
+Avoid unsafe parsing, uncontrolled resource consumption and unnecessary
+privileged operations.
+
+Security-sensitive behavior should follow the project's dedicated security
+requirements when available.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+VoxelForge code should remain understandable, robust, testable, compatible and
+efficient as the project grows.
+
+==============================================================================
+
+END OF CODING STANDARDS — BEST PRACTICES

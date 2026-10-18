@@ -1,0 +1,165 @@
+# Version 1.0
+
+## Objective
+
+Version 1.0 represents the first stable release of VoxelForge.
+
+The primary goal is to provide a reliable voxel editing workflow with a complete foundation for world editing, rendering, block management, import/export, UI interaction, testing, and future extension.
+
+Version 1.0 prioritizes reliability and completeness over advanced experimental features.
+
+## Core World Editing
+
+Version 1.0 should provide a stable voxel-world representation capable of:
+
+- Creating voxel worlds.
+- Loading voxel worlds.
+- Saving voxel worlds.
+- Editing individual blocks.
+- Editing groups of blocks.
+- Handling multiple chunks.
+- Handling chunk boundaries correctly.
+- Preserving block coordinates.
+- Preserving world state during normal editing.
+
+World modifications must remain deterministic and must not silently corrupt voxel data.
+
+## Brush System
+
+The brush system should provide the core editing operations required for normal voxel construction.
+
+Version 1.0 should support the documented brush operations and their required behaviors.
+
+Brush operations must correctly handle:
+
+- Block placement.
+- Block removal.
+- Block replacement.
+- Selection boundaries.
+- Chunk boundaries.
+- Large edits.
+- Undo/redo integration.
+
+Large operations should use the performance and memory rules defined by the performance specification.
+
+## Block Database
+
+The block database should provide a reliable source of block definitions for the editor and renderer.
+
+Version 1.0 should support:
+
+- Block identification.
+- Block metadata.
+- Rendering information.
+- Block categories where defined.
+- Compatibility mappings.
+- Validation of block definitions.
+
+Unknown or unsupported block types must be handled according to documented fallback rules rather than causing silent corruption.
+
+## Renderer
+
+The Version 1.0 renderer should provide stable visualization of the authoritative voxel world.
+
+It should correctly handle:
+
+- Chunk rendering.
+- Block visibility.
+- Face culling.
+- Chunk boundaries.
+- Transparent blocks where supported.
+- Camera movement.
+- Mesh rebuilding.
+- World modifications.
+- Render invalidation.
+
+Rendering must remain a consumer of authoritative world data and must never modify that data.
+
+## Import and Export
+
+Version 1.0 should provide the documented import/export workflows required by the project.
+
+This includes compatibility with supported Minecraft and Bloxd.io workflows.
+
+For Bloxd.io `.bloxdschem` export:
+
+- A schematic may contain at most 200 chunks.
+- Structures requiring more than 200 chunks must be split into multiple schematic files.
+- Every generated schematic must contain no more than 200 chunks.
+- Splitting must preserve all chunk coordinates and block data.
+- Re-importing all generated parts must reconstruct the original structure.
+
+## User Interface
+
+Version 1.0 should provide a complete basic editing interface.
+
+The UI should allow users to:
+
+- Create or open projects/worlds.
+- Select blocks.
+- Select tools.
+- Configure brush parameters.
+- Navigate the viewport.
+- Perform editing operations.
+- Undo and redo changes.
+- Import and export supported data.
+- Receive clear feedback about operations and errors.
+
+## Performance
+
+Version 1.0 should establish acceptable performance for normal supported workloads.
+
+Performance work should prioritize:
+
+- Chunk processing.
+- Rendering.
+- Brush operations.
+- Memory usage.
+- Import/export.
+- Save/load.
+
+Performance optimizations must not compromise correctness or data integrity.
+
+## Plugin Foundation
+
+Version 1.0 should establish the foundational Plugin API where required by the architecture.
+
+The initial API should remain intentionally controlled.
+
+Only stable interfaces should be exposed as long-term plugin contracts.
+
+## Testing
+
+Version 1.0 must include sufficient automated testing for the core systems.
+
+Required coverage should include:
+
+- Unit tests.
+- Integration tests.
+- Render tests.
+- Performance tests where applicable.
+- Regression tests.
+- Import/export compatibility tests.
+- Bloxd.io schematic tests.
+- CI validation.
+
+Critical functionality must not depend exclusively on manual testing.
+
+## Release Criteria
+
+Version 1.0 should not be considered complete until:
+
+- Core editing workflows are stable.
+- World data remains consistent.
+- Rendering is reliable.
+- Supported import/export workflows work correctly.
+- Bloxd.io 200-chunk splitting works correctly.
+- Critical regression tests pass.
+- CI passes the required test suite.
+- Known release-blocking issues are resolved or explicitly documented.
+
+## Version 1.0 Principle
+
+Version 1.0 should establish a dependable foundation.
+
+Advanced features may be postponed when implementing them would introduce unnecessary instability into the initial stable release.

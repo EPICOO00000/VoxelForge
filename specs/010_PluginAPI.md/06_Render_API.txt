@@ -1,0 +1,234 @@
+==============================================================================
+PLUGIN API — RENDER API
+==============================================================================
+
+The Render API defines the supported extension points for plugins that need to
+integrate with VoxelForge rendering.
+
+Plugins may extend rendering through documented interfaces without directly
+depending on private Renderer implementation details.
+
+==============================================================================
+
+PURPOSE
+
+The Render API may provide controlled access to:
+
+Render Extensions.
+
+Custom Visual Elements.
+
+Render Hooks.
+
+Material or Visual Metadata.
+
+Viewport Integration.
+
+Rendering Events where supported.
+
+==============================================================================
+
+RENDERER OWNERSHIP
+
+The Renderer remains responsible for the rendering pipeline.
+
+Plugins must not take ownership of the main rendering pipeline.
+
+A render plugin extends the Renderer through documented extension points rather
+than replacing internal Renderer components.
+
+==============================================================================
+
+RENDER EXTENSIONS
+
+A plugin may provide custom render functionality when an appropriate extension
+point exists.
+
+Possible examples include:
+
+Custom Overlays.
+
+Selection Visualization.
+
+Tool Visualization.
+
+Gizmos.
+
+Plugin-Specific Visual Elements.
+
+Debug Visualization.
+
+Other explicitly supported rendering extensions.
+
+==============================================================================
+
+WORLD DATA
+
+Render plugins must access world information through documented APIs.
+
+They must not directly manipulate internal chunk storage or private voxel data
+structures.
+
+The Renderer remains responsible for determining how world data becomes
+renderable geometry.
+
+==============================================================================
+
+VOXEL DATA
+
+When a plugin needs voxel information, it must use the appropriate VoxelWorld or
+Block API.
+
+A plugin must not modify voxel data through the Render API.
+
+Rendering must remain a read-oriented operation unless an explicit interaction
+API states otherwise.
+
+==============================================================================
+
+BRUSH VISUALIZATION
+
+Brush plugins may provide visual feedback such as:
+
+Brush Shape.
+
+Affected Region.
+
+Preview Area.
+
+Falloff Visualization.
+
+Custom Brush Indicators.
+
+The visualization must remain separate from the actual world modification.
+
+A visual preview must never modify world state.
+
+==============================================================================
+
+GIZMOS
+
+Plugins may provide custom gizmos through the documented UI/Render extension
+interfaces.
+
+Gizmos may display or manipulate user-facing controls when explicitly
+supported.
+
+Actual world modifications must still pass through the appropriate Engine and
+world-editing APIs.
+
+==============================================================================
+
+RENDER LIFECYCLE
+
+Render extensions must follow the rendering lifecycle defined by VoxelForge.
+
+Plugins must not assume that rendering resources remain available outside the
+documented lifecycle.
+
+Resources created by a plugin must be released when the plugin is disabled or
+unloaded according to the API contract.
+
+==============================================================================
+
+THREADING
+
+Rendering operations may be restricted to the rendering thread or another
+specific execution context.
+
+Plugins must follow the thread guarantees of each Render API method.
+
+A plugin must not perform unsafe Renderer access from arbitrary worker threads.
+
+==============================================================================
+
+PERFORMANCE
+
+Render extensions execute in potentially performance-sensitive paths.
+
+Plugins should:
+
+Avoid Unnecessary Allocations.
+
+Avoid Rebuilding Unchanged Data.
+
+Avoid Expensive Work Per Frame.
+
+Cache Stable Resources When Supported.
+
+Release Unused Resources.
+
+A plugin must not introduce continuous frame-time overhead without justification.
+
+==============================================================================
+
+INVALIDATION
+
+When plugin-rendered data becomes invalid, the plugin must use the documented
+invalidation mechanism.
+
+Plugins must not force broad Renderer rebuilds when a more precise invalidation
+mechanism exists.
+
+==============================================================================
+
+MINECRAFT COMPATIBILITY
+
+Render extensions must correctly represent Minecraft-compatible block and world
+data when visualizing Minecraft worlds.
+
+Visual representation must not alter the underlying block data.
+
+==============================================================================
+
+BLOXD.IO COMPATIBILITY
+
+Render extensions must remain compatible with worlds intended for Bloxd.io
+export.
+
+Rendering-specific data must not be required for `.bloxdschem` export unless it
+is explicitly part of the supported schematic format.
+
+Bloxd.io schematic output remains a data/export responsibility, including the
+requirement that each schematic stays within the 200-chunk maximum.
+
+==============================================================================
+
+SEPARATION FROM IMPORT/EXPORT
+
+The Render API must remain separate from Import/Export APIs.
+
+Importers and exporters must not require direct access to rendering internals.
+
+A plugin may use both APIs when necessary, but their responsibilities remain
+separate.
+
+==============================================================================
+
+ERROR HANDLING
+
+A rendering extension failure must not corrupt voxel or world data.
+
+Where possible, the failing visual extension should be disabled or isolated
+while the rest of the Renderer continues operating.
+
+==============================================================================
+
+PLUGIN OWNERSHIP
+
+Resources created by a render plugin must remain associated with that plugin.
+
+When the plugin is disabled, its resources and registered render extensions must
+be safely removed according to the lifecycle contract.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Render API provides controlled rendering extensibility while preserving
+Renderer ownership, frame-time performance, world-data safety, threading rules
+and compatibility with Minecraft and Bloxd.io workflows.
+
+==============================================================================
+
+END OF RENDER API

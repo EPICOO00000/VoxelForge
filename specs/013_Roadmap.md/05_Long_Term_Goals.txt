@@ -1,0 +1,276 @@
+VOXELFORGE — LONG-TERM GOALS
+============================
+
+Purpose
+-------
+This document defines the long-term direction of VoxelForge.
+
+These goals describe the intended evolution of the project and must not be
+treated as immediate implementation requirements unless another specification
+explicitly promotes a goal into an active feature.
+
+The long-term direction must remain compatible with the project's existing
+architecture and must not justify unnecessary complexity in the current
+implementation.
+
+1. Professional voxel editing environment
+------------------------------------------
+VoxelForge should evolve into a complete desktop voxel creation and editing
+environment capable of handling small projects and very large structures.
+
+The application should support workflows ranging from simple block editing to
+complex multi-region construction.
+
+The interface should remain understandable while progressively exposing more
+advanced functionality to users who need it.
+
+2. Large-scale world editing
+----------------------------
+VoxelForge should eventually handle very large voxel worlds efficiently.
+
+Long-term development should investigate:
+
+- streaming world data;
+- region-based storage;
+- intelligent chunk loading;
+- background processing;
+- incremental saving;
+- efficient undo/redo;
+- large-area transformations;
+- large-scale copy/paste;
+- region comparison;
+- world partitioning.
+
+The internal world representation should not be constrained by the maximum
+size of any individual external schematic format.
+
+3. Strong Minecraft interoperability
+-------------------------------------
+VoxelForge should become a reliable intermediary between different Minecraft
+voxel workflows.
+
+Long-term support may include additional Minecraft-related formats, block
+state preservation, metadata conversion, structure tools, and improved
+compatibility diagnostics.
+
+Format-specific behavior should remain isolated inside the appropriate
+import/export and block-database systems.
+
+4. Strong Bloxd.io interoperability
+-----------------------------------
+Bloxd.io should remain a first-class export/import target.
+
+The implementation should continue improving:
+
+- .bloxdschem compatibility;
+- block mapping;
+- import validation;
+- export validation;
+- schematic splitting;
+- large-structure workflows;
+- deterministic exports;
+- conversion diagnostics.
+
+The 200-chunk maximum for a single Bloxd schematic must remain enforced unless
+the actual supported Bloxd format specification changes.
+
+When an object exceeds this limit, VoxelForge should provide increasingly
+advanced ways to divide the structure into multiple compatible schematics.
+
+5. Advanced procedural tools
+----------------------------
+Future versions may provide procedural generation and transformation tools.
+
+Potential capabilities include:
+
+- pattern generators;
+- symmetry tools;
+- procedural structures;
+- parametric shapes;
+- terrain generation;
+- noise-based generation;
+- configurable generators;
+- repeatable generation from seeds;
+- procedural editing brushes.
+
+Procedural operations must remain deterministic when given identical inputs,
+parameters, and seeds.
+
+6. Advanced brush ecosystem
+---------------------------
+The brush system should eventually support a broad ecosystem of specialized
+editing tools.
+
+Potential future brushes include:
+
+- terrain brushes;
+- smoothing brushes;
+- erosion brushes;
+- pattern brushes;
+- selection-aware brushes;
+- procedural brushes;
+- symmetry brushes;
+- replacement brushes;
+- conditional brushes;
+- custom plugin brushes.
+
+The Brush System specification remains the authoritative source for the
+behavior of implemented brushes.
+
+7. Plugin ecosystem
+-------------------
+The Plugin API should eventually support a stable third-party ecosystem.
+
+Long-term goals include:
+
+- custom tools;
+- custom brushes;
+- custom importers;
+- custom exporters;
+- custom block providers;
+- UI extensions;
+- automation;
+- procedural generators;
+- analysis tools.
+
+Plugins should operate through documented APIs rather than depending on
+unstable internal implementation details.
+
+8. Automation
+-------------
+VoxelForge should eventually support automation for repetitive workflows.
+
+Possible capabilities include:
+
+- batch conversion;
+- batch schematic splitting;
+- automated validation;
+- scripted editing;
+- export pipelines;
+- project processing;
+- plugin-based automation.
+
+Automation must respect the same validation and safety rules as interactive
+operations.
+
+9. Improved collaboration
+-------------------------
+Future research may investigate collaborative workflows.
+
+Possible directions include:
+
+- project sharing;
+- change tracking;
+- version history;
+- region locking;
+- conflict detection;
+- collaborative editing;
+- project synchronization.
+
+Collaboration must not be implemented at the expense of deterministic local
+editing or project integrity.
+
+10. Advanced undo and history
+-----------------------------
+VoxelForge should eventually provide scalable editing history for very large
+operations.
+
+The system should investigate:
+
+- operation-based history;
+- compressed history;
+- region-level history;
+- selective undo;
+- history checkpoints;
+- persistent history.
+
+History must avoid unnecessary duplication of complete world states.
+
+11. Visual analysis tools
+-------------------------
+Future versions may provide tools for analyzing voxel structures.
+
+Potential features include:
+
+- block statistics;
+- volume measurements;
+- bounding-box analysis;
+- empty-space analysis;
+- chunk usage;
+- palette analysis;
+- complexity estimation;
+- export-size prediction.
+
+These tools should help users understand large structures before expensive
+operations are started.
+
+12. Reliability and data integrity
+----------------------------------
+Long-term development must prioritize project integrity.
+
+VoxelForge should progressively improve:
+
+- crash recovery;
+- autosaving;
+- corruption detection;
+- transactional saves;
+- backup management;
+- export validation;
+- deterministic serialization.
+
+A failed operation should never silently report success.
+
+13. Cross-platform development
+------------------------------
+VoxelForge should remain architecturally suitable for supported desktop
+platforms.
+
+Platform-specific code should be isolated where possible.
+
+The core voxel model, transformation logic, serialization logic, and other
+platform-independent systems should remain portable.
+
+14. Performance at scale
+------------------------
+Performance must continue to improve as project size increases.
+
+Long-term research should investigate:
+
+- multithreaded processing;
+- task scheduling;
+- memory pooling;
+- compressed storage;
+- cache-aware data structures;
+- GPU-assisted operations where appropriate;
+- incremental rendering;
+- background chunk processing.
+
+Performance optimizations must remain measurable and must not compromise
+correctness.
+
+15. Future format support
+-------------------------
+VoxelForge should remain extensible enough to support additional voxel and
+schematic formats in the future.
+
+New formats must be implemented through the Import/Export architecture rather
+than by introducing format-specific logic throughout the application.
+
+16. Maintainability
+-------------------
+Long-term development must preserve a clean architecture.
+
+New functionality should reuse existing systems whenever possible.
+
+Duplicated implementations of the same concept should be avoided.
+
+Documentation, testing, API stability, and code standards must evolve alongside
+the implementation.
+
+Long-term principle
+-------------------
+VoxelForge should prioritize reliability, interoperability, scalability, and
+maintainability over adding features simply for the sake of feature count.
+
+Future features should provide a clear benefit to the core voxel-editing
+workflow.

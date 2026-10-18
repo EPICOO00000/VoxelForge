@@ -1,0 +1,140 @@
+==============================================================================
+PERFORMANCE DESIGN PRINCIPLES
+==============================================================================
+
+Performance optimization in VoxelForge follows explicit principles.
+
+Optimizations must improve measurable performance without introducing
+unnecessary complexity or violating architectural rules.
+
+==============================================================================
+
+PRINCIPLE 1 - MEASURE BEFORE OPTIMIZING
+
+Performance problems should be identified through profiling or benchmarks
+before significant optimization work begins.
+
+Assumptions alone are not sufficient evidence for optimization.
+
+==============================================================================
+
+PRINCIPLE 2 - PRESERVE CORRECTNESS
+
+An optimization must produce the same logically correct result as the
+non-optimized implementation.
+
+Performance must never justify incorrect voxel data, corrupted files or
+inconsistent world state.
+
+==============================================================================
+
+PRINCIPLE 3 - AVOID UNNECESSARY WORK
+
+Systems should avoid processing data that cannot affect the requested result.
+
+Examples include:
+
+Updating invisible chunks.
+
+Rebuilding unchanged meshes.
+
+Processing unaffected voxels.
+
+Repeating identical conversions.
+
+==============================================================================
+
+PRINCIPLE 4 - MINIMIZE DATA MOVEMENT
+
+Large voxel datasets should not be copied unnecessarily.
+
+Operations should prefer references, views, streaming and in-place processing
+where these approaches are safe and compatible with ownership rules.
+
+==============================================================================
+
+PRINCIPLE 5 - LOCALITY
+
+Data structures and algorithms should favor CPU cache locality.
+
+Frequently accessed voxel and chunk data should remain compact and predictable
+in memory whenever practical.
+
+==============================================================================
+
+PRINCIPLE 6 - PARALLELISM
+
+Independent work may be executed concurrently.
+
+Parallel execution must respect:
+
+Data Ownership.
+
+Thread Safety.
+
+Determinism.
+
+Task Dependencies.
+
+==============================================================================
+
+PRINCIPLE 7 - ASYNCHRONOUS LONG OPERATIONS
+
+Operations that may take significant time should execute through the Task System
+rather than blocking interactive systems unnecessarily.
+
+==============================================================================
+
+PRINCIPLE 8 - CACHE REPEATED WORK
+
+Repeatedly computed information may be cached when:
+
+The computation is sufficiently expensive.
+
+The cached data has a clear invalidation rule.
+
+The memory cost is justified.
+
+==============================================================================
+
+PRINCIPLE 9 - PREDICTABLE PERFORMANCE
+
+Performance should remain stable and predictable as workload increases.
+
+Sudden quadratic or exponential behavior should be avoided in core systems.
+
+==============================================================================
+
+PRINCIPLE 10 - OPTIMIZE HOT PATHS
+
+Optimization effort should focus primarily on code paths that materially
+contribute to measured execution time.
+
+Rarely executed code should not receive disproportionate optimization effort.
+
+==============================================================================
+
+PRINCIPLE 11 - NO ARCHITECTURAL VIOLATIONS
+
+Performance optimizations must not bypass module ownership, dependency rules,
+history requirements or event rules defined by the architecture.
+
+==============================================================================
+
+PRINCIPLE 12 - REGRESSION PREVENTION
+
+Important performance characteristics should be protected by repeatable
+benchmarks.
+
+Performance regressions should be detectable during development.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Performance optimization should remain evidence-based, controlled and
+compatible with the overall VoxelForge architecture.
+
+==============================================================================
+
+END OF PERFORMANCE DESIGN PRINCIPLES

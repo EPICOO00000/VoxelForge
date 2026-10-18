@@ -1,0 +1,97 @@
+TITLE: Import / Export
+
+PURPOSE:
+Defines terminology and rules for importing and exporting voxel data between VoxelForge and external formats.
+
+DEFINITION:
+Import is the process of converting external voxel data into the internal VoxelForge representation. Export is the reverse process, converting VoxelForge data into an external representation while preserving supported structure and metadata.
+
+SOURCE FORMAT:
+An external representation such as Minecraft-compatible schematic data, Bloxd.io .bloxdschem data, or another supported voxel format.
+
+TARGET FORMAT:
+The format selected by the user or by an automated conversion workflow.
+
+CONVERSION PIPELINE:
+External Data
+-> Format Reader
+-> Validation
+-> Block Mapping
+-> Coordinate Conversion
+-> Internal Voxel Representation
+-> Optional Processing
+-> Format Writer
+
+BLOCK MAPPING:
+External block identifiers must be translated through a centralized mapping system.
+
+If an external block cannot be mapped exactly, the converter must use a documented fallback strategy and report the conversion issue.
+
+COORDINATE SYSTEM:
+Importers and exporters must explicitly define the source and target coordinate systems. Axis transformations must never be assumed implicitly.
+
+ORIGIN:
+The origin of imported structures must be preserved or explicitly transformed according to the selected import options.
+
+DIMENSIONS:
+Imported and exported dimensions must be represented explicitly.
+
+CHUNKS:
+Large structures must be processed chunk-by-chunk whenever possible to avoid unnecessary memory usage.
+
+BLOXD.IO COMPATIBILITY:
+VoxelForge must support the Bloxd.io .bloxdschem representation through a dedicated format adapter.
+
+The .bloxdschem implementation must preserve the required chunk structure and block data encoding.
+
+A Bloxd.io schematic has a maximum supported size of 200 chunks. Structures exceeding this limit must automatically be divided into multiple schematic files.
+
+SPLITTING:
+When a structure exceeds the maximum Bloxd.io schematic size:
+1. Determine the required chunk boundaries.
+2. Partition the structure into valid groups.
+3. Generate multiple independent .bloxdschem files.
+4. Preserve the original relative placement of every generated part.
+5. Provide deterministic part names and ordering.
+6. Ensure no chunk is omitted or duplicated.
+
+Minecraft compatibility must be treated independently from Bloxd.io format encoding. Shared internal voxel data may be used, but format-specific serialization logic must remain isolated.
+
+VALIDATION:
+Before export, the system must validate:
+- Dimensions
+- Chunk boundaries
+- Block identifiers
+- Coordinate ranges
+- Format-specific limits
+- Required metadata
+- Data integrity
+
+ERROR REPORTING:
+Import/export failures must provide actionable information including:
+- File involved
+- Position or chunk involved when available
+- Invalid value
+- Expected value or range
+- Suggested corrective action
+
+LOSSY CONVERSION:
+If the destination format cannot represent a source feature, the converter must explicitly report the loss instead of silently discarding it.
+
+ROUND-TRIP:
+Where the formats permit it, importing and immediately exporting a structure should preserve geometry, block placement, dimensions, and supported metadata.
+
+PERFORMANCE:
+Large imports and exports should use streaming or chunk-based processing where possible.
+
+SECURITY:
+External files must be treated as untrusted input. Parsers must validate lengths, counts, identifiers, and boundaries before allocating large amounts of memory.
+
+RELATED SYSTEMS:
+- Block Database
+- Voxel World
+- Chunk System
+- Renderer
+- File I/O
+- Bloxd.io Adapter
+- Minecraft Adapter

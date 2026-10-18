@@ -1,0 +1,172 @@
+==============================================================================
+PROCEDURAL BRUSHES
+==============================================================================
+
+Procedural Brushes generate voxel modifications using mathematical,
+algorithmic or rule-based methods rather than direct user input alone.
+
+They extend the Brush System with procedural content generation while
+remaining fully compatible with the standard Brush Pipeline.
+
+==============================================================================
+
+PURPOSE
+
+Procedural Brushes allow users to create complex natural structures,
+terrain details and repetitive patterns with minimal manual work.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Procedural Brushes must remain:
+
+Deterministic.
+
+Seed-based.
+
+Non-destructive until committed.
+
+Independent from rendering.
+
+Composable.
+
+==============================================================================
+
+CORE PROCEDURAL BRUSHES
+
+The engine should provide:
+
+Noise Brush.
+
+Perlin Brush.
+
+Simplex Brush.
+
+Voronoi Brush.
+
+Cellular Brush.
+
+Random Scatter.
+
+Terrain Brush.
+
+Rock Generator.
+
+Tree Generator.
+
+Crystal Generator.
+
+Erosion Brush.
+
+Weathering Brush.
+
+Cave Brush.
+
+==============================================================================
+
+NOISE BRUSH
+
+Applies procedural noise to voxel density or block placement.
+
+Supported algorithms may include:
+
+Perlin.
+
+Simplex.
+
+OpenSimplex.
+
+Fractal Noise.
+
+==============================================================================
+
+VORONOI BRUSH
+
+Generates cellular patterns.
+
+Useful for:
+
+Stone formations.
+
+Crystal growth.
+
+Stylized terrain.
+
+==============================================================================
+
+EROSION BRUSH
+
+Simulates natural erosion.
+
+Possible modes:
+
+Hydraulic.
+
+Thermal.
+
+Wind.
+
+==============================================================================
+
+SCATTER BRUSH
+
+Places voxels using probability distributions.
+
+Supports density control and random seeds.
+
+==============================================================================
+
+SEEDS
+
+Every Procedural Brush must support deterministic random seeds.
+
+Identical seeds produce identical results.
+
+==============================================================================
+
+PARAMETERS
+
+Procedural Brushes may expose:
+
+Seed.
+
+Frequency.
+
+Amplitude.
+
+Octaves.
+
+Persistence.
+
+Lacunarity.
+
+Threshold.
+
+Density.
+
+==============================================================================
+
+PERFORMANCE
+
+Procedural evaluation should operate on chunk-local data.
+
+Intermediate buffers should be reused whenever possible.
+
+==============================================================================
+
+EXTENSIBILITY
+
+New procedural algorithms should integrate through the standard
+Brush Behavior interface.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Procedural Brushes should combine artistic freedom with deterministic
+generation suitable for both manual editing and large-scale world creation.
+
+==============================================================================
+
+END OF PROCEDURAL BRUSHES

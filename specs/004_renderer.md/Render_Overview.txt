@@ -1,0 +1,148 @@
+==============================================================================
+RENDER SYSTEM OVERVIEW
+==============================================================================
+
+The Render System is responsible for transforming the Voxel World into
+visible geometry inside Blender.
+
+Rendering is a derived representation.
+
+The renderer never owns voxel data.
+
+The Voxel World always remains the single source of truth.
+
+==============================================================================
+
+PURPOSE
+
+The Render System converts voxel information into optimized polygon meshes.
+
+Its purpose is to provide interactive visualization while preserving the
+integrity of the underlying voxel data.
+
+==============================================================================
+
+DESIGN PHILOSOPHY
+
+Rendering is completely separated from editing.
+
+Editing modifies voxels.
+
+Rendering visualizes voxels.
+
+These responsibilities must never overlap.
+
+==============================================================================
+
+SOURCE OF TRUTH
+
+The Voxel World owns:
+
+Voxel data.
+
+Chunk structure.
+
+Palette references.
+
+Dirty state.
+
+Selections.
+
+History.
+
+The Render System owns only generated meshes and temporary rendering data.
+
+==============================================================================
+
+RENDER REPRESENTATION
+
+Meshes are disposable.
+
+They may be rebuilt at any time.
+
+Destroying every rendered mesh must never destroy voxel information.
+
+Likewise, rebuilding every mesh must never modify the Voxel World.
+
+==============================================================================
+
+INDEPENDENCE
+
+The renderer must remain independent from:
+
+Brush logic.
+
+Import logic.
+
+Export logic.
+
+History implementation.
+
+Selection implementation.
+
+The renderer only consumes voxel data.
+
+==============================================================================
+
+RENDER OBJECTIVES
+
+The renderer must prioritize:
+
+Correctness.
+
+Visual consistency.
+
+Performance.
+
+Low memory overhead.
+
+Incremental updates.
+
+Scalability.
+
+==============================================================================
+
+REBUILD STRATEGY
+
+Only modified chunks should be rebuilt.
+
+The renderer should avoid rebuilding unaffected geometry.
+
+Incremental rendering is fundamental for interactive performance.
+
+==============================================================================
+
+VISUAL CONSISTENCY
+
+Every rendered mesh must accurately represent the current voxel state.
+
+Outdated geometry must never remain visible after successful updates.
+
+==============================================================================
+
+FAILURE RECOVERY
+
+Rendering failures must never corrupt voxel data.
+
+The Voxel World remains valid even if rendering fails completely.
+
+The renderer should be restartable without rebuilding the world.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Future rendering algorithms may replace internal implementations without
+changing the public Render System interface.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The renderer exists solely to visualize the Voxel World.
+
+It never becomes authoritative.
+
+==============================================================================
+
+END OF RENDER SYSTEM OVERVIEW

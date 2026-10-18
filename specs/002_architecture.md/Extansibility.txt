@@ -1,0 +1,172 @@
+==============================================================================
+EXTENSIBILITY
+==============================================================================
+
+The VoxelForge Engine is designed for continuous evolution.
+
+New systems, tools and features should integrate into the existing
+architecture without requiring major modifications.
+
+Extensibility is a primary architectural objective.
+
+==============================================================================
+
+GENERAL PRINCIPLES
+
+The architecture should remain open for extension while remaining closed for
+unnecessary modification.
+
+Existing systems should rarely require changes when introducing new
+features.
+
+==============================================================================
+
+MODULAR DESIGN
+
+Every subsystem should expose stable public interfaces.
+
+Internal implementations may evolve independently.
+
+Modules should remain interchangeable whenever possible.
+
+==============================================================================
+
+ADDING NEW FEATURES
+
+New functionality should integrate through existing extension points.
+
+Whenever possible, new features should extend current systems rather than
+replace them.
+
+The addition of a feature should have minimal impact on unrelated modules.
+
+==============================================================================
+
+ADDING NEW BRUSHES
+
+The Brush Engine should allow new brush implementations without requiring
+changes to existing brushes.
+
+Brushes should follow the common Brush interface.
+
+Every brush should integrate naturally into the Brush Engine.
+
+==============================================================================
+
+ADDING NEW RENDERERS
+
+The architecture should support multiple rendering implementations.
+
+Replacing the renderer should not require modifications to the Core.
+
+Rendering implementations should remain isolated.
+
+==============================================================================
+
+ADDING NEW IMPORTERS
+
+Each importer should be implemented independently.
+
+Adding support for a new file format should not require modifications to
+existing importers.
+
+Importers should only translate external data into the internal voxel
+representation.
+
+==============================================================================
+
+ADDING NEW EXPORTERS
+
+Each exporter should remain independent.
+
+Exporters should only translate the internal voxel representation into an
+external format.
+
+The addition of a new exporter must not affect existing exporters.
+
+==============================================================================
+
+ADDING NEW BLOCK DATABASES
+
+The Block Database should support new games and new block mappings without
+modifying the engine.
+
+Mappings should remain external data whenever possible.
+
+==============================================================================
+
+ADDING NEW PLUGINS
+
+Plugins should extend existing functionality through the official Plugin API.
+
+Plugins should never modify internal engine structures directly.
+
+Plugins should remain isolated from one another.
+
+==============================================================================
+
+ADDING NEW TOOLS
+
+Editing tools should integrate through the existing tool framework.
+
+The Engine should recognize tools through common interfaces.
+
+Tool-specific logic should remain inside the tool implementation.
+
+==============================================================================
+
+BACKWARD COMPATIBILITY
+
+Whenever practical, new features should preserve compatibility with existing
+projects.
+
+Breaking changes should be minimized.
+
+When breaking changes are unavoidable, migration strategies should be
+provided.
+
+==============================================================================
+
+SCALABILITY
+
+Future growth should be anticipated.
+
+The architecture should support:
+
+Additional modules
+
+Additional game formats
+
+Additional generators
+
+Additional renderers
+
+Additional editing tools
+
+Additional plugins
+
+without requiring architectural redesign.
+
+==============================================================================
+
+MAINTAINABILITY
+
+Extensions should follow the same architectural principles as the core
+engine.
+
+New functionality should improve the ecosystem rather than fragment it.
+
+==============================================================================
+
+LONG-TERM EVOLUTION
+
+The architecture should remain stable as the project evolves.
+
+Future improvements should build upon existing foundations rather than
+replace them unnecessarily.
+
+Architectural consistency should always be preserved.
+
+==============================================================================
+
+END OF EXTENSIBILITY

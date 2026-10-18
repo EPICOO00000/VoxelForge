@@ -1,0 +1,194 @@
+==============================================================================
+ARCHITECTURE RULES
+==============================================================================
+
+The architecture of VoxelForge is designed to remain modular,
+maintainable and scalable over many years.
+
+Every architectural decision must preserve these qualities.
+
+==============================================================================
+
+GENERAL PRINCIPLES
+
+Architecture always takes priority over implementation convenience.
+
+A working implementation is not sufficient if it weakens the architecture.
+
+Long-term maintainability always has priority over short-term simplicity.
+
+==============================================================================
+
+MODULARITY
+
+Each module must have one clearly defined responsibility.
+
+Modules should communicate only through well-defined public interfaces.
+
+Implementation details must remain private.
+
+Modules should remain independently replaceable whenever possible.
+
+==============================================================================
+
+SEPARATION OF CONCERNS
+
+A subsystem should only solve the problem it was designed to solve.
+
+Rendering code must never contain export logic.
+
+Exporters must never contain rendering logic.
+
+User interface code must never modify low-level engine internals directly.
+
+Every responsibility belongs to exactly one subsystem.
+
+==============================================================================
+
+DEPENDENCIES
+
+Dependencies should always point in one direction.
+
+Avoid dependency cycles.
+
+Avoid hidden dependencies.
+
+Every dependency should have a clear justification.
+
+When possible, depend on abstractions rather than implementations.
+
+==============================================================================
+
+PUBLIC INTERFACES
+
+Every public interface should remain stable.
+
+Changes to public APIs should be carefully evaluated.
+
+Avoid unnecessary breaking changes.
+
+Interfaces should remain simple and predictable.
+
+==============================================================================
+
+EXTENSIBILITY
+
+Architectures should be designed to allow future expansion.
+
+Adding a new feature should require extending the project,
+not rewriting existing systems.
+
+Avoid designs that only support current requirements.
+
+==============================================================================
+
+COHESION
+
+Related functionality should remain grouped together.
+
+Unrelated responsibilities should never share the same module.
+
+High cohesion improves readability and maintainability.
+
+==============================================================================
+
+COUPLING
+
+Reduce coupling whenever possible.
+
+Modules should know as little as possible about one another.
+
+Avoid exposing internal implementation details.
+
+==============================================================================
+
+REUSABILITY
+
+Before creating a new component,
+verify whether an existing one can be extended.
+
+Avoid duplicate systems solving the same problem.
+
+Prefer reuse over duplication.
+
+==============================================================================
+
+ABSTRACTION
+
+Introduce abstractions only when they solve a real problem.
+
+Avoid unnecessary layers.
+
+Avoid premature generalization.
+
+Every abstraction should have a clear purpose.
+
+==============================================================================
+
+SCALABILITY
+
+Architecture should support future growth.
+
+Assume that:
+
+new renderers,
+
+new exporters,
+
+new importers,
+
+new brushes,
+
+new generators,
+
+and new plugins
+
+will eventually be added.
+
+The architecture should accommodate these additions naturally.
+
+==============================================================================
+
+CONSISTENCY
+
+Follow existing architectural patterns.
+
+Do not introduce new architectural styles without strong justification.
+
+Consistency is more valuable than cleverness.
+
+==============================================================================
+
+DOCUMENTATION
+
+Every architectural decision should be documented.
+
+Every major architectural modification should include its motivation.
+
+Future contributors must understand why a system exists.
+
+==============================================================================
+
+ARCHITECTURAL CHANGES
+
+Before modifying the architecture,
+evaluate:
+
+impact on existing systems,
+
+compatibility,
+
+maintainability,
+
+performance,
+
+extensibility,
+
+future development.
+
+Architecture should evolve deliberately,
+never accidentally.
+
+==============================================================================
+
+END OF ARCHITECTURE RULES

@@ -1,0 +1,223 @@
+==============================================================================
+BLENDER MESH BUILDER
+==============================================================================
+
+The Blender Mesh Builder is responsible for converting generated geometry
+buffers into Blender Mesh objects.
+
+It represents the final CPU stage before GPU synchronization.
+
+The Blender Mesh Builder does not generate geometry.
+
+It only transfers already validated mesh data into Blender.
+
+==============================================================================
+
+PURPOSE
+
+The Mesh Builder bridges the Render System and Blender.
+
+Its sole responsibility is constructing and updating Blender Mesh datablocks
+from renderer-generated buffers.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+The Mesh Builder must remain:
+
+Deterministic.
+
+Efficient.
+
+Stateless whenever practical.
+
+Independent from mesh generation algorithms.
+
+==============================================================================
+
+INPUT
+
+The Mesh Builder receives validated geometry buffers containing:
+
+Vertices.
+
+Triangle indices.
+
+Normals.
+
+UV coordinates.
+
+Material indices.
+
+Custom attributes.
+
+The builder never computes geometry itself.
+
+==============================================================================
+
+OUTPUT
+
+The builder produces valid Blender Mesh datablocks.
+
+Every generated mesh must accurately represent the supplied geometry buffers.
+
+==============================================================================
+
+ONE MESH PER CHUNK
+
+Each chunk owns exactly one Blender Mesh.
+
+Each chunk owns exactly one Blender Object.
+
+Chunk meshes are completely independent.
+
+No mesh should contain geometry belonging to multiple chunks.
+
+==============================================================================
+
+MESH REPLACEMENT
+
+When a chunk is rebuilt:
+
+Old geometry is discarded.
+
+New geometry replaces the previous mesh.
+
+The replacement should occur atomically whenever possible.
+
+==============================================================================
+
+BLENDER API
+
+Mesh creation should use Blender's low-level bulk APIs whenever practical.
+
+Bulk memory transfer is preferred over incremental construction.
+
+Repeated Python API calls should be minimized.
+
+==============================================================================
+
+FOREACH_SET
+
+Large datasets should preferentially use:
+
+foreach_set()
+
+Bulk transfer is significantly faster than assigning elements
+individually.
+
+==============================================================================
+
+BMESH
+
+BMesh is intended for interactive mesh editing.
+
+It should not be the primary construction method for large voxel meshes.
+
+BMesh may be used only when its editing capabilities are specifically
+required.
+
+==============================================================================
+
+FROM_PYDATA
+
+mesh.from_pydata() is convenient for small meshes.
+
+It is not intended for very large voxel worlds.
+
+Production rendering should favor bulk buffer transfer.
+
+==============================================================================
+
+UV LAYERS
+
+UV layers should be generated automatically when required.
+
+Missing UV layers should never produce invalid meshes.
+
+==============================================================================
+
+NORMALS
+
+Normals should be assigned after geometry creation.
+
+Normal generation must remain deterministic.
+
+==============================================================================
+
+MATERIAL SLOTS
+
+Material slots should remain stable across chunk rebuilds.
+
+Materials should be reused whenever possible.
+
+==============================================================================
+
+OBJECT MANAGEMENT
+
+Chunk objects should persist.
+
+Geometry should change.
+
+Objects should not be recreated unnecessarily.
+
+==============================================================================
+
+VALIDATION
+
+Before finalizing a mesh the builder should verify:
+
+Valid vertex count.
+
+Valid index count.
+
+Valid triangle references.
+
+Valid UV data.
+
+Valid material references.
+
+==============================================================================
+
+FAILURE HANDLING
+
+If mesh creation fails:
+
+Previous valid geometry should remain available whenever possible.
+
+Voxel data must remain untouched.
+
+==============================================================================
+
+MEMORY MANAGEMENT
+
+Temporary Blender objects should be avoided.
+
+Temporary arrays should be released immediately after successful upload.
+
+==============================================================================
+
+PERFORMANCE
+
+Mesh creation should minimize:
+
+Python object allocation.
+
+API calls.
+
+Memory copies.
+
+Synchronization overhead.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Blender Mesh Builder should convert renderer output into Blender meshes
+with the lowest possible CPU overhead while preserving complete visual
+accuracy.
+
+==============================================================================
+
+END OF BLENDER MESH BUILDER

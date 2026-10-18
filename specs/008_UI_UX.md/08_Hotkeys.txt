@@ -1,0 +1,111 @@
+==============================================================================
+HOTKEYS
+==============================================================================
+
+Hotkeys provide fast access to the most frequently used VoxelForge operations.
+
+The hotkey system must integrate naturally with Blender's existing keymap
+while minimizing conflicts with native Blender shortcuts.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Hotkeys should be:
+
+Fast.
+
+Easy to Remember.
+
+Context Aware.
+
+Fully Configurable.
+
+Consistent.
+
+==============================================================================
+
+SUPPORTED OPERATIONS
+
+Hotkeys may control:
+
+Tool Selection.
+
+Brush Size.
+
+Brush Strength.
+
+Block Selection.
+
+Undo.
+
+Redo.
+
+Copy.
+
+Paste.
+
+Delete.
+
+Selection Modes.
+
+Import.
+
+Export.
+
+Viewport Overlays.
+
+==============================================================================
+
+CONTEXT AWARENESS
+
+Hotkeys should only execute when relevant.
+
+Examples:
+
+Typing inside text fields should disable editing shortcuts.
+
+Brush shortcuts should only work while a voxel tool is active.
+
+==============================================================================
+
+CUSTOMIZATION
+
+Users may:
+
+Assign custom shortcuts.
+
+Disable shortcuts.
+
+Restore default mappings.
+
+Export shortcut profiles.
+
+Import shortcut profiles.
+
+==============================================================================
+
+CONFLICT DETECTION
+
+Shortcut conflicts should be detected automatically.
+
+Users should receive clear feedback whenever two shortcuts collide.
+
+==============================================================================
+
+PLUGIN SUPPORT
+
+Plugins may register additional hotkeys.
+
+Plugin hotkeys follow the same validation and conflict detection rules.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Hotkey System should maximize editing speed while remaining fully
+compatible with Blender's native workflow.
+
+==============================================================================
+
+END OF HOTKEYS

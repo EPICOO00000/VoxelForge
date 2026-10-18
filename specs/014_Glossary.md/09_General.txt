@@ -1,0 +1,115 @@
+TITLE: General
+
+PURPOSE:
+Defines general terminology and conventions used throughout the VoxelForge specifications.
+
+PROJECT:
+VoxelForge is a voxel editing and processing application designed around structured voxel worlds, editing tools, rendering, import/export, and extensibility.
+
+VOXEL WORLD:
+The complete spatial representation containing voxel data, block information, and associated world metadata.
+
+STRUCTURE:
+A collection of voxel data representing a build or other editable arrangement.
+
+CHUNK:
+A fixed spatial subdivision used to organize voxel storage and processing.
+
+BLOCK:
+A discrete voxel material or state referenced through the Block Database.
+
+BLOCK DATABASE:
+The centralized source of block definitions and associated metadata.
+
+WORLD POSITION:
+A coordinate identifying a location in the voxel world.
+
+LOCAL POSITION:
+A coordinate relative to a chunk or other local coordinate space.
+
+COORDINATE SYSTEM:
+The defined relationship between the application's X, Y, and Z axes.
+
+ORIGIN:
+The reference coordinate from which positions are measured.
+
+EDITOR:
+The interactive environment used to modify voxel structures and worlds.
+
+BRUSH:
+An editing mechanism used to apply operations to one or more voxels.
+
+RENDERER:
+The subsystem responsible for displaying voxel data.
+
+IMPORT:
+Conversion of external data into the VoxelForge internal representation.
+
+EXPORT:
+Conversion of VoxelForge data into an external representation.
+
+SCHEMATIC:
+A serialized representation of a voxel structure that can be saved, transferred, imported, or exported.
+
+BLOXD.IO SCHEMATIC:
+A .bloxdschem file using the supported Bloxd.io schematic representation.
+
+BLOXD.IO SIZE LIMIT:
+A single Bloxd.io schematic must not exceed 200 chunks. Larger structures must be divided into multiple schematic files.
+
+MINECRAFT COMPATIBILITY:
+VoxelForge should support compatible Minecraft-oriented workflows without coupling the internal representation to a single external format.
+
+PLUGIN:
+An extension using the supported Plugin API.
+
+API:
+A defined programming interface exposed to other software components.
+
+SPECIFICATION:
+A document defining requirements, behavior, interfaces, constraints, or terminology for a VoxelForge subsystem.
+
+IMPLEMENTATION:
+The concrete code that realizes a specification.
+
+VALIDATION:
+The process of checking that data or behavior satisfies defined requirements.
+
+ERROR:
+A condition in which an operation cannot correctly complete according to its requirements.
+
+WARNING:
+A condition that does not necessarily prevent an operation but should be communicated to the user or developer.
+
+FALLBACK:
+A defined alternative behavior used when the preferred behavior cannot be performed.
+
+DETERMINISTIC:
+Producing the same result for the same input and defined state.
+
+COMPATIBILITY:
+The ability to operate correctly with supported versions, formats, APIs, or external applications.
+
+DATA INTEGRITY:
+The requirement that voxel and project data remain correct and consistent during editing, processing, saving, importing, and exporting.
+
+SOURCE OF TRUTH:
+The authoritative subsystem or data definition from which other systems should obtain a particular piece of information.
+
+UNSUPPORTED BEHAVIOR:
+Behavior that is not guaranteed by the specification and must not be relied upon by other components.
+
+GENERAL RULE:
+When multiple specifications describe the same system behavior, implementations must follow the most specific applicable requirement while maintaining compatibility with the broader architecture.
+
+RELATED SYSTEMS:
+- Project Architecture
+- Voxel World
+- Block Database
+- Renderer
+- Brush System
+- Import/Export
+- UI
+- Performance
+- Plugin API
+- Testingss

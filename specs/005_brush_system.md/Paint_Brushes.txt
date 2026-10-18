@@ -1,0 +1,98 @@
+==============================================================================
+PAINT BRUSHES
+==============================================================================
+
+Paint Brushes modify voxel attributes without altering geometry.
+
+==============================================================================
+
+PURPOSE
+
+Painting allows artists to assign block identities, colors and metadata while
+preserving voxel positions.
+
+==============================================================================
+
+CORE BRUSHES
+
+Paint.
+
+Replace.
+
+Flood Fill.
+
+Gradient Paint.
+
+Random Paint.
+
+Pattern Paint.
+
+Material Blend.
+
+==============================================================================
+
+PAINT
+
+Assigns one block type.
+
+==============================================================================
+
+REPLACE
+
+Replaces only matching blocks.
+
+==============================================================================
+
+FLOOD FILL
+
+Fills connected regions.
+
+==============================================================================
+
+GRADIENT PAINT
+
+Interpolates between multiple materials.
+
+==============================================================================
+
+RANDOM PAINT
+
+Distributes blocks using weighted probabilities.
+
+==============================================================================
+
+PATTERN PAINT
+
+Applies predefined repeating patterns.
+
+==============================================================================
+
+MATERIAL BLEND
+
+Transitions smoothly between compatible block types.
+
+==============================================================================
+
+FILTERS
+
+Painting may filter by:
+
+Current Block.
+
+Height.
+
+Slope.
+
+Selection.
+
+Metadata.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Painting should remain precise, predictable and non-destructive to geometry.
+
+==============================================================================
+
+END OF PAINT BRUSHES

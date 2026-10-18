@@ -1,0 +1,192 @@
+==============================================================================
+FORBIDDEN PRACTICES
+==============================================================================
+
+This document defines practices that are strictly prohibited during the
+development of the VoxelForge project.
+
+These rules exist to preserve maintainability, scalability and long-term
+stability.
+
+==============================================================================
+
+ARCHITECTURE
+
+Never bypass the official architecture.
+
+Never create hidden dependencies between modules.
+
+Never introduce circular dependencies.
+
+Never couple independent systems together.
+
+Never access another subsystem's internal implementation when a public
+interface already exists.
+
+Never place logic in the wrong module.
+
+==============================================================================
+
+SOURCE OF TRUTH
+
+Never duplicate the project's source of truth.
+
+Voxel data must always remain the authoritative representation of the world.
+
+Generated data must never become persistent data.
+
+Meshes are never the source of truth.
+
+Rendered objects are never the source of truth.
+
+Exported files are never the source of truth.
+
+==============================================================================
+
+DUPLICATION
+
+Never duplicate code without a compelling reason.
+
+Never duplicate algorithms.
+
+Never duplicate data structures.
+
+Never duplicate configuration files.
+
+When similar logic already exists, extend or reuse it instead.
+
+==============================================================================
+
+HARD CODED VALUES
+
+Never hardcode values that belong in configuration files,
+registries or data assets.
+
+Avoid magic numbers.
+
+Avoid hardcoded block names.
+
+Avoid hardcoded file paths.
+
+Avoid hardcoded game-specific behaviour.
+
+==============================================================================
+
+MODULARITY
+
+Never create a feature that cannot be extended.
+
+Never design systems that only work for one game.
+
+Never introduce Minecraft-specific logic into the core engine.
+
+Never create unnecessary coupling between exporters.
+
+==============================================================================
+
+PUBLIC INTERFACES
+
+Never modify public interfaces without considering compatibility.
+
+Never remove public functionality without justification.
+
+Never silently change the behaviour of existing APIs.
+
+==============================================================================
+
+PERFORMANCE
+
+Never allocate large amounts of memory unnecessarily.
+
+Never duplicate large datasets.
+
+Never perform expensive computations repeatedly when avoidable.
+
+Never ignore obvious scalability issues.
+
+==============================================================================
+
+DOCUMENTATION
+
+Never implement significant features without updating the corresponding
+documentation.
+
+Never leave outdated documentation after changing behaviour.
+
+==============================================================================
+
+CODE QUALITY
+
+Never leave dead code inside the project.
+
+Never leave commented-out implementations.
+
+Never leave debugging code.
+
+Never leave temporary workarounds without explicit documentation.
+
+Never commit unfinished experimental code to the main branch.
+
+==============================================================================
+
+ERROR HANDLING
+
+Never silently ignore errors.
+
+Never suppress exceptions without a valid reason.
+
+Never hide failures from the user or developer.
+
+==============================================================================
+
+NAMING
+
+Never use unclear names.
+
+Avoid abbreviations unless universally understood.
+
+Avoid misleading names.
+
+A class, method or variable should clearly describe its purpose.
+
+==============================================================================
+
+DEPENDENCIES
+
+Never introduce third-party dependencies without justification.
+
+Never duplicate functionality already provided by the project.
+
+Prefer the standard library whenever practical.
+
+==============================================================================
+
+OPTIMIZATION
+
+Never optimize before correctness.
+
+Never sacrifice maintainability for insignificant performance gains.
+
+Never introduce unnecessary complexity in the name of optimization.
+
+==============================================================================
+
+USER EXPERIENCE
+
+Never expose internal implementation details to end users.
+
+Never require unnecessary steps to perform common tasks.
+
+Never break existing workflows without strong justification.
+
+==============================================================================
+
+PROJECT PHILOSOPHY
+
+Never violate the principles defined in Project Philosophy.
+
+When in doubt, the specifications always take precedence over convenience.
+
+==============================================================================
+
+END OF FORBIDDEN PRACTICES

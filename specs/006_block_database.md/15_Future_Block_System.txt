@@ -1,0 +1,114 @@
+==============================================================================
+FUTURE BLOCK SYSTEM
+==============================================================================
+
+This document describes possible future evolutions of the Block Database.
+
+These features are not part of the current implementation and must not
+influence the architecture of existing systems.
+
+==============================================================================
+
+DESIGN PHILOSOPHY
+
+Future extensions should integrate into the existing Block Database without
+requiring architectural redesign.
+
+Backward compatibility should always be preserved whenever possible.
+
+==============================================================================
+
+POSSIBLE EXTENSIONS
+
+Future versions may introduce:
+
+Procedural Blocks.
+
+Parametric Blocks.
+
+Composite Blocks.
+
+Dynamic Block Definitions.
+
+Runtime Generated Variants.
+
+Streaming Block Libraries.
+
+==============================================================================
+
+ADVANCED MATERIAL SYSTEM
+
+Future Block Definitions may support:
+
+Advanced Materials.
+
+Physically Based Rendering Properties.
+
+Multiple Texture Layers.
+
+Procedural Surface Rules.
+
+==============================================================================
+
+ADVANCED STATE SYSTEM
+
+Possible future improvements include:
+
+Hierarchical States.
+
+Conditional States.
+
+Computed States.
+
+Scriptable States.
+
+==============================================================================
+
+PLUGIN EVOLUTION
+
+Future Plugin APIs may allow:
+
+Runtime Block Registration.
+
+Dynamic Block Categories.
+
+Custom Validation Rules.
+
+Custom Metadata Types.
+
+Custom Import Converters.
+
+==============================================================================
+
+MULTI-GAME SUPPORT
+
+Additional voxel games should be integrated only through new Game Mappings.
+
+Existing engine systems should remain unchanged.
+
+==============================================================================
+
+MIGRATION
+
+Future Block Database versions should provide migration tools allowing
+existing projects to remain compatible.
+
+==============================================================================
+
+ARCHITECTURAL STABILITY
+
+The Block Database architecture should remain stable across future engine
+versions.
+
+New features should extend the system rather than replacing it.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Block Database should provide a long-term foundation capable of evolving
+for many years while preserving compatibility, modularity and maintainability.
+
+==============================================================================
+
+END OF FUTURE BLOCK SYSTEM

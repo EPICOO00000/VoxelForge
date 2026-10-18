@@ -1,0 +1,230 @@
+==============================================================================
+RENDER CACHE
+==============================================================================
+
+The Render Cache stores temporary rendering resources that can be reused
+between chunk rebuilds.
+
+Its objective is to minimize memory allocations, reduce CPU overhead and
+avoid unnecessary reconstruction of temporary rendering data.
+
+The Render Cache never owns voxel data.
+
+==============================================================================
+
+PURPOSE
+
+Rendering repeatedly allocates temporary memory.
+
+Without caching, frequent allocation and deallocation create excessive CPU
+overhead, memory fragmentation and garbage collection pauses.
+
+The Render Cache minimizes these costs.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+The Render Cache must remain:
+
+Deterministic.
+
+Transparent.
+
+Reusable.
+
+Memory Efficient.
+
+Self-cleaning.
+
+==============================================================================
+
+CACHE OWNERSHIP
+
+The Render Cache owns only temporary rendering resources.
+
+Examples include:
+
+Temporary vertex buffers.
+
+Temporary index buffers.
+
+Temporary visibility masks.
+
+Temporary merge masks.
+
+Temporary NumPy arrays.
+
+Reusable workspaces.
+
+The cache never owns voxel information.
+
+==============================================================================
+
+CACHEABLE OBJECTS
+
+Objects suitable for caching include:
+
+Visibility masks.
+
+Greedy masks.
+
+Mesh buffers.
+
+Vertex arrays.
+
+Normal arrays.
+
+UV arrays.
+
+Material arrays.
+
+Temporary lookup tables.
+
+==============================================================================
+
+NON CACHEABLE OBJECTS
+
+The cache must never store:
+
+Voxel data.
+
+Chunk ownership.
+
+History.
+
+Selections.
+
+Palette data.
+
+World state.
+
+==============================================================================
+
+BUFFER REUSE
+
+Buffers should be reused whenever possible.
+
+If an existing buffer has sufficient capacity, it should be recycled instead
+of allocating a new one.
+
+==============================================================================
+
+DYNAMIC RESIZING
+
+Buffers may grow automatically when required.
+
+Buffers should rarely shrink.
+
+Frequent resizing should be avoided.
+
+==============================================================================
+
+OBJECT POOLING
+
+Frequently allocated objects should be managed through object pools.
+
+Pool allocation is preferred over repeated creation and destruction.
+
+==============================================================================
+
+CACHE INVALIDATION
+
+Cached resources become invalid whenever:
+
+Their format changes.
+
+Their size becomes incompatible.
+
+Their content becomes obsolete.
+
+Invalid resources should never be reused.
+
+==============================================================================
+
+CACHE LIFETIME
+
+Temporary resources should remain available while useful.
+
+Unused resources may eventually be released automatically.
+
+==============================================================================
+
+MEMORY LIMITS
+
+Future implementations may define cache limits.
+
+Possible limits include:
+
+Maximum memory usage.
+
+Maximum buffer count.
+
+Maximum idle lifetime.
+
+==============================================================================
+
+CACHE CLEANUP
+
+Cleanup should occur automatically.
+
+Cleanup must never interrupt active rendering work.
+
+==============================================================================
+
+THREAD SAFETY
+
+Independent worker threads may request cached resources.
+
+Synchronization should minimize contention.
+
+==============================================================================
+
+PERFORMANCE
+
+Cache lookup should execute in constant or near-constant time.
+
+Allocation should become increasingly rare during long editing sessions.
+
+==============================================================================
+
+DEBUGGING
+
+Diagnostic information may include:
+
+Cache hit rate.
+
+Cache miss rate.
+
+Allocated memory.
+
+Reused buffers.
+
+Released buffers.
+
+==============================================================================
+
+FUTURE IMPROVEMENTS
+
+Future versions may introduce:
+
+LRU eviction.
+
+Memory pressure detection.
+
+Adaptive cache sizing.
+
+Persistent renderer workspaces.
+
+GPU-side caching.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+The Render Cache should eliminate unnecessary allocations while remaining
+completely invisible to higher-level rendering systems.
+
+==============================================================================
+
+END OF RENDER CACHE

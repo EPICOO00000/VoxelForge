@@ -1,0 +1,282 @@
+# ==============================================================================
+# VoxelForge Technical Specification
+# Document 001 - Development Rules
+# ==============================================================================
+
+Status: Accepted
+
+Version: 1.0.0
+
+==============================================================================
+
+# 1. Project Philosophy
+
+This document defines the mandatory development rules for the entire
+VoxelForge project.
+
+Every contributor, whether human or AI, must follow these rules.
+
+No exception should be made unless the specification itself is updated.
+
+These rules take precedence over implementation convenience.
+
+==============================================================================
+
+# 1.1 Mission
+
+VoxelForge is not a Blender addon.
+
+VoxelForge is a voxel engine running inside Blender.
+
+Blender provides:
+
+- User Interface
+- Viewport
+- Input
+- File management
+
+VoxelForge provides:
+
+- World representation
+- Voxel editing
+- Terrain generation
+- Rendering
+- Exporting
+
+This distinction must always remain true.
+
+==============================================================================
+
+# 1.2 Development Philosophy
+
+Code must always be written with long-term maintainability in mind.
+
+A working solution is not necessarily a good solution.
+
+The preferred solution is the one that remains understandable,
+testable and extendable after several years.
+
+Never optimize for the present at the expense of the future.
+
+==============================================================================
+
+# 1.3 Long-Term Thinking
+
+Every architectural decision must answer the following questions:
+
+Can this still work in five years?
+
+Can another developer understand it?
+
+Can another renderer replace the current one?
+
+Can another exporter be added without modifying the engine?
+
+Can another voxel backend replace the current implementation?
+
+If one answer is "No",
+the architecture should be reconsidered.
+
+==============================================================================
+
+# 1.4 AI Development
+
+Artificial Intelligence is considered a development assistant.
+
+AI must never invent architecture.
+
+AI must respect existing specifications.
+
+AI may propose improvements.
+
+However, every architectural modification must first be justified.
+
+When suggesting a modification, AI must explain:
+
+- Why the modification is necessary.
+- Advantages.
+- Drawbacks.
+- Performance impact.
+- Memory impact.
+- Compatibility impact.
+- Alternative solutions.
+
+==============================================================================
+
+# 1.5 Simplicity First
+
+The simplest architecture capable of supporting future features
+should always be preferred.
+
+Complexity must never be introduced without measurable benefits.
+
+Every new abstraction must solve an existing problem.
+
+==============================================================================
+
+# 1.6 Performance First
+
+Performance is a primary objective.
+
+VoxelForge targets extremely large voxel worlds.
+
+Development decisions must always consider:
+
+- CPU usage
+
+- Memory usage
+
+- GPU usage
+
+- Disk usage
+
+- Cache locality
+
+- Scalability
+
+Never choose convenience over scalability.
+
+==============================================================================
+
+# 1.7 Data First
+
+Voxel data is the only source of truth.
+
+Everything else is generated.
+
+Renderer:
+
+Generated.
+
+Meshes:
+
+Generated.
+
+Preview:
+
+Generated.
+
+Export:
+
+Generated.
+
+Nothing except voxel data should be considered persistent.
+
+==============================================================================
+
+# 1.8 Separation of Responsibilities
+
+Each module must have one responsibility.
+
+Examples:
+
+Renderer:
+
+Creates meshes.
+
+Nothing else.
+
+Exporter:
+
+Writes files.
+
+Nothing else.
+
+Brush Engine:
+
+Computes voxel modifications.
+
+Nothing else.
+
+World:
+
+Stores voxel data.
+
+Nothing else.
+
+==============================================================================
+
+# 1.9 No Hidden Logic
+
+Code must never contain hidden side effects.
+
+Every modification must be explicit.
+
+A function named:
+
+update_mesh()
+
+must never:
+
+- save a file
+
+- modify the camera
+
+- rebuild selections
+
+- emit unrelated events
+
+Functions should do exactly what their name describes.
+
+==============================================================================
+
+# 1.10 Extensibility
+
+Every major system must be replaceable.
+
+Examples:
+
+Renderer
+
+↓
+
+New Renderer
+
+Brush Engine
+
+↓
+
+New Brush Engine
+
+Exporter
+
+↓
+
+New Exporter
+
+Voxel Backend
+
+↓
+
+GPU Backend
+
+Future replacement must require minimal changes.
+
+==============================================================================
+
+# 1.11 Consistency
+
+Consistency is more important than cleverness.
+
+Never introduce a new naming convention.
+
+Never invent a new architecture style.
+
+Never duplicate existing concepts.
+
+Prefer improving existing systems.
+
+==============================================================================
+
+# 1.12 Documentation
+
+Every major architectural decision must be documented.
+
+Undocumented architecture does not exist.
+
+If future developers cannot understand why something exists,
+then the design has failed.
+
+==============================================================================
+
+# End of Section 1

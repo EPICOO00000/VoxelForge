@@ -1,0 +1,71 @@
+TITLE: Blocks
+
+PURPOSE:
+Defines the terminology used for voxel blocks throughout VoxelForge.
+
+DEFINITION:
+A block is the fundamental volumetric element used to construct a voxel world. Each block occupies one discrete voxel position and references a block definition from the Block Database.
+
+CORE CONCEPTS:
+
+Block ID:
+A stable numeric identifier used internally to reference a block definition. Block IDs must remain deterministic within the active block database and must not be assigned randomly at runtime.
+
+Block Definition:
+The complete metadata associated with a block, including its identifier, name, textures, rendering properties, physical properties, and behavior.
+
+Block State:
+The runtime state associated with a block when additional state is required. Examples may include orientation, variant, or other supported block properties.
+
+Voxel:
+A single discrete cell in the voxel world. A voxel position contains either an active block or the designated empty/air state.
+
+Air:
+The canonical empty block state. Air does not render as visible geometry and does not occupy solid voxel volume.
+
+SOLIDITY:
+Blocks may be classified according to whether they contribute solid geometry or behave as non-solid content. Solidity must be defined by the block database rather than inferred independently by each subsystem.
+
+OPAQUENESS:
+Opacity determines whether a block prevents visibility through its volume. Rendering and visibility systems must use the block definition instead of hard-coded block IDs.
+
+COLLISION:
+Collision properties determine whether a block contributes to world collision geometry. Collision data must remain consistent with the block database.
+
+TRANSPARENCY:
+Transparent or translucent blocks require appropriate renderer handling. Their rendering behavior must not be confused with their physical collision behavior.
+
+IDENTITY RULES:
+Block identity must be stable across world editing, serialization, import/export, undo/redo, and plugin operations.
+
+DATABASE INTEGRATION:
+All systems that need block metadata should resolve it through the central Block Database. Duplicate independent definitions of block properties are prohibited unless explicitly required for caching.
+
+IMPORT/EXPORT:
+When importing Minecraft or Bloxd.io-compatible data, external block identifiers must be translated through the appropriate mapping layer before becoming internal VoxelForge block IDs.
+
+PERFORMANCE:
+Frequently accessed block properties may be cached, but cached values must remain invalidatable when the underlying block database changes.
+
+COMPATIBILITY:
+The block abstraction must support both Minecraft-compatible workflows and Bloxd.io-compatible workflows. Format-specific identifiers must remain isolated from the internal block representation.
+
+ERROR HANDLING:
+Unknown block identifiers must resolve to a controlled fallback state and must never corrupt the world representation.
+
+IMPLEMENTATION REQUIREMENTS:
+- Use deterministic block identifiers.
+- Keep block metadata centralized.
+- Do not duplicate block definitions across unrelated systems.
+- Separate block identity from rendering implementation.
+- Separate rendering properties from collision properties.
+- Support format-specific mappings through import/export layers.
+- Preserve unknown-block information where possible during conversion.
+
+RELATED SYSTEMS:
+- Block Database
+- Voxel World
+- Renderer
+- Import/Export
+- Chunk System
+- Plugin API

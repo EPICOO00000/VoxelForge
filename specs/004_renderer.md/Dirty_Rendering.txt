@@ -1,0 +1,181 @@
+==============================================================================
+DIRTY RENDERING
+==============================================================================
+
+Dirty Rendering defines how the Render System detects, schedules and rebuilds
+modified chunks after changes occur inside the Voxel World.
+
+Dirty Rendering is responsible for incremental rendering.
+
+It ensures that only necessary geometry is regenerated.
+
+==============================================================================
+
+PURPOSE
+
+The objective of Dirty Rendering is to minimize rendering work after voxel
+modifications.
+
+Entire world rebuilds should be avoided whenever possible.
+
+Only affected chunks should be processed.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Dirty Rendering must remain:
+
+Incremental.
+
+Deterministic.
+
+Efficient.
+
+Recoverable.
+
+Thread-safe.
+
+==============================================================================
+
+DIRTY CHUNK DISCOVERY
+
+The renderer never determines dirty chunks itself.
+
+Dirty information is provided exclusively by the Voxel World.
+
+The Voxel World remains the authoritative source for chunk synchronization.
+
+==============================================================================
+
+RENDER QUEUE
+
+Dirty chunks enter a Render Queue.
+
+The Render Queue schedules chunk reconstruction.
+
+Duplicate entries are prohibited.
+
+Each chunk may appear only once regardless of how many edits occurred.
+
+==============================================================================
+
+MULTIPLE MODIFICATIONS
+
+A chunk may receive multiple voxel modifications before rendering begins.
+
+The renderer rebuilds the final voxel state only once.
+
+Intermediate visual states are discarded.
+
+==============================================================================
+
+PRIORITIZATION
+
+Future implementations may prioritize chunks according to:
+
+Distance from camera.
+
+Viewport visibility.
+
+User interaction.
+
+Modification timestamp.
+
+Task priority.
+
+The public Render API should remain unchanged.
+
+==============================================================================
+
+PARTIAL WORLD REBUILD
+
+Dirty Rendering never rebuilds unaffected chunks.
+
+Independent chunk reconstruction is fundamental to engine scalability.
+
+==============================================================================
+
+DEPENDENCY MANAGEMENT
+
+Some rendering algorithms require neighboring chunk information.
+
+When neighbor visibility influences generated geometry,
+required neighboring chunks may also be scheduled.
+
+Only true rendering dependencies should trigger additional work.
+
+==============================================================================
+
+RENDER COMPLETION
+
+After successful reconstruction:
+
+Generated meshes replace previous meshes.
+
+GPU synchronization occurs.
+
+The chunk becomes Clean.
+
+==============================================================================
+
+FAILED RECONSTRUCTION
+
+If reconstruction fails:
+
+Previous mesh remains valid whenever possible.
+
+The chunk remains Dirty.
+
+The renderer may retry later.
+
+Voxel data is never modified.
+
+==============================================================================
+
+QUEUE MANAGEMENT
+
+The Render Queue should support:
+
+Insertion.
+
+Removal.
+
+Iteration.
+
+Priority scheduling.
+
+Duplicate prevention.
+
+Cancellation.
+
+==============================================================================
+
+PARALLEL EXECUTION
+
+Independent chunks may be rebuilt simultaneously.
+
+Chunk reconstruction should avoid unnecessary synchronization.
+
+Shared resources must remain protected.
+
+==============================================================================
+
+MEMORY MANAGEMENT
+
+Temporary rendering buffers exist only during reconstruction.
+
+Buffers should be recycled whenever practical.
+
+Repeated allocation should be minimized.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Dirty Rendering minimizes rendering cost by rebuilding only the geometry that
+is no longer synchronized with the Voxel World.
+
+==============================================================================
+
+END OF DIRTY RENDERING

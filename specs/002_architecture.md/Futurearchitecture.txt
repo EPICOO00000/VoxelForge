@@ -1,0 +1,169 @@
+==============================================================================
+FUTURE ARCHITECTURE
+==============================================================================
+
+The VoxelForge architecture has been designed to support continuous
+evolution over many years.
+
+Future development should expand the engine without compromising its core
+principles.
+
+Architectural stability is considered more important than rapid feature
+development.
+
+==============================================================================
+
+ARCHITECTURAL STABILITY
+
+The Core Architecture should remain stable throughout the lifetime of the
+project.
+
+Future improvements should primarily occur through extensions rather than
+major architectural redesigns.
+
+Existing systems should evolve incrementally.
+
+==============================================================================
+
+ENGINE EVOLUTION
+
+The Engine should remain the central coordinator of the application.
+
+Future functionality should integrate into the existing Engine rather than
+creating competing control systems.
+
+The Engine should continue to expose a unified interface to all major
+subsystems.
+
+==============================================================================
+
+SUBSYSTEM EVOLUTION
+
+Every subsystem should be capable of evolving independently.
+
+Improving one subsystem should require little or no modification to the
+others.
+
+Subsystem responsibilities should remain clearly separated as the project
+grows.
+
+==============================================================================
+
+BACKWARD COMPATIBILITY
+
+Whenever practical, future versions should preserve compatibility with:
+
+Existing projects
+
+Existing plugins
+
+Existing assets
+
+Existing workflows
+
+Breaking compatibility should only occur when the long-term benefits clearly
+justify the transition.
+
+==============================================================================
+
+SCALABILITY
+
+Future versions should continue supporting increasingly large voxel worlds.
+
+Architectural decisions should continue prioritizing scalability over
+short-term convenience.
+
+New features should preserve the ability to process extremely large datasets.
+
+==============================================================================
+
+MODULAR GROWTH
+
+Future systems should integrate as independent modules.
+
+New modules should communicate through existing public interfaces.
+
+Internal implementations should remain isolated.
+
+==============================================================================
+
+NEW TECHNOLOGIES
+
+The architecture should remain flexible enough to adopt future technologies.
+
+Examples include:
+
+Improved rendering techniques
+
+New Blender APIs
+
+GPU acceleration
+
+Alternative storage systems
+
+New export formats
+
+Distributed processing
+
+Support for future technologies should not require redesigning the engine.
+
+==============================================================================
+
+PLUGIN ECOSYSTEM
+
+Future versions should encourage an ecosystem of community plugins.
+
+Plugins should remain first-class extensions of the engine.
+
+The Plugin API should evolve while maintaining long-term stability whenever
+possible.
+
+==============================================================================
+
+DATA EVOLUTION
+
+Internal data structures may evolve over time.
+
+Migration paths should be provided whenever persistent project formats
+change.
+
+Existing projects should remain usable whenever reasonably possible.
+
+==============================================================================
+
+DOCUMENTATION
+
+Architectural evolution should always be reflected in the official
+documentation.
+
+Specifications should evolve together with the engine.
+
+Undocumented architectural changes should be avoided.
+
+==============================================================================
+
+DESIGN PHILOSOPHY
+
+Future development should continue following the principles established by:
+
+Project Vision
+
+Development Rules
+
+Architecture
+
+Future features should reinforce these principles rather than weaken them.
+
+==============================================================================
+
+FINAL PRINCIPLE
+
+VoxelForge is intended to become a long-term platform rather than a
+collection of independent features.
+
+Every architectural decision should contribute to a codebase that remains
+stable, understandable, maintainable and extensible for many years.
+
+==============================================================================
+
+END OF FUTURE ARCHITECTURE

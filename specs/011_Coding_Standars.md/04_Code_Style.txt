@@ -1,0 +1,267 @@
+==============================================================================
+CODING STANDARDS — CODE STYLE
+==============================================================================
+
+VoxelForge code must follow a consistent style so that developers can read,
+review and modify code without having to adapt to different conventions.
+
+==============================================================================
+
+GENERAL PRINCIPLE
+
+Code style exists to improve readability and consistency.
+
+The exact language-specific formatting rules must follow the formatter and
+tooling configured by the project.
+
+Formatting preferences must not override correctness or architectural rules.
+
+==============================================================================
+
+INDENTATION
+
+Use the project's configured indentation standard consistently.
+
+Do not mix indentation styles within the same file.
+
+Whitespace must be used consistently and must not change program behavior.
+
+==============================================================================
+
+BRACES AND BLOCKS
+
+Control-flow blocks must use the project's standard brace convention.
+
+Braces should make scope visually clear, especially for:
+
+Conditions.
+
+Loops.
+
+Functions.
+
+Exception Handling.
+
+Resource Management.
+
+==============================================================================
+
+LINE LENGTH
+
+Avoid excessively long lines when they reduce readability.
+
+Long expressions may be split across multiple lines using the language's
+standard formatting conventions.
+
+Do not create awkward line breaks solely to satisfy an arbitrary limit when
+doing so makes the code harder to understand.
+
+==============================================================================
+
+SPACING
+
+Use consistent spacing around operators, parameters and language constructs.
+
+Avoid unnecessary whitespace.
+
+Formatting should remain compatible with the project's automatic formatter when
+one is provided.
+
+==============================================================================
+
+COMMENTS
+
+Comments should explain intent, constraints or non-obvious behavior.
+
+Do not write comments that merely restate obvious code.
+
+Prefer improving unclear code over adding comments to compensate for poor
+structure.
+
+==============================================================================
+
+DOCUMENTATION COMMENTS
+
+Public APIs should include documentation describing:
+
+Purpose.
+
+Parameters.
+
+Return Values.
+
+Errors or Failure Conditions.
+
+Threading Requirements where relevant.
+
+Ownership or Lifetime Requirements where relevant.
+
+==============================================================================
+
+TODO ITEMS
+
+TODO comments must be specific enough to explain what remains to be done.
+
+Where the project uses issue tracking, TODO items should reference the
+corresponding issue when appropriate.
+
+Temporary debugging comments must not remain in production code.
+
+==============================================================================
+
+FUNCTION SIZE
+
+Functions should remain focused on a clear responsibility.
+
+Large functions should be split when doing so improves:
+
+Readability.
+
+Testing.
+
+Reuse.
+
+Error Handling.
+
+Maintainability.
+
+Do not split functions into arbitrary fragments when the resulting structure
+becomes harder to follow.
+
+==============================================================================
+
+CONDITIONAL LOGIC
+
+Prefer clear conditional logic over deeply nested structures.
+
+Early returns may be used when they make control flow easier to understand.
+
+Complex conditions should be extracted into clearly named variables or helper
+functions when appropriate.
+
+==============================================================================
+
+LOOPS
+
+Loops must have clear termination conditions.
+
+Avoid unnecessary work inside frequently executed loops.
+
+Performance-sensitive loops should avoid unnecessary allocations and repeated
+lookups where practical.
+
+==============================================================================
+
+ERROR HANDLING
+
+Error handling must be explicit.
+
+Do not use exceptions, error values or result types inconsistently within the
+same subsystem.
+
+Follow the error-handling model defined by the project's architecture.
+
+Errors must not be silently discarded when they can affect correctness.
+
+==============================================================================
+
+MEMORY
+
+Resource ownership must be clear.
+
+Objects that require explicit cleanup must follow the appropriate lifetime
+mechanism.
+
+Avoid unnecessary copies of large voxel, chunk or world data.
+
+==============================================================================
+
+THREADING
+
+Thread-sensitive code must make its execution requirements clear.
+
+Do not access UI state from background threads.
+
+Do not modify shared world or rendering state concurrently without following the
+appropriate synchronization and ownership rules.
+
+==============================================================================
+
+PERFORMANCE-SENSITIVE CODE
+
+Code executed frequently, such as rendering, chunk processing or brush
+operations, must avoid unnecessary overhead.
+
+Do not introduce micro-optimizations without evidence that they solve a real
+performance problem.
+
+Use profiling and benchmarks when optimization decisions matter.
+
+==============================================================================
+
+API USAGE
+
+Use public APIs instead of reaching into private subsystem implementation.
+
+For example:
+
+- World operations use VoxelWorld APIs.
+- Rendering operations use Renderer APIs.
+- Brush operations use Brush System APIs.
+- Block information uses Block Database APIs.
+- Plugin integrations use Plugin APIs.
+
+==============================================================================
+
+IMPORT / EXPORT
+
+Format conversion code should remain readable even when performance-sensitive.
+
+Minecraft and Bloxd.io conversion code must preserve the documented format
+constraints.
+
+Bloxd.io `.bloxdschem` exports must never exceed 200 chunks per schematic.
+Exports larger than this limit must be split into multiple schematic files.
+
+==============================================================================
+
+MAGIC VALUES
+
+Avoid unexplained numeric or string literals when they represent meaningful
+configuration, limits or protocol values.
+
+Use named constants where doing so improves clarity.
+
+External format constants should be documented when their meaning is not
+obvious.
+
+==============================================================================
+
+DUPLICATION
+
+Avoid unnecessary duplicated logic.
+
+If two implementations genuinely have different requirements, do not force them
+into an abstraction solely to remove superficial duplication.
+
+==============================================================================
+
+AUTOMATIC FORMATTING
+
+When a project formatter is configured, source code should remain formatter-
+compatible.
+
+Developers should not manually fight the formatter to preserve personal style.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Code should look as though it was written by one coherent engineering team.
+
+Consistency, readability and correctness take priority over personal formatting
+preferences.
+
+==============================================================================
+
+END OF CODING STANDARDS — CODE STYLE

@@ -1,0 +1,209 @@
+==============================================================================
+BRUSH SAMPLING
+==============================================================================
+
+Brush Sampling converts an abstract Brush Shape into a concrete set of voxel
+coordinates.
+
+Sampling determines which voxels are evaluated by the Brush Behavior.
+
+It never modifies voxel data.
+
+==============================================================================
+
+PURPOSE
+
+Sampling efficiently identifies every voxel potentially affected by a Brush.
+
+The objective is to minimize unnecessary computation while guaranteeing that
+no valid voxel is missed.
+
+==============================================================================
+
+DESIGN PRINCIPLES
+
+Brush Sampling must remain:
+
+Deterministic.
+
+Fast.
+
+Chunk-aware.
+
+Vectorizable.
+
+Independent from Brush Behaviors.
+
+==============================================================================
+
+SAMPLING PIPELINE
+
+Every sampling operation follows the same sequence.
+
+Brush Shape
+
+↓
+
+Bounding Volume
+
+↓
+
+Intersecting Chunks
+
+↓
+
+Voxel Coordinates
+
+↓
+
+Shape Test
+
+↓
+
+Influence Mask
+
+↓
+
+Behavior
+
+==============================================================================
+
+BOUNDING VOLUME
+
+Every Shape exposes an Axis-Aligned Bounding Box (AABB).
+
+Sampling never evaluates voxels outside this bounding volume.
+
+The Bounding Volume acts as the first optimization stage.
+
+==============================================================================
+
+CHUNK FILTERING
+
+The Bounding Volume determines which chunks may contain affected voxels.
+
+Chunks completely outside the volume are ignored.
+
+Only intersecting chunks are sampled.
+
+==============================================================================
+
+LOCAL CHUNK SAMPLING
+
+Each chunk is sampled independently.
+
+Sampling coordinates are converted into local chunk coordinates before
+evaluation.
+
+This allows fully parallel chunk processing.
+
+==============================================================================
+
+VOXEL CANDIDATES
+
+Sampling initially considers every voxel inside the Bounding Volume.
+
+Candidate voxels are then filtered using precise Shape tests.
+
+==============================================================================
+
+SHAPE EVALUATION
+
+Each candidate voxel performs a geometric inclusion test.
+
+Possible results are:
+
+Inside.
+
+Outside.
+
+Boundary.
+
+Only valid voxels continue through the pipeline.
+
+==============================================================================
+
+INFLUENCE MASK
+
+Sampling produces an Influence Mask.
+
+The Influence Mask contains:
+
+Voxel Coordinates.
+
+Normalized Distance.
+
+Influence Weight.
+
+Chunk Reference.
+
+Local Coordinates.
+
+This structure becomes the input of the Brush Behavior.
+
+==============================================================================
+
+VECTORIZATION
+
+Sampling should operate on contiguous arrays whenever possible.
+
+Vectorized NumPy operations are preferred over Python loops.
+
+Sequential memory access should be favored.
+
+==============================================================================
+
+EARLY REJECTION
+
+Sampling should reject voxels as early as possible.
+
+Bounding tests should always execute before expensive geometric evaluation.
+
+==============================================================================
+
+MEMORY
+
+Temporary sampling buffers should be reused whenever practical.
+
+Repeated allocations should be minimized.
+
+==============================================================================
+
+THREADING
+
+Different chunks may be sampled simultaneously.
+
+Shared voxel data must never be modified during sampling.
+
+==============================================================================
+
+DETERMINISM
+
+Identical Shape parameters must always produce identical Influence Masks.
+
+==============================================================================
+
+FUTURE IMPROVEMENTS
+
+Future implementations may introduce:
+
+SIMD acceleration.
+
+GPU sampling.
+
+Signed Distance Fields.
+
+Adaptive sampling.
+
+Sparse masks.
+
+==============================================================================
+
+DESIGN OBJECTIVE
+
+Brush Sampling should evaluate the minimum possible number of voxels while
+guaranteeing complete geometric accuracy.
+
+==============================================================================
+
+END OF BRUSH SAMPLING
