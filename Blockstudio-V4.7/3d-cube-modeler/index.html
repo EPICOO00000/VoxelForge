@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Shape Modeler</title>
+  <link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/bloxd-adapted-tools.css">
+<link rel="stylesheet" href="assets/css/bloxd-texture-studio.css">
+<link rel="stylesheet" href="assets/css/bloxd-procedural-advanced.css">
+<link rel="stylesheet" href="assets/css/bloxd-material-clarity.css">
+<link rel="stylesheet" href="assets/css/bloxd-world-tools.css">
+</head>
+<body>
+
+<header class="project-bar" aria-label="Project controls">
+  <div class="project-bar__brand">Shape Studio</div>
+  <div class="editor-mode-switch" id="editorModeSwitch" aria-label="Editor mode"><button class="is-active" type="button" data-editor-mode="3d">3D</button><button type="button" data-editor-mode="bloxd">BLOXD</button></div>
+  <div class="project-bar__divider"></div>
+  <button id="undoButton" type="button" title="Undo (Ctrl/Cmd+Z)" disabled>↶ <span>Undo</span></button>
+  <button id="redoButton" type="button" title="Redo (Ctrl/Cmd+Y or Ctrl/Cmd+Shift+Z)" disabled>↷ <span>Redo</span></button>
+  <div class="project-bar__divider"></div>
+  <button id="saveProjectButton" type="button" title="Save project">↓ <span>Save</span></button>
+  <button id="loadProjectButton" type="button" title="Open project">↑ <span>Open</span></button>
+  <input class="visually-hidden" id="projectFileInput" type="file" accept=".shapeproject,.json,application/json">
+  <div class="export-control">
+    <button id="exportMenuButton" type="button" aria-haspopup="true" aria-expanded="false">⇩ <span>Export 3D</span></button>
+    <div class="export-menu is-hidden" id="exportMenu" role="menu">
+      <button type="button" data-export-format="glb" role="menuitem"><strong>GLB</strong><small>Best for sharing, Blender, Unity, web</small></button>
+      <button type="button" data-export-format="obj" role="menuitem"><strong>OBJ</strong><small>Universal mesh format</small></button>
+      <button type="button" data-export-format="stl" role="menuitem"><strong>STL</strong><small>3D printing geometry</small></button>
+      <button type="button" data-export-format="bloxdschem" role="menuitem"><strong>BLOXD</strong><small>Voxel schematic for Bloxd.io</small></button>
+    </div>
+  </div>
+  <div class="project-status" id="projectStatus" role="status" aria-live="polite"></div>
+</header>
+
+<nav class="tool-palette" aria-label="Modeling tools">
+  <div class="tool-palette__brand" aria-hidden="true">3D</div>
+
+  <button class="tool-button is-active" type="button" data-tool="select" data-tooltip="Select (Q)" aria-label="Select">↖</button>
+  <button class="tool-button" type="button" data-tool="boxselect" data-tooltip="Box select (X)" aria-label="Box select">⬚</button>
+  <button class="tool-button" type="button" data-tool="translate" data-tooltip="Move (G)" aria-label="Move">✥</button>
+  <button class="tool-button" type="button" data-tool="rotate" data-tooltip="Rotate (R)" aria-label="Rotate">↻</button>
+  <button class="tool-button" type="button" data-tool="scale" data-tooltip="Scale (S)" aria-label="Scale">⤢</button>
+  <button class="tool-button" type="button" data-tool="sculpt" data-tooltip="Sculpt (B)" aria-label="Sculpt">✎</button>
+  <button class="tool-button" type="button" data-tool="edit" data-tooltip="Vertex / edge / face edit (E)" aria-label="Edit geometry">△</button>
+  <button class="tool-button" type="button" data-tool="measure" data-tooltip="Measure (M)" aria-label="Measure">⌁</button>
+
+  <div class="tool-separator"></div>
+
+  <button class="tool-button" type="button" data-action="add" data-tooltip="Add shape (N)" aria-label="Add shape">＋</button>
+  <button class="tool-button" type="button" data-action="duplicate" data-tooltip="Duplicate (D)" aria-label="Duplicate shape">▣</button>
+  <button class="tool-button" type="button" data-action="color" data-tooltip="Shape color" aria-label="Change shape color">◉</button>
+  <input id="toolbarColor" class="visually-hidden" type="color" aria-label="Shape color">
+  <button class="tool-button tool-button--danger" type="button" data-action="delete" data-tooltip="Delete shape (Delete)" aria-label="Delete shape">×</button>
+
+  <div class="tool-separator"></div>
+
+  <button class="tool-button" type="button" data-action="reset-view" data-tooltip="Reset view" aria-label="Reset view">⌂</button>
+  <button class="tool-button" type="button" data-action="fit-all" data-tooltip="Fit all shapes" aria-label="Fit all shapes">◎</button>
+  <button class="tool-button" type="button" data-action="array" data-tooltip="Array tool" aria-label="Open array tool">⠿</button>
+  <button class="tool-button" type="button" data-action="procedural" data-tooltip="Procedural generators (P)" aria-label="Open procedural generators">⌘</button>
+  <button class="tool-button" type="button" data-action="hierarchy" data-tooltip="Objects & hierarchy" aria-label="Toggle object hierarchy">☰</button>
+  <button class="tool-button" type="button" data-action="materials" data-tooltip="Materials & textures" aria-label="Materials and textures">◐</button>
+  <button class="tool-button" type="button" data-action="modifiers" data-tooltip="Modifiers & booleans" aria-label="Modifiers and booleans">◇</button>
+  <button class="tool-button" type="button" data-action="statistics" data-tooltip="Project statistics" aria-label="Project statistics">#</button>
+
+  <div class="tool-palette__spacer"></div>
+  <button class="tool-button" id="advancedToggle" type="button" data-action="advanced" data-tooltip="Advanced editor" aria-label="Toggle advanced editor" aria-pressed="false">☷</button>
+</nav>
+
+<section class="voxel-panel is-hidden" id="voxelPanel" aria-label="Bloxd block editor">
+  <div class="voxel-panel__header"><div><div class="panel-kicker">Permanent block world</div><strong>Bloxd editor</strong></div><span id="voxelBlockCount">0 blocks</span></div>
+  <div class="voxel-tool-grid" id="voxelToolGrid">
+    <button class="is-active" data-voxel-tool="place" type="button" title="Place blocks">＋<small>Place</small></button><button data-voxel-tool="remove" type="button" title="Remove blocks">−<small>Remove</small></button>
+    <button data-voxel-tool="paint" type="button" title="Paint existing blocks">◉<small>Paint</small></button><button data-voxel-tool="eyedropper" type="button" title="Pick a block">⌾<small>Pick</small></button>
+    <button data-voxel-tool="box" type="button" title="Click two corners to fill a box">□<small>Box</small></button><button data-voxel-tool="hollow-box" type="button" title="Click two corners for a hollow box">▢<small>Shell</small></button>
+    <button data-voxel-tool="line" type="button" title="Click two points for a line">╱<small>Line</small></button><button data-voxel-tool="fill" type="button" title="Flood-fill connected blocks">▧<small>Fill</small></button>
+    <button data-voxel-tool="select" type="button" title="Click two corners to select blocks">⬚<small>Select</small></button><button data-voxel-tool="connected" type="button" title="Select connected blocks of one type">⌘<small>Connected</small></button>
+    <button data-voxel-tool="paste" type="button" title="Paste clipboard at clicked position">▣<small>Paste</small></button><button data-voxel-tool="texture" type="button" title="Paint palette noise onto existing blocks">≈<small>Texture</small></button>
+    <button data-voxel-tool="asset" type="button" title="Place loaded Bloxd assets">⌂<small>Assets</small></button><button data-voxel-tool="terrain" type="button" title="Paint and sculpt terrain biomes">⛰<small>Terrain</small></button>
+    <button data-voxel-tool="scatter" type="button" title="Procedurally scatter schematic assets">✣<small>Scatter</small></button><button data-voxel-tool="path" type="button" title="Draw editable roads, rivers, and structures">〰<small>Paths</small></button>
+  </div>
+  <div class="voxel-tool-hint" id="voxelToolHint">Click a block face to place the selected block.</div>
+  <div class="voxel-block-picker">
+    <label>Official Bloxd block<input id="voxelBlockSearch" type="search" placeholder="Search 2,090 blocks…"></label>
+    <div class="voxel-current-block"><span id="voxelBlockSwatch"></span><select id="voxelBlockSelect"></select></div>
+  </div>
+  <details class="voxel-texture-studio" id="voxelTextureStudio">
+    <summary><span><b>Palette Texture Studio</b><small>Compose block palettes and paint procedural noise</small></span><i>▾</i></summary>
+    <div class="voxel-texture-body">
+      <section><span class="field-title">Player palette</span><div class="voxel-texture-palette" id="voxelTexturePalette"></div><div class="voxel-texture-actions"><button id="voxelTextureAddCurrent" type="button">+ Current block</button><button id="voxelTextureClear" type="button">Clear</button></div></section>
+      <section class="voxel-texture-generator"><span class="field-title">Generate near RGB</span><label>Target color<input id="voxelTextureColor" type="color" value="#668866"></label><label>Blocks<input id="voxelTextureCount" type="number" min="2" max="16" value="6"></label><label>Maximum color distance<input id="voxelTextureSpread" type="range" min="10" max="120" value="65"><output id="voxelTextureSpreadValue">65</output></label><label>Family<select id="voxelTextureFamily"><option value="safe">Safe blocks</option><option value="natural">Natural</option><option value="concrete">Concrete</option><option value="wool">Wool</option><option value="glass">Glass / ice</option><option value="wood">Wood</option><option value="colored">Colored building</option></select></label><button id="voxelTextureGenerate" type="button">Generate nearby palette</button></section>
+      <section><span class="field-title">Pattern</span><label>Noise<select id="voxelTextureMode"><option value="fbm">Fractal Perlin</option><option value="perlin">Perlin</option><option value="ridged">Ridged multifractal</option><option value="value">Smooth value noise</option><option value="cellular">Cellular / Worley</option><option value="random">Random speckle</option><option value="checker">Checker</option><option value="stripes">Stripes</option><option value="gradient">Gradient</option></select></label><label>Seed<input id="voxelTextureSeed" type="text" value="texture-1"></label><label>Feature size<input id="voxelTextureScale" type="number" min="0.25" max="128" step="0.25" value="6"></label><label>Octaves<input id="voxelTextureOctaves" type="number" min="1" max="8" value="4"></label><label>Contrast<input id="voxelTextureContrast" type="range" min="0.1" max="4" value="1" step="0.1"><output id="voxelTextureContrastValue">1.0</output></label><label>Bias<input id="voxelTextureBias" type="range" min="-0.5" max="0.5" value="0" step="0.02"><output id="voxelTextureBiasValue">0.00</output></label><label>Axis<select id="voxelTextureAxis"><option value="y">Y</option><option value="x">X</option><option value="z">Z</option></select></label><label class="check-row"><input id="voxelTextureInvert" type="checkbox"> Invert pattern</label></section>
+      <section><span class="field-title">Application</span><label>Target<select id="voxelTextureTarget"><option value="selection">Selection</option><option value="selection-surface">Selection surface</option><option value="world-surface">Entire exposed surface</option><option value="world">Entire world</option></select></label><label class="check-row"><input id="voxelTextureOnlyCurrent" type="checkbox"> Replace only the currently selected block ID</label><div class="voxel-texture-actions"><button class="primary-action" id="voxelTextureApply" type="button">Apply texture</button><button id="voxelTextureRandomize" type="button">Randomize seed</button></div><div class="voxel-texture-status" id="voxelTextureStatus">Add at least two blocks to the palette.</div></section>
+    </div>
+  </details>
+  <details class="voxel-asset-library" id="voxelAssetLibrary">
+    <summary><span><b>Bloxd Asset Library</b><small>922 placeable schematics from Bloxd Map Editor</small></span><i>▾</i></summary>
+    <div class="voxel-asset-body">
+      <div class="voxel-asset-search"><input id="voxelAssetSearch" type="search" placeholder="Search houses, trees, rocks…"><select id="voxelAssetCategory"><option value="all">All assets</option><option value="favorites">★ Favorites</option><option value="recent">Recent</option><option value="house">Houses</option><option value="tree">Trees</option><option value="rock">Rocks</option><option value="stand">Stands</option></select></div>
+      <div class="voxel-asset-list" id="voxelAssetList"></div>
+      <div class="voxel-asset-pager"><button id="voxelAssetPrevious" type="button">Previous</button><span id="voxelAssetPage"></span><button id="voxelAssetNext" type="button">Next</button></div>
+      <div class="voxel-asset-selected" id="voxelAssetSelected">Select an asset to load it as a block placement brush.</div>
+      <div class="voxel-asset-controls"><button data-voxel-asset-rotate="y" type="button">Rotate Y</button><button data-voxel-asset-mirror="x" type="button">Mirror X</button><button data-voxel-asset-mirror="z" type="button">Mirror Z</button><label>Anchor<select id="voxelAssetAnchor"><option value="bottom-center">Bottom center</option><option value="corner">Bottom corner</option><option value="center">Center</option><option value="top-center">Top center</option></select></label><label>Placement mode<select id="voxelAssetPasteMode"><option value="merge">Merge / overwrite blocks</option><option value="air-only">Fill empty space only</option><option value="replace-volume">Replace entire asset volume</option><option value="subtract">Subtract asset shape</option></select></label><label>Vertical offset<input id="voxelAssetYOffset" type="number" value="0" step="1"></label><label class="check-row"><input id="voxelAssetFoundation" type="checkbox"> Auto-foundation</label></div>
+      <div class="voxel-asset-ghost-status" id="voxelAssetGhostStatus">Ghost preview appears in the viewport. Mouse wheel raises or lowers it.</div><button class="primary-action" id="voxelAssetPlaceMode" type="button" disabled>Activate ghost placement</button>
+      <button id="voxelAssetUpload" type="button">Import custom .bloxdschem asset</button><input class="visually-hidden" id="voxelAssetFile" type="file" accept=".bloxdschem">
+    </div>
+  </details>
+  <details class="voxel-terrain-studio" id="voxelTerrainStudio">
+    <summary><span><b>Terrain & Biome Painter</b><small>Sculpt, erode, texture, and populate block terrain</small></span><i>▾</i></summary>
+    <div class="voxel-terrain-body">
+      <span class="field-title">Brush operation</span><div class="voxel-terrain-tools" id="voxelTerrainTools"><button class="is-active" data-terrain-tool="raise">Raise</button><button data-terrain-tool="lower">Lower</button><button data-terrain-tool="flatten">Flatten</button><button data-terrain-tool="smooth">Smooth</button><button data-terrain-tool="erode">Erode</button><button data-terrain-tool="terrace">Terrace</button><button data-terrain-tool="river">River</button><button data-terrain-tool="road">Road</button><button data-terrain-tool="cliff">Cliff</button><button data-terrain-tool="beach">Beach</button><button data-terrain-tool="biome">Biome</button><button data-terrain-tool="vegetation">Vegetation</button><button data-terrain-tool="snow">Snow</button></div>
+      <label>Biome preset<select id="voxelTerrainBiome"><option value="tropical">Tropical</option><option value="temperate" selected>Temperate</option><option value="arid">Arid / desert</option><option value="alpine">Alpine</option><option value="volcanic">Volcanic</option><option value="alien">Alien</option></select></label>
+      <label>Radius <output id="voxelTerrainRadiusValue">6</output><input id="voxelTerrainRadius" type="range" min="1" max="32" value="6"></label><label>Strength / height <output id="voxelTerrainStrengthValue">2</output><input id="voxelTerrainStrength" type="range" min="1" max="16" value="2"></label><label>Material depth<input id="voxelTerrainDepth" type="number" min="1" max="32" value="3"></label><label>Falloff<select id="voxelTerrainFalloff"><option value="smooth">Smooth</option><option value="linear">Linear</option><option value="hard">Hard circle</option></select></label><label>Seed<input id="voxelTerrainSeed" type="text" value="biome-1"></label><label>Vegetation density<input id="voxelTerrainDensity" type="range" min="0.01" max="0.35" step="0.01" value="0.08"></label><label class="check-row"><input id="voxelTerrainWater" type="checkbox" checked> Add water to river beds</label>
+      <div class="voxel-terrain-palette" id="voxelTerrainPalette"></div><button id="voxelTerrainCapturePalette" type="button">Use Texture Studio palette for surface</button>
+      <div class="voxel-terrain-help" id="voxelTerrainHelp">Drag over terrain to raise it. One undo state is created per stroke.</div>
+    </div>
+  </details>
+  <details class="voxel-world-studio" id="voxelScatterStudio">
+    <summary><span><b>Procedural Asset Scattering</b><small>Biome-aware trees, rocks, buildings, docks, and ruins</small></span><i>▾</i></summary>
+    <div class="voxel-world-studio__body">
+      <label>Scatter rule<select id="voxelScatterKind"><option value="trees">Trees · altitude + moisture</option><option value="rocks">Rocks · slopes</option><option value="houses">Houses · near live roads</option><option value="docks">Docks · water edges</option><option value="ruins">Ruins · regional noise</option></select></label>
+      <label>Biome asset set<select id="voxelScatterBiome"><option value="tropical">Tropical</option><option value="temperate" selected>Temperate</option><option value="arid">Arid</option><option value="alpine">Alpine</option><option value="volcanic">Volcanic</option><option value="alien">Alien</option></select></label>
+      <div class="voxel-world-studio__grid"><label>Maximum assets<input id="voxelScatterCount" type="number" min="1" max="500" value="40"></label><label>Minimum spacing<input id="voxelScatterSpacing" type="number" min="2" max="128" value="12"></label><label>Density<input id="voxelScatterDensity" type="number" min="0.01" max="1" step="0.01" value="0.3"></label><label>Seed<input id="voxelScatterSeed" type="text" value="scatter-1"></label><label>Min altitude (0–1)<input id="voxelScatterMinAltitude" type="number" min="0" max="1" step="0.05" value="0"></label><label>Max altitude (0–1)<input id="voxelScatterMaxAltitude" type="number" min="0" max="1" step="0.05" value="1"></label><label>Min moisture<input id="voxelScatterMoisture" type="number" min="0" max="1" step="0.05" value="0"></label><label>Max slope<input id="voxelScatterSlope" type="number" min="0" max="32" step="0.25" value="8"></label></div>
+      <label>Weighted asset collection<textarea id="voxelScatterCollection" rows="3" placeholder="Optional: tree001:3, tree025:1"></textarea></label>
+      <label class="check-row"><input id="voxelScatterRotate" type="checkbox" checked> Random 90° rotation</label><label class="check-row"><input id="voxelScatterMirror" type="checkbox" checked> Random mirroring</label>
+      <button class="primary-action" id="voxelScatterApply" type="button">Scatter collision-free assets</button><div class="voxel-world-status" id="voxelScatterStatus">Uses terrain, water, live paths, spacing, and schematic collisions.</div>
+    </div>
+  </details>
+  <details class="voxel-world-studio" id="voxelPathStudio">
+    <summary><span><b>Roads, Rivers & Live Paths</b><small>Click control points and keep generated structures editable</small></span><i>▾</i></summary>
+    <div class="voxel-world-studio__body">
+      <label>Structure<select id="voxelPathType"><option value="road">Road</option><option value="river">River</option><option value="wall">Wall</option><option value="bridge">Bridge</option><option value="tunnel">Tunnel</option><option value="pipe">Pipe</option><option value="fence">Fence</option></select></label>
+      <div class="voxel-world-studio__grid"><label>Width<input id="voxelPathWidth" type="number" min="1" max="64" value="5"></label><label>Elevation offset<input id="voxelPathElevation" type="number" min="-64" max="128" value="0"></label><label>Height / depth<input id="voxelPathHeight" type="number" min="1" max="64" value="4"></label><label>Curve smoothness<input id="voxelPathSmoothness" type="number" min="1" max="16" value="6"></label><label>Surface block ID<input id="voxelPathSurface" type="number" min="1" value="28"></label><label>Edge block ID<input id="voxelPathEdge" type="number" min="1" value="5"></label><label>Fill / water block ID<input id="voxelPathFill" type="number" min="1" value="28"></label><label>Seed<input id="voxelPathSeed" type="text" value="path-1"></label></div>
+      <label class="check-row"><input id="voxelPathConform" type="checkbox" checked> Conform generated path to terrain</label><button id="voxelPathCapturePalette" type="button">Use Texture Studio palette for surface role</button>
+      <div class="voxel-world-studio__actions"><button class="primary-action" id="voxelPathNew" type="button">New path · click points</button><button id="voxelPathFinish" type="button">Finish / rebuild</button><button id="voxelPathUndoPoint" type="button">Undo last point</button><button id="voxelPathDelete" type="button">Delete selected path</button></div>
+      <label>Live procedural paths<select id="voxelPathList" size="4"></select></label><div class="voxel-world-status" id="voxelPathStatus">Create a path, click at least two control points, then finish. Select a saved path to edit and rebuild it.</div>
+    </div>
+  </details>
+  <div class="voxel-selection-actions">
+    <span id="voxelSelectionCount">No blocks selected</span>
+    <div><button id="voxelCopy" type="button">Copy</button><button id="voxelCut" type="button">Cut</button><button id="voxelDeleteSelection" type="button">Delete</button><button id="voxelClearSelection" type="button">Clear</button></div>
+    <div class="voxel-nudge"><button data-voxel-move="-1,0,0">−X</button><button data-voxel-move="1,0,0">+X</button><button data-voxel-move="0,-1,0">−Y</button><button data-voxel-move="0,1,0">+Y</button><button data-voxel-move="0,0,-1">−Z</button><button data-voxel-move="0,0,1">+Z</button></div>
+    <div class="voxel-nudge"><button data-voxel-rotate="x">Rot X</button><button data-voxel-rotate="y">Rot Y</button><button data-voxel-rotate="z">Rot Z</button><button data-voxel-mirror="x">Mirror X</button><button data-voxel-mirror="y">Mirror Y</button><button data-voxel-mirror="z">Mirror Z</button></div>
+  </div>
+  <div class="voxel-world-settings"><label>Global blocks/unit<input id="voxelGlobalResolution" type="number" min="0.5" max="12" step="0.5" value="2"></label><label>Render chunk size<select id="voxelChunkSize"><option value="8">8³</option><option value="16" selected>16³</option><option value="32">32³</option></select></label><label>Block brush radius<input id="voxelBrushRadius" type="number" min="0" max="8" step="1" value="0"></label><button id="voxelReplaceAll" type="button">Replace current block…</button></div>
+</section>
+
+<section class="sculpt-panel is-hidden" id="sculptPanel" aria-label="Sculpt settings">
+  <div class="sculpt-panel__header">
+    <div>
+      <div class="panel-kicker">Direct editing</div>
+      <strong>Sculpt brush</strong>
+    </div>
+    <span class="sculpt-panel__shortcut">B</span>
+  </div>
+
+  <label class="sculpt-label">Brush mode</label>
+  <div class="sculpt-modes" role="group" aria-label="Sculpt brush mode">
+    <button class="sculpt-mode is-active" type="button" data-sculpt-mode="inflate">Inflate</button>
+    <button class="sculpt-mode" type="button" data-sculpt-mode="deflate">Deflate</button>
+    <button class="sculpt-mode" type="button" data-sculpt-mode="smooth">Smooth</button>
+    <button class="sculpt-mode" type="button" data-sculpt-mode="flatten">Flatten</button>
+  </div>
+
+  <label class="sculpt-slider-label" for="sculptRadius">
+    <span>Radius</span><output id="sculptRadiusValue">0.60</output>
+  </label>
+  <input id="sculptRadius" type="range" min="0.08" max="2.50" value="0.60" step="0.02">
+
+  <label class="sculpt-slider-label" for="sculptStrength">
+    <span>Strength</span><output id="sculptStrengthValue">0.040</output>
+  </label>
+  <input id="sculptStrength" type="range" min="0.005" max="0.150" value="0.040" step="0.005">
+
+  <button class="sculpt-undo" id="sculptUndo" type="button" disabled>↶ Undo last stroke</button>
+  <p>Left-drag on a selected shape to sculpt. Right-drag still orbits the camera.</p>
+</section>
+<div class="sculpt-cursor" id="sculptCursor" aria-hidden="true"></div>
+
+<section class="edit-panel is-hidden" id="editPanel" aria-label="Geometry edit settings">
+  <div class="mini-panel-header"><div><div class="panel-kicker">Mesh editing</div><strong>Edit geometry</strong></div><span>E</span></div>
+  <div class="component-modes" role="group" aria-label="Component selection mode">
+    <button class="is-active" type="button" data-component-mode="vertex">Vertex</button>
+    <button type="button" data-component-mode="edge">Edge</button>
+    <button type="button" data-component-mode="face">Face</button>
+  </div>
+  <p id="editHint">Click a vertex on the selected model, then drag the XYZ arrows.</p>
+  <div class="face-actions" id="faceActions">
+    <label>Extrude amount<input id="extrudeAmount" type="number" value="0.35" step="0.05"></label>
+    <button id="extrudeFace" type="button">Extrude selected face</button>
+  </div>
+</section>
+
+<section class="measure-panel is-hidden" id="measurePanel" aria-label="Measurement settings">
+  <div class="mini-panel-header"><div><div class="panel-kicker">Inspection</div><strong>Measure</strong></div><span>M</span></div>
+  <div class="component-modes" role="group" aria-label="Measurement mode">
+    <button class="is-active" type="button" data-measure-mode="distance">Distance</button>
+    <button type="button" data-measure-mode="angle">Angle</button>
+  </div>
+  <div class="measure-dimensions" id="measureDimensions">Select an object to view dimensions.</div>
+  <div class="measure-result" id="measureResult">Click two surface points.</div>
+  <button class="secondary-action" id="clearMeasurements" type="button">Clear measurements</button>
+  <p>Distance uses 2 points. Angle uses 3 points. Right-drag orbits the camera.</p>
+</section>
+
+<aside class="hierarchy-panel is-hidden" id="hierarchyPanel" aria-label="Object hierarchy">
+  <div class="hierarchy-header"><div><div class="panel-kicker">Scene</div><strong>Objects & hierarchy</strong></div><button id="closeHierarchy" type="button" aria-label="Close hierarchy">×</button></div>
+  <div class="hierarchy-actions">
+    <button id="groupObjects" type="button" title="Group selected objects">Group</button>
+    <button id="ungroupObjects" type="button" title="Ungroup selected group">Ungroup</button>
+    <button id="parentObjects" type="button" title="Parent other selected objects to the active object">Parent</button>
+    <button id="unparentObjects" type="button" title="Remove selected objects from their parents">Unparent</button>
+  </div>
+  <div class="object-properties">
+    <input id="objectName" type="text" placeholder="Selected object name">
+    <button id="renameObject" type="button">Rename</button>
+    <button id="toggleObjectLock" type="button">Lock</button>
+    <button id="toggleObjectVisibility" type="button">Hide</button>
+  </div>
+  <div class="hierarchy-help">Click to select · Ctrl/Cmd-click for multiple · the last selected object is active</div>
+  <div class="hierarchy-list" id="hierarchyList"></div>
+</aside>
+
+<aside class="ui-panel is-hidden" id="advancedPanel">
+  <div class="panel-heading">
+    <div>
+      <div class="panel-kicker">Advanced editor</div>
+      <h2>Shape Modeler</h2>
+    </div>
+    <button class="panel-close" id="closeAdvanced" type="button" aria-label="Close advanced editor">×</button>
+  </div>
+
+  <div class="voxel-only voxel-advanced-controls" id="voxelAdvancedControls">
+    <div class="control-group"><strong>Bloxd selection inspector</strong><div class="info-text" id="voxelAdvancedSummary">No blocks selected</div></div>
+    <div class="control-group"><label>Move selection (blocks)</label><div class="axis-inputs"><input id="voxelAdvancedMoveX" type="number" value="0" step="1"><input id="voxelAdvancedMoveY" type="number" value="0" step="1"><input id="voxelAdvancedMoveZ" type="number" value="0" step="1"></div><button id="voxelAdvancedApplyMove" type="button">Apply block move</button></div>
+    <div class="control-group"><label>Scale selection (discrete)</label><div class="axis-inputs"><input id="voxelAdvancedScaleX" type="number" value="1" min="0.1" max="10" step="0.1"><input id="voxelAdvancedScaleY" type="number" value="1" min="0.1" max="10" step="0.1"><input id="voxelAdvancedScaleZ" type="number" value="1" min="0.1" max="10" step="0.1"></div><button id="voxelAdvancedApplyScale" type="button">Resample selected blocks</button></div>
+    <div class="control-group"><label>90° rotate</label><div class="button-row"><button data-voxel-advanced-rotate="x">X</button><button data-voxel-advanced-rotate="y">Y</button><button data-voxel-advanced-rotate="z">Z</button></div></div>
+    <div class="control-group"><label>Mirror</label><div class="button-row"><button data-voxel-advanced-mirror="x">X</button><button data-voxel-advanced-mirror="y">Y</button><button data-voxel-advanced-mirror="z">Z</button></div></div>
+    <div class="control-group"><button id="voxelAdvancedDuplicate" type="button">Duplicate to clipboard</button><button id="voxelAdvancedDelete" type="button">Delete selection</button><button id="voxelAdvancedClearWorld" type="button">Clear block world</button></div>
+  </div>
+
+  <div class="control-group mesh-only">
+    <button onclick="showShapePicker()">+ Add Shape</button>
+    <div class="info-text">Click on canvas to select a shape</div>
+  </div>
+
+  <div id="selected-controls" style="display: none;">
+    <div class="control-group">
+      <label>Selected Shape: <strong id="selectedShapeName">—</strong></label>
+      <button onclick="deleteCube()" style="background: #8b0000; border-color: #ff4444; color: #ff4444;">Delete</button>
+      <button onclick="duplicateCube()">Duplicate</button>
+    </div>
+
+    <div class="control-group">
+      <label>Position (X, Y, Z)</label>
+      <div class="axis-inputs">
+        <input type="number" id="posX" placeholder="X" step="0.5" onchange="updateTransform()">
+        <input type="number" id="posY" placeholder="Y" step="0.5" onchange="updateTransform()">
+        <input type="number" id="posZ" placeholder="Z" step="0.5" onchange="updateTransform()">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Rotation (X, Y, Z) - Degrees</label>
+      <div class="axis-inputs">
+        <input type="number" id="rotX" placeholder="Rx" step="5" onchange="updateTransform()">
+        <input type="number" id="rotY" placeholder="Ry" step="5" onchange="updateTransform()">
+        <input type="number" id="rotZ" placeholder="Rz" step="5" onchange="updateTransform()">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Scale (X, Y, Z)</label>
+      <div class="axis-inputs">
+        <input type="number" id="scaleX" placeholder="X" step="0.1" min="0.1" onchange="updateTransform()">
+        <input type="number" id="scaleY" placeholder="Y" step="0.1" min="0.1" onchange="updateTransform()">
+        <input type="number" id="scaleZ" placeholder="Z" step="0.1" min="0.1" onchange="updateTransform()">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Color</label>
+      <input type="color" id="cubeColor" onchange="updateColor()">
+    </div>
+
+    <div class="control-group">
+      <label>Quick Rotate (90°)</label>
+      <div class="button-row">
+        <button onclick="quickRotate('x')">X-Axis</button>
+        <button onclick="quickRotate('y')">Y-Axis</button>
+        <button onclick="quickRotate('z')">Z-Axis</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label>Quick Scale</label>
+      <div class="button-row">
+        <button onclick="quickScale(1.2)">+20%</button>
+        <button onclick="quickScale(0.8)">-20%</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <label>Camera Controls</label>
+    <div class="button-row">
+      <button onclick="resetView()">Reset View</button>
+      <button onclick="fitAll()">Fit All</button>
+    </div>
+    <div class="info-text">Drag empty space to orbit • Scroll to zoom</div>
+  </div>
+
+  <div class="control-group">
+    <label>Scene</label>
+    <button onclick="clearAll()">Clear All</button>
+    <div class="info-text" id="cubeCount">Shapes: 0</div>
+  </div>
+
+</aside>
+
+<div class="status">
+  <div id="status-content">No shape selected</div>
+</div>
+
+<section class="material-panel floating-tool-panel is-hidden" id="materialPanel">
+  <div class="hierarchy-header"><div><div class="panel-kicker">Surface</div><strong>Materials & textures</strong></div><button type="button" data-close-floating="materialPanel">×</button></div>
+  <div class="voxel-only voxel-material-controls"><p>Bloxd materials are official block IDs. Choose a color to find the nearest safe block, then paint or replace the selection.</p><label>Find nearest block<input id="voxelMaterialColor" type="color" value="#ffffff"></label><div class="three-actions"><button id="voxelMaterialUse" type="button">Use nearest block</button><button id="voxelMaterialPaintSelection" type="button">Paint selection</button><button id="voxelMaterialPickFromSelection" type="button">Pick dominant</button><button id="voxelMaterialTexture" type="button">Sample texture → block</button></div></div>
+  <label class="mesh-only">Base color<input id="materialColor" type="color" value="#ffffff"></label>
+  <label>Metalness<input id="materialMetalness" type="range" min="0" max="1" value="0.35" step="0.01"><output id="materialMetalnessValue">0.35</output></label>
+  <label>Roughness<input id="materialRoughness" type="range" min="0" max="1" value="0.62" step="0.01"><output id="materialRoughnessValue">0.62</output></label>
+  <label>Opacity<input id="materialOpacity" type="range" min="0.05" max="1" value="1" step="0.01"><output id="materialOpacityValue">1.00</output></label>
+  <label class="check-row"><input id="materialWireframe" type="checkbox"> Wireframe</label>
+  <button class="secondary-action" id="uploadTexture" type="button">Upload texture</button>
+  <input class="visually-hidden" id="textureFileInput" type="file" accept="image/png,image/jpeg,image/webp">
+  <button class="secondary-action" id="clearTexture" type="button">Clear texture</button>
+</section>
+
+<section class="modifier-panel floating-tool-panel is-hidden" id="modifierPanel">
+  <div class="hierarchy-header"><div><div class="panel-kicker">Non-destructive ideas, applied now</div><strong>Modifiers & booleans</strong></div><button type="button" data-close-floating="modifierPanel">×</button></div>
+  <div class="voxel-only voxel-modifier-controls">
+    <p>Block-native modifiers operate destructively on the current selection and use voxel undo/redo.</p>
+    <span class="field-title">Shape modifiers</span><div class="boolean-actions"><button data-voxel-modifier="hollow" type="button">Hollow</button><button data-voxel-modifier="dilate" type="button">Dilate</button><button data-voxel-modifier="erode" type="button">Erode</button><button data-voxel-modifier="smooth" type="button">Smooth IDs</button><button data-voxel-modifier="subdivide" type="button">Subdivide ×2</button></div>
+    <span class="field-title">Clipboard booleans</span><p>Copy a block selection, select the target, then apply.</p><div class="boolean-actions"><button data-voxel-boolean="union" type="button">Union</button><button data-voxel-boolean="subtract" type="button">Difference</button><button data-voxel-boolean="intersect" type="button">Intersection</button></div>
+    <span class="field-title">Mirror selected blocks</span><div class="three-actions"><button data-voxel-modifier-mirror="x" type="button">Mirror X</button><button data-voxel-modifier-mirror="y" type="button">Mirror Y</button><button data-voxel-modifier-mirror="z" type="button">Mirror Z</button></div>
+  </div>
+  <span class="field-title mesh-only">Mirror geometry</span>
+  <div class="three-actions"><button type="button" data-mirror-axis="x">Mirror X</button><button type="button" data-mirror-axis="y">Mirror Y</button><button type="button" data-mirror-axis="z">Mirror Z</button></div>
+  <span class="field-title">Subdivision</span>
+  <label>Levels<select id="subdivisionLevels"><option value="1">1 level</option><option value="2">2 levels</option></select></label>
+  <button class="secondary-action" id="applySubdivision" type="button">Subdivide selected mesh</button>
+  <span class="field-title">Boolean — select exactly 2 objects</span>
+  <div class="boolean-actions"><button type="button" data-boolean="union">Union</button><button type="button" data-boolean="subtract">Difference</button><button type="button" data-boolean="intersect">Intersection</button></div>
+</section>
+
+<section class="statistics-panel floating-tool-panel is-hidden" id="statisticsPanel">
+  <div class="hierarchy-header"><div><div class="panel-kicker">Scene analysis</div><strong>Project statistics</strong></div><button type="button" data-close-floating="statisticsPanel">×</button></div>
+  <div id="statisticsContent" class="statistics-content"></div>
+</section>
+
+<div class="view-widget" aria-label="Camera views">
+  <button type="button" data-view="perspective" title="Perspective">P</button>
+  <button type="button" data-view="front" title="Front orthographic">F</button>
+  <button type="button" data-view="right" title="Right orthographic">R</button>
+  <button type="button" data-view="top" title="Top orthographic">T</button>
+</div>
+<div class="box-selection" id="boxSelection"></div>
+
+<div class="autosave-recovery is-hidden" id="autosaveRecovery">
+  <div><strong>Recovered autosave found</strong><span>Restore your last browser session?</span></div>
+  <button id="restoreAutosave" type="button">Restore</button><button id="discardAutosave" type="button">Discard</button>
+</div>
+
+<div class="voxel-convert-dialog" id="voxelConvertDialog" aria-hidden="true">
+  <div class="voxel-convert-dialog__backdrop" data-close-voxel-convert></div>
+  <section role="dialog" aria-modal="true" aria-labelledby="voxelConvertTitle">
+    <header><div><div class="panel-kicker">Permanent project conversion</div><h2 id="voxelConvertTitle">Enter Bloxd mode</h2><p>This permanently replaces the smooth triangle scene with editable Bloxd blocks. Save a separate project first if you may need the original meshes.</p></div><button data-close-voxel-convert type="button">×</button></header>
+    <div class="voxel-warning">⚠ Original smooth geometry will be discarded after conversion. This cannot be reversed by switching back to 3D view.</div>
+    <label>Global blocks per model unit<input id="voxelConvertResolution" type="number" min="0.5" max="12" step="0.5" value="2"></label>
+    <label>Conversion style<select id="voxelConvertFill"><option value="shell">Hollow surface shell</option><option value="solid">Approximate solid fill</option></select></label>
+    <label>Block assignment<select id="voxelConvertMaterials"><option value="colors">Match model material colors to Bloxd blocks</option><option value="single">Use selected block everywhere</option></select></label>
+    <label id="voxelConvertBlockRow">Default block<select id="voxelConvertBlock"></select></label>
+    <label>Color palette<select id="voxelConvertPalette"><option value="safe">Safe placeable blocks</option><option value="natural">Natural terrain</option><option value="concrete">Concrete only</option><option value="wool">Wool only</option><option value="glass">Glass and ice</option><option value="wood">Wood family</option><option value="colored">Colored building blocks</option></select></label>
+    <label class="voxel-confirm"><input id="voxelTextureColors" type="checkbox" checked> Sample uploaded/imported textures when matching colors.</label>
+    <label class="voxel-confirm"><input id="voxelColorDither" type="checkbox" checked> Dither between the two closest blocks for smoother gradients.</label>
+    <label class="voxel-confirm"><input id="voxelPermanentConfirm" type="checkbox"> I understand that mesh geometry will be permanently replaced.</label>
+    <div class="bloxd-progress is-hidden" id="voxelConvertProgress"><div><span id="voxelConvertProgressBar"></span></div><strong id="voxelConvertProgressText">Preparing…</strong></div>
+    <footer><button data-close-voxel-convert type="button">Cancel</button><button class="primary-action" id="confirmVoxelConvert" type="button" disabled>Convert entire scene</button></footer>
+  </section>
+</div>
+
+<div class="procedural-dialog" id="proceduralDialog" aria-hidden="true">
+  <div class="procedural-dialog__backdrop" data-close-procedural></div>
+  <section class="procedural-dialog__content" role="dialog" aria-modal="true" aria-labelledby="proceduralTitle">
+    <header class="procedural-header">
+      <div><div class="panel-kicker">Seeded creation system</div><h2 id="proceduralTitle">Procedural generators</h2><p>Create complex worlds, architecture, organic structures, systems, and fractals. Parameters remain editable until baked.</p></div>
+      <button type="button" data-close-procedural aria-label="Close procedural generators">×</button>
+    </header>
+    <div class="procedural-workspace">
+      <aside class="procedural-library">
+        <div class="procedural-search"><input id="proceduralSearch" type="search" placeholder="Search 16 generators…"><button id="randomProceduralType" type="button" title="Pick a random generator">⚄</button></div>
+        <div class="procedural-categories" id="proceduralCategories"></div>
+        <div class="procedural-list" id="proceduralList"></div>
+      </aside>
+      <main class="procedural-editor">
+        <div class="procedural-selected"><span id="proceduralIcon">⛰</span><div><strong id="proceduralName">Mountain Terrain</strong><p id="proceduralDescription"></p></div></div>
+        <div class="procedural-preview" id="proceduralPreview"><div class="procedural-preview__badge">LIVE PREVIEW</div></div>
+        <div class="procedural-fields">
+          <label class="wide">Seed<div class="seed-input"><input id="proceduralSeed" type="text" value="1"><button id="randomizeProceduralSeed" type="button">Randomize</button></div></label>
+          <label>Overall size<input id="proceduralSize" type="number" min="2" max="24" step="0.5"></label>
+          <label>Height<input id="proceduralHeight" type="number" min="1" max="24" step="0.5"></label>
+          <label>Detail <output id="proceduralDetailValue"></output><input id="proceduralDetail" type="range" min="1" max="10" step="1"></label>
+          <label>Density <output id="proceduralDensityValue"></output><input id="proceduralDensity" type="range" min="1" max="10" step="1"></label>
+          <label>Variation <output id="proceduralVariationValue"></output><input id="proceduralVariation" type="range" min="0" max="1" step="0.05"></label>
+          <label>Primary color<input id="proceduralPrimary" type="color"></label>
+          <label>Accent color<input id="proceduralSecondary" type="color"></label>
+        </div>
+        <details class="procedural-advanced is-hidden" id="proceduralAdvanced" open>
+          <summary><span>⚙</span><div><strong>Advanced native Bloxd controls</strong><small>Every generator parameter and role-based block texturing</small></div></summary>
+          <div class="procedural-advanced-tabs"><button class="is-active" type="button" data-procedural-advanced-tab="parameters">Parameters</button><button type="button" data-procedural-advanced-tab="materials">Block materials</button><button type="button" data-procedural-advanced-tab="raw">Raw JSON</button></div>
+          <section data-procedural-advanced-page="parameters"><p>These controls are read directly by the native block algorithm. Nothing is converted from a mesh.</p><div class="procedural-advanced-grid" id="proceduralAdvancedParameters"></div></section>
+          <section class="is-hidden" data-procedural-advanced-page="materials"><div class="procedural-material-explainer"><strong>How generated-block replacement works</strong><ol><li>Choose a generator part, such as terrain surface, tree leaves, or castle walls.</li><li>Choose what should appear wherever that part is generated: its original block, one replacement block, or a palette.</li><li>For a palette, choose the blocks and a noise pattern that decides which palette block is placed at each coordinate.</li></ol><p>Example: <b>Terrain surface → Palette + noise → Grass, Moss, Dirt</b>. The mountain shape stays the same; only its generated surface blocks vary.</p></div><div class="procedural-material-toolbar"><button id="resetProceduralMaterials" type="button">Reset every role to original blocks</button><button id="captureProceduralPaletteAll" type="button">Use editor palette for all visible roles</button></div><div class="procedural-material-slots" id="proceduralMaterialSlots"></div></section>
+          <section class="is-hidden" data-procedural-advanced-page="raw"><p>Edit every stored property for this layer. Apply validates JSON and reloads all friendly controls.</p><textarea id="proceduralRawParameters" rows="14" spellcheck="false"></textarea><button id="applyProceduralRaw" type="button">Apply complete layer JSON</button></section>
+        </details>
+        <datalist id="bloxdBlockNames"></datalist>
+        <details class="island-studio is-hidden" id="islandStudio" open>
+          <summary><span>🏝</span><div><strong>Island world controls</strong><small>Terrain, coast, hydrology, biomes, ecosystems, and habitation</small></div></summary>
+          <section class="bloxd-island-map is-hidden" id="bloxdIslandMapStudio"><div class="bloxd-island-map__head"><div><strong>2D generation map</strong><small>Paint terrain, draw roads/rivers/bridges, or outline biome zones before generation.</small></div><label class="island-check">Fast texturing<input id="bloxdFastTexturing" type="checkbox"></label></div><div class="bloxd-island-map__toolbar"><select id="bloxdMapTool"><option value="biome">Biome zone</option><option value="road">Road</option><option value="river">River</option><option value="bridge">Bridge</option><option value="raise">Raise terrain</option><option value="lower">Lower terrain</option><option value="flatten">Flatten terrain</option><option value="erase">Erase feature</option></select><select id="bloxdMapBiome"></select><label>Width / radius<input id="bloxdMapBrushSize" type="range" min="1" max="30" value="7"></label><label>Strength<input id="bloxdMapStrength" type="range" min="1" max="100" value="25"></label></div><canvas id="bloxdIslandMapCanvas" width="512" height="512"></canvas><div class="bloxd-island-map__actions"><button id="bloxdMapFinish" type="button">Finish current points</button><button id="bloxdMapUndo" type="button">Undo point/feature</button><button id="bloxdMapClear" type="button">Clear map plan</button></div><div id="bloxdMapStatus">Choose a tool, then click points on the map. Biome zones need at least three points.</div><p class="bloxd-fast-texture-note">Fast texturing uses locked, prechosen Fractal Perlin palettes independently for grass, soil, stone, sand, snow, water, roads, and other generated layers.</p></section>
+          <div class="island-preset-row"><button type="button" data-island-preset="tropical">Tropical</button><button type="button" data-island-preset="volcanic">Volcanic</button><button type="button" data-island-preset="atoll">Atoll</button><button type="button" data-island-preset="alpine">Alpine</button><button type="button" data-island-preset="alien">Alien</button><button type="button" id="randomizeIslandWorld">Surprise me</button></div>
+          <div class="island-control-section"><h3>Landmass</h3><div class="island-control-grid">
+            <label>Formation<select id="islandStyle"><option value="natural">Natural island</option><option value="archipelago">Archipelago</option><option value="volcanic">Volcanic</option><option value="atoll">Atoll</option><option value="cliffs">Cliff island</option></select></label>
+            <label>Island count<input id="islandCount" type="number" min="1" max="9" step="1"></label>
+            <label>Terrain resolution<input id="islandResolution" type="number" min="24" max="112" step="4"></label>
+            <label>Coast roughness<input id="islandCoastRoughness" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Mountain strength<input id="islandMountainStrength" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Peak sharpness<input id="islandPeakSharpness" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Terracing<input id="islandTerracing" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Erosion strength<input id="islandErosion" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Volcanic crater<input id="islandCrater" type="range" min="0" max="1" step="0.05"><output></output></label>
+          </div></div>
+          <div class="island-control-section"><h3>Ocean and hydrology</h3><div class="island-control-grid">
+            <label>Beach width<input id="islandBeachWidth" type="range" min="0" max="0.3" step="0.01"><output></output></label>
+            <label>Ocean depth<input id="islandOceanDepth" type="range" min="0.1" max="1" step="0.05"><output></output></label>
+            <label>Rivers<input id="islandRiverCount" type="number" min="0" max="10" step="1"></label>
+            <label>River carving<input id="islandRiverDepth" type="range" min="0" max="0.3" step="0.01"><output></output></label>
+            <label>Reef density<input id="islandReefDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label class="island-check">Ocean water<input id="islandWaterEnabled" type="checkbox"></label>
+            <label>Water color<input id="islandWaterColor" type="color"></label>
+          </div></div>
+          <div class="island-control-section"><h3>Climate and life</h3><div class="island-control-grid">
+            <label>Biome<select id="islandBiome"><option value="tropical">Tropical</option><option value="temperate">Temperate</option><option value="arid">Arid</option><option value="alpine">Alpine</option><option value="alien">Alien</option></select></label>
+            <label>Moisture<input id="islandMoisture" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Temperature<input id="islandTemperature" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Snow line<input id="islandSnowLine" type="range" min="0.35" max="1" step="0.05"><output></output></label>
+            <label class="bloxd-disabled-generation">Vegetation<input id="islandVegetation" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Rock outcrops<input id="islandRockDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label class="bloxd-disabled-generation">Settlements<input id="islandSettlementDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+          </div></div>
+          <div class="island-control-section"><h3>Massive world and LOD</h3><div class="island-control-grid">
+            <label>World scale ×<input id="islandWorldScale" type="number" min="1" max="100" step="1"></label>
+            <label>Chunks per axis<input id="islandChunkCount" type="number" min="1" max="16" step="1"></label>
+            <label>Vertices per chunk<input id="islandChunkResolution" type="number" min="8" max="48" step="2"></label>
+            <label>LOD distance<input id="islandLodDistance" type="range" min="0.5" max="5" step="0.25"><output></output></label>
+            <label class="island-check">Chunked LOD<input id="islandLodEnabled" type="checkbox"></label>
+          </div></div>
+          <div class="island-control-section bloxd-disabled-generation"><h3>Advanced forests</h3><div class="tree-preset-row"><button type="button" data-tree-preset="oldgrowth">Old growth</button><button type="button" data-tree-preset="jungle">Dense jungle</button><button type="button" data-tree-preset="orchard">Fruit orchard</button><button type="button" data-tree-preset="haunted">Haunted forest</button><button type="button" data-tree-preset="giants">Giant fantasy</button></div><div class="island-control-grid">
+            <label>Species<select id="islandTreeSpecies"><option value="mixed">Biome mixture</option><option value="oak">Oak</option><option value="pine">Pine</option><option value="palm">Palm</option><option value="birch">Birch</option><option value="cedar">Cedar</option><option value="acacia">Acacia</option><option value="mangrove">Mangrove</option></select></label>
+            <label>Forest clustering<input id="islandForestClustering" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Tree scale<input id="islandTreeScale" type="range" min="0.25" max="4" step="0.05"><output></output></label>
+            <label>Canopy fullness<input id="islandCanopyFullness" type="range" min="0.1" max="2" step="0.05"><output></output></label>
+            <label>Branch complexity<input id="islandBranchComplexity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Dead tree ratio<input id="islandDeadTreeRatio" type="range" min="0" max="0.5" step="0.02"><output></output></label>
+            <label>Maximum trees<input id="islandTreeMaxCount" type="number" min="50" max="20000" step="50"></label>
+            <label>Tree age / maturity<input id="islandTreeAge" type="range" min="0.2" max="2.5" step="0.05"><output></output></label>
+            <label>Trunk taper<input id="islandTrunkTaper" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Trunk twist<input id="islandTrunkTwist" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Branch levels<input id="islandBranchLevels" type="number" min="1" max="5" step="1"></label>
+            <label>Branch spread<input id="islandBranchSpread" type="range" min="0.1" max="1.8" step="0.05"><output></output></label>
+            <label>Branch droop<input id="islandBranchDroop" type="range" min="-0.5" max="1" step="0.05"><output></output></label>
+            <label>Root spread<input id="islandRootSpread" type="range" min="0" max="2.5" step="0.05"><output></output></label>
+            <label>Canopy clusters<input id="islandCanopyClusters" type="number" min="1" max="9" step="1"></label>
+            <label>Leaf cluster scale<input id="islandLeafScale" type="range" min="0.2" max="2.5" step="0.05"><output></output></label>
+            <label>Color variation<input id="islandLeafColorVariation" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Season<select id="islandTreeSeason"><option value="summer">Summer</option><option value="spring">Spring blossom</option><option value="autumn">Autumn</option><option value="winter">Winter</option><option value="fantasy">Fantasy glow</option></select></label>
+            <label>Leaf rendering<select id="islandLeafMode"><option value="cards">Textured leaf spheres</option><option value="both">Leaf spheres + canopy clusters</option><option value="blobs">Canopy clusters only</option><option value="none">Bare branches</option></select></label>
+            <label>Leaf volume<select id="islandLeafGeometry"><option value="sphere">Small textured spheres</option><option value="disc">Textured circular cards</option></select></label>
+            <label>Leaf shape<select id="islandLeafShape"><option value="round">Round</option><option value="oval">Oval</option><option value="pointed">Pointed</option><option value="serrated">Serrated</option></select></label>
+            <label>Leaves per branch tip<input id="islandLeavesPerTip" type="number" min="1" max="32" step="1"></label>
+            <label>Leaf size<input id="islandLeafCardSize" type="range" min="0.05" max="2" step="0.05"><output></output></label>
+            <label>Leaf opacity<input id="islandLeafOpacity" type="range" min="0.1" max="1" step="0.05"><output></output></label>
+            <label>Leaf vein strength<input id="islandLeafVeins" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Leaf orientation jitter<input id="islandLeafJitter" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label class="island-check">Procedural leaf texture<input id="islandLeafTextureEnabled" type="checkbox"></label>
+            <label>Fruit / blossom<input id="islandFruitDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Hanging vines<input id="islandVineDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Fallen logs<input id="islandFallenLogDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Tree stumps<input id="islandStumpDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Giant tree chance<input id="islandGiantTreeChance" type="range" min="0" max="0.25" step="0.01"><output></output></label>
+            <label>Giant tree scale<input id="islandGiantTreeScale" type="range" min="1" max="8" step="0.25"><output></output></label>
+          </div></div>
+          <div class="island-control-section bloxd-disabled-generation"><h3>Civilization generator</h3><div class="island-control-grid">
+            <label>Culture<select id="islandCulture"><option value="auto">Biome-aware</option><option value="tropical">Tropical</option><option value="medieval">Medieval</option><option value="alpine">Alpine</option><option value="desert">Desert</option><option value="alien">Alien</option></select></label>
+            <label>Settlements<input id="islandSettlementCount" type="number" min="0" max="20" step="1"></label>
+            <label>Houses / settlement<input id="islandHousesPerSettlement" type="number" min="1" max="30" step="1"></label>
+            <label>House stories<input id="islandHouseStories" type="number" min="1" max="5" step="1"></label>
+            <label>Roof pitch<input id="islandRoofPitch" type="range" min="0.1" max="1.5" step="0.05"><output></output></label>
+            <label>Road network<input id="islandRoadDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Farms<input id="islandFarmDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Harbors and docks<input id="islandDockDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Walls and towers<input id="islandDefenseDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+            <label>Ruins<input id="islandRuinDensity" type="range" min="0" max="1" step="0.05"><output></output></label>
+          </div></div>
+        </details>
+        <section class="procedural-composer">
+          <div class="procedural-section-heading"><div><strong>Composition layers</strong><small>Combine generators or scatter repeated instances</small></div><div><button id="duplicateProceduralLayer" type="button">Duplicate</button><button id="addProceduralLayer" type="button">+ Layer</button></div></div>
+          <div class="procedural-layer-tabs" id="proceduralLayerTabs"></div>
+          <div class="procedural-layer-fields">
+            <label>Pattern<select id="proceduralPattern"><option value="single">Single</option><option value="random">Random scatter</option><option value="ring">Radial ring</option><option value="grid">Grid</option></select></label>
+            <label>Instances<input id="proceduralInstances" type="number" min="1" max="25" value="1"></label>
+            <label>Spread<input id="proceduralSpread" type="number" min="0" max="30" step="0.5" value="6"></label>
+            <label>Layer scale<input id="proceduralLayerScale" type="number" min="0.05" max="5" step="0.05" value="1"></label>
+            <label>Offset Y<input id="proceduralOffsetY" type="number" min="-20" max="20" step="0.25" value="0"></label>
+            <label>Rotation<input id="proceduralRotation" type="number" min="-360" max="360" step="5" value="0"></label>
+          </div>
+          <button id="removeProceduralLayer" class="remove-layer" type="button">Remove active layer</button>
+        </section>
+        <div class="procedural-presets"><span>Quality</span><button type="button" data-procedural-preset="draft">Draft</button><button type="button" data-procedural-preset="balanced">Balanced</button><button type="button" data-procedural-preset="detailed">Detailed</button></div>
+        <div class="procedural-mutations"><span>Seed mutations</span><button type="button" data-seed-mutation="1">A</button><button type="button" data-seed-mutation="2">B</button><button type="button" data-seed-mutation="3">C</button><button type="button" data-seed-mutation="4">D</button></div>
+        <div class="procedural-saved-presets"><input id="proceduralPresetName" type="text" placeholder="Preset name"><button id="saveProceduralPreset" type="button">Save preset</button><select id="proceduralPresetSelect"><option value="">Saved presets…</option></select><button id="deleteProceduralPreset" type="button">Delete</button></div>
+        <div class="procedural-note" id="proceduralNote">A new live procedural object will be created. Reopen this panel while it is selected to change its seed or parameters.</div>
+        <div class="procedural-stats" id="proceduralStats">Ready to generate</div>
+      </main>
+    </div>
+    <footer class="procedural-footer"><button type="button" id="bakeProcedural" class="danger-outline is-hidden">Bake selected to mesh</button><span></span><button type="button" data-close-procedural>Cancel</button><button type="button" id="generateProcedural" class="primary-action">Generate object</button></footer>
+  </section>
+</div>
+
+<div class="bloxd-export-dialog" id="bloxdExportDialog" aria-hidden="true">
+  <div class="bloxd-export-dialog__backdrop" data-close-bloxd-export></div>
+  <section class="bloxd-export-dialog__content" role="dialog" aria-modal="true" aria-labelledby="bloxdExportTitle">
+    <header>
+      <div><div class="panel-kicker">Bloxd.io voxel conversion</div><h2 id="bloxdExportTitle">Export Bloxd schematic</h2><p>Converts visible triangle meshes into blocks and downloads a game-ready <code>.bloxdschem</code>.</p></div>
+      <button type="button" data-close-bloxd-export aria-label="Close Bloxd export">×</button>
+    </header>
+    <div class="bloxd-export-grid">
+      <label>Schematic name<input id="bloxdSchemName" type="text" value="3D Model"></label>
+      <label>Blocks per model unit<input id="bloxdResolution" type="number" min="0.5" max="12" step="0.5" value="2"><small>Higher values create more detail and more blocks.</small></label>
+      <label>Voxel style<select id="bloxdFillMode"><option value="shell">Hollow shell</option><option value="solid">Solid fill</option></select><small>Solid fills each surface column; shell is lighter and preserves openings.</small></label>
+      <label>Block materials<select id="bloxdMaterialMode"><option value="single">Use one block</option><option value="colors">Match model material colors</option></select><small>Color matching picks the nearest supported Bloxd block for each mesh material.</small></label>
+      <label id="bloxdBlockRow">Block type<select id="bloxdBlockType"></select></label>
+      <label>Color palette<select id="bloxdPaletteFamily"><option value="safe">Safe placeable blocks</option><option value="natural">Natural terrain</option><option value="concrete">Concrete</option><option value="wool">Wool</option><option value="glass">Glass / ice</option><option value="wood">Wood</option><option value="colored">Colored blocks</option></select></label>
+      <label>Texture-aware matching<input id="bloxdTextureColors" type="checkbox" checked></label>
+      <label>Color dithering<input id="bloxdColorDither" type="checkbox" checked></label>
+    </div>
+    <div class="bloxd-export-estimate" id="bloxdEstimate">Scene estimate will appear here.</div>
+    <div class="bloxd-export-info">
+      <span>Axis mapping: model X/Y/Z → Bloxd X/Y/Z</span>
+      <span>Limit: 160 chunks / 2,000,000 blocks</span>
+    </div>
+    <div class="bloxd-progress is-hidden" id="bloxdProgress"><div><span id="bloxdProgressBar"></span></div><strong id="bloxdProgressText">Preparing…</strong></div>
+    <div class="bloxd-export-result is-hidden" id="bloxdExportResult"></div>
+    <div class="bloxd-export-footer"><button type="button" data-close-bloxd-export>Cancel</button><button class="primary-action" id="generateBloxdSchem" type="button">Voxelize & download</button></div>
+  </section>
+</div>
+
+<div class="array-dialog" id="arrayDialog" aria-hidden="true">
+  <div class="array-dialog__backdrop" data-close-array></div>
+  <section class="array-dialog__content" role="dialog" aria-modal="true" aria-labelledby="arrayTitle">
+    <header><div><div class="panel-kicker">Procedural duplication</div><h2 id="arrayTitle">Array tool</h2></div><button type="button" data-close-array aria-label="Close array tool">×</button></header>
+    <label>Array type<select id="arrayType"><option value="linear">Linear</option><option value="radial">Radial</option></select></label>
+    <label>Number of objects<input id="arrayCount" type="number" min="2" max="50" value="5"></label>
+    <div id="linearArrayOptions">
+      <span class="field-title">Offset per copy</span>
+      <div class="triple-fields"><label>X<input id="arrayOffsetX" type="number" step="0.1" value="1.5"></label><label>Y<input id="arrayOffsetY" type="number" step="0.1" value="0"></label><label>Z<input id="arrayOffsetZ" type="number" step="0.1" value="0"></label></div>
+    </div>
+    <div class="is-hidden" id="radialArrayOptions">
+      <label>Radius<input id="arrayRadius" type="number" min="0.1" step="0.1" value="3"></label>
+      <label>Axis<select id="arrayAxis"><option value="y">Y</option><option value="x">X</option><option value="z">Z</option></select></label>
+    </div>
+    <div class="array-dialog__footer"><button type="button" data-close-array>Cancel</button><button class="primary-action" id="applyArray" type="button">Create array</button></div>
+  </section>
+</div>
+
+<div class="shape-picker" id="shapePicker" aria-hidden="true">
+  <div class="shape-picker__backdrop" data-close-picker></div>
+  <section class="shape-picker__dialog" role="dialog" aria-modal="true" aria-labelledby="shapePickerTitle">
+    <header class="shape-picker__header">
+      <div>
+        <div class="panel-kicker">Geometry library</div>
+        <h2 id="shapePickerTitle">Choose a shape</h2>
+        <p>Pick a form, then move, rotate, scale, color, duplicate, or edit it like any other object.</p>
+      </div>
+      <button class="shape-picker__close" type="button" data-close-picker aria-label="Close shape picker">×</button>
+    </header>
+    <div class="model-import">
+      <div class="model-import__icon" aria-hidden="true">⇧</div>
+      <div class="model-import__copy">
+        <strong>Import your own 3D model</strong>
+        <span>GLB, glTF, OBJ, or STL · Select companion files together when needed</span>
+      </div>
+      <button class="model-import__button" id="importModelButton" type="button">Choose files</button>
+      <input class="visually-hidden" id="modelFileInput" type="file" accept=".glb,.gltf,.obj,.stl,.bin,.png,.jpg,.jpeg,.webp" multiple>
+      <div class="model-import__status" id="modelImportStatus" role="status" aria-live="polite"></div>
+    </div>
+    <div class="shape-picker__search-row">
+      <input id="shapeSearch" type="search" placeholder="Search 70+ shapes…" autocomplete="off">
+      <span id="shapeResultCount"></span>
+    </div>
+    <div class="shape-picker__categories" id="shapeCategories" aria-label="Shape categories"></div>
+    <div class="shape-picker__grid" id="shapeGrid"></div>
+  </section>
+</div>
+
+<script src="assets/js/vendor/three.min.js"></script>
+<script src="assets/js/vendor/TransformControls.js"></script>
+<script src="assets/js/vendor/GLTFLoader.js"></script>
+<script src="assets/js/vendor/OBJLoader.js"></script>
+<script src="assets/js/vendor/STLLoader.js"></script>
+<script src="assets/js/vendor/GLTFExporter.js"></script>
+<script src="assets/js/vendor/OBJExporter.js"></script>
+<script src="assets/js/vendor/STLExporter.js"></script>
+<script src="assets/js/vendor/ShapeCSG.js"></script>
+<script src="assets/js/bloxd-block-colors.js"></script>
+<script src="assets/js/bloxd-block-catalog.js"></script>
+<script src="assets/js/bloxd-color-matcher.js"></script>
+<script src="assets/js/bloxd-texture-engine.js"></script>
+<script src="assets/js/bloxd-island-map.js"></script>
+<script src="assets/js/bloxd-procedural-advanced.js"></script>
+<script src="assets/js/bloxd-procedural-generators.js"></script>
+<script src="assets/js/bloxd-asset-catalog.js"></script>
+<script src="assets/js/bloxd-terrain-brush.js"></script>
+<script src="assets/js/bloxd-asset-scatter.js"></script>
+<script src="assets/js/bloxd-path-engine.js"></script>
+<script src="assets/js/bloxd-voxel-editor.js"></script>
+<script src="assets/js/bloxd-schematic.js"></script>
+<script src="assets/js/island-world-system.js"></script>
+<script src="assets/js/procedural-generators.js"></script>
+<script src="assets/js/app.js"></script>
+
+</body>
+</html>
