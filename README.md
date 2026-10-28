@@ -65,24 +65,54 @@ because the Bloxd asset library is loaded with `fetch`.
 
 ---
 
-## Bloxd schematic splitter (new)
+## Bloxd schematic splitter
 
 Open it with the **✂ Splitter** button in the top project bar. It is a
 full-screen workspace and leaves your 3D scene untouched.
 
-1. **Import** one or several `.bloxdschem` files (button or drag & drop).
-   Multi-file imports are merged using world offsets in the file names
-   (`house_x128_z-64.bloxdschem`) or packed side by side along X otherwise.
-2. **Detect & split** removes full ground platforms and finds separate objects.
-   Detection runs automatically after import and whenever a setting changes.
-3. **Inspect** the result in the 3D preview: drag to orbit, right-drag to pan,
-   wheel to zoom, click a block (or a row) to highlight one unit. Switch between
-   per-unit colors and real Bloxd block colors.
-4. **Export**:
+It has two modes, because a `.bloxdschem` can be "too much" in two different ways:
 
-   - the ⬇ button on a row downloads that single unit;
-   - **Download ZIP** writes one `.bloxdschem` per unit plus a Bloxd
-     `manifest.json` (prefix, start number, and ZIP name are configurable).
+### Chunk limiter — export builds above Bloxd's 160-chunk limit
+
+Bloxd rejects any schematic above **160 chunks** (32×32×32 blocks), roughly a
+5120-block-wide build at full height. This mode makes any size exportable:
+
+1. Import the big build (or several files: they merge by world offsets).
+2. Choose **Chunk limiter** in *Split mode*.
+3. The build is cut into the **fewest possible parts**, each at or below 160
+   chunks. Full height is kept when possible, so every part loads at the same Y.
+   Very tall builds are also stacked along Y.
+4. **Download ZIP** gives you the parts, a `manifest.json` with each part's
+   `x / y / z` offset, and a `GUIDE_IMPORTATION.txt` explaining where to place
+   each file in Bloxd.
+
+Part names carry the coordinate you load them at, using the same convention as
+the Bloxd Map Editor:
+
+```text
+greycastle_part001_x0_z0.bloxdschem
+greycastle_part002_x384_z0.bloxdschem
+greycastle_part003_x0_z384.bloxdschem
+greycastle_part004_x384_z384.bloxdschem
+```
+
+Drag those files back into the splitter (or the Bloxd Map Editor's Schem Placer)
+and they merge at the exact original position, because the offsets are read from
+the names. **The exported parts always pass the 160-chunk limit**, so a build of
+any size can be loaded in game, part by part.
+
+### Separate objects — split a map into buildings, trees and props
+
+1. **Import** one or several `.bloxdschem` files (button or drag & drop).
+2. **Detect & split** removes full ground platforms and finds separate objects.
+3. **Inspect** in the 3D preview: drag to orbit, right-drag to pan, wheel to
+   zoom, click a block (or a row) to highlight one unit.
+4. **Export** a single unit with ⬇, or **Download ZIP** for one file per unit plus
+   a `manifest.json`.
+
+Objects that are still above the chunk limit are flagged (**→ N parts**) and are
+automatically exported as `unit001_part001_x…_z…` files instead of an invalid
+schematic.
 
 ### Detection modes
 
@@ -101,21 +131,17 @@ blocks by default) are merged into the large unit they overlap, with a manual
 
 ### Limits worth knowing
 
-- Bloxd accepts at most **160 chunks** per schematic. A unit above that limit is
-  highlighted in the list so you can merge/split differently; exports are still
-  written (they simply cannot be imported into Bloxd).
+- **Max chunks per file** defaults to 160 and cannot be raised (that is Bloxd's
+  limit); lowering it is allowed.
 - Imports are capped at **3,000,000 blocks** to keep the browser responsive.
 - Platform removal is a heuristic: it deletes any ≥3 × 3 area that fills at least
   60 % of its own bounding box within the bottom four layers. Turn it off if a
-  low structure is being eaten. A schematic is never emptied by this step — a
-  flat prop such as a rock stays intact as one unit.
+  low structure is being eaten. A schematic is never emptied by this step.
 - Splitting operates on block data only. It does not read Minecraft `.schem` or
   `.litematic` files — convert them to `.bloxdschem` first.
 
-See [docs/SPLITTER.md](docs/SPLITTER.md) for the file format, algorithm details,
-and the programmatic API.
-
----
+See [docs/SPLITTER.md](docs/SPLITTER.md) for the file format, the splitting
+algorithm, and the programmatic API.
 
 ## Editor highlights
 
@@ -187,7 +213,9 @@ for test in tests/*.js; do node "$test" || exit 1; done
 
 `tests/test-bloxd-splitter.js` covers decoding, platform removal, both detection
 modes, fragment merging, unit encoding, multi-file merging, ZIP/CRC structure,
-and compatibility with the editor's own schematic decoder.
+and compatibility with the editor's own schematic decoder. It also covers the
+chunk limiter: tile planning under 160 chunks, splitting oversized builds,
+vertical splitting, part naming, and exact reassembly from the file names.
 
 ---
 

@@ -73,7 +73,8 @@ test('the splitter workspace markup is complete', () => {
   const required = [
     'schemSplitter', 'splitterCanvas', 'splitterFileInput', 'splitterImport', 'splitterDetect',
     'splitterDownload', 'splitterDownloadSide', 'splitterUnitList', 'splitterPrefix',
-    'splitterStart', 'splitterZipName', 'splitterMode', 'splitterClose', 'openSchemSplitter'
+    'splitterStart', 'splitterZipName', 'splitterMode', 'splitterClose', 'openSchemSplitter',
+    'splitterSplitMode', 'splitterMaxChunks', 'splitterObjectOptions', 'splitterModeNote'
   ]
   const missing = required.filter(id => !html.includes(`id="${id}"`))
   assert.deepStrictEqual(missing, [])
@@ -101,7 +102,8 @@ test('the splitter core exposes its public API', () => {
   for (const name of [
     'parseSchematic', 'VoxelSet', 'mergeSources', 'removePlatforms', 'detectUnits',
     'mergeSmallUnits', 'findParentUnit', 'mergeUnits', 'encodeUnit', 'encodeVoxels',
-    'createZip', 'unitColor', 'unitSize', 'unitChunkCount'
+    'createZip', 'unitColor', 'unitSize', 'unitChunkCount',
+    'planTiles', 'splitUnitIntoParts', 'splitVoxelsIntoParts', 'partFileName', 'buildPartsGuide'
   ]) {
     assert.strictEqual(typeof Splitter[name], 'function', name + ' must be exported')
   }

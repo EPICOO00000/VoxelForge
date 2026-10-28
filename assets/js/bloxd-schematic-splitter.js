@@ -27,6 +27,9 @@
   const AIR = 0
   const MAX_BLOCKS = 3000000
   const SMALL_UNIT_BLOCKS = 100
+  // Bloxd refuses a schematic above 160 chunks: bigger builds must be exported
+  // as several parts loaded next to each other.
+  const MAX_CHUNKS_PER_FILE = 160
   const GOLDEN_ANGLE = 137.508
 
   /* ------------------------------------------------------------------ *
@@ -390,8 +393,13 @@
     const text = String(filename || '')
     const xMatch = text.match(/_x_?(-?\d+)/i) || text.match(/-x_?(-?\d+)/i)
     const zMatch = text.match(/_z_?(-?\d+)/i) || text.match(/-z_?(-?\d+)/i)
+    const yMatch = text.match(/_y_?(-?\d+)/i)
     if (!xMatch || !zMatch) return null
-    return { x: parseInt(xMatch[1], 10), z: parseInt(zMatch[1], 10), y: 0 }
+    return {
+      x: parseInt(xMatch[1], 10),
+      y: yMatch ? parseInt(yMatch[1], 10) : 0,
+      z: parseInt(zMatch[1], 10)
+    }
   }
 
   /**
@@ -911,6 +919,210 @@
   }
 
   /* ------------------------------------------------------------------ *
+   * Chunk limiter — split a build into parts under Bloxd's 160-chunk cap
+   * ------------------------------------------------------------------ */
+
+  function clampChunks(value) {
+    const number = Math.floor(Number(value))
+    if (!Number.isFinite(number)) return MAX_CHUNKS_PER_FILE
+    return Math.max(1, Math.min(MAX_CHUNKS_PER_FILE, number))
+  }
+
+  /** Chunk counts of a size on Bloxd's 32^3 chunk grid. */
+  function chunkCounts(size) {
+    const nx = Math.max(1, Math.ceil(Math.max(1, size.x) / CHUNK))
+    const ny = Math.max(1, Math.ceil(Math.max(1, size.y) / CHUNK))
+    const nz = Math.max(1, Math.ceil(Math.max(1, size.z) / CHUNK))
+    return { x: nx, y: ny, z: nz, total: nx * ny * nz }
+  }
+
+  /**
+   * Best XZ tile shape (in chunks) for a chunk area budget.
+   * Minimises the number of parts, then prefers the largest tiles so part
+   * files stay chunky instead of becoming thin slices.
+   */
+  function bestXZTiling(nx, nz, area) {
+    let best = { x: 1, z: 1, parts: nx * nz, volume: 1 }
+    const limit = Math.min(nx, Math.max(1, area))
+    for (let tileX = 1; tileX <= limit; tileX++) {
+      const tileZ = Math.min(nz, Math.floor(area / tileX))
+      if (tileZ < 1) continue
+      const parts = Math.ceil(nx / tileX) * Math.ceil(nz / tileZ)
+      const volume = tileX * tileZ
+      if (parts < best.parts || (parts === best.parts && volume > best.volume)) {
+        best = { x: tileX, z: tileZ, parts, volume }
+      }
+    }
+    return best
+  }
+
+  /**
+   * Plan how a size is cut into parts that each stay under `maxChunks`.
+   * Full height is kept whenever possible (all parts can be loaded at the same
+   * Y in Bloxd); a build taller than the limit is also split vertically.
+   */
+  function planTiles(size, options) {
+    const settings = options || {}
+    const maxChunks = clampChunks(settings.maxChunks)
+    const counts = chunkCounts(size)
+    if (counts.total <= maxChunks) {
+      return {
+        maxChunks,
+        nx: counts.x,
+        ny: counts.y,
+        nz: counts.z,
+        tileX: counts.x,
+        tileY: counts.y,
+        tileZ: counts.z,
+        cols: 1,
+        rows: 1,
+        layers: 1,
+        parts: 1,
+        single: true,
+        totalChunks: counts.total,
+        splitY: false
+      }
+    }
+    const tileY = Math.min(counts.y, maxChunks)
+    const area = Math.max(1, Math.floor(maxChunks / tileY))
+    const best = bestXZTiling(counts.x, counts.z, area)
+    const cols = Math.ceil(counts.x / best.x)
+    const rows = Math.ceil(counts.z / best.z)
+    const layers = Math.ceil(counts.y / tileY)
+    return {
+      maxChunks,
+      nx: counts.x,
+      ny: counts.y,
+      nz: counts.z,
+      tileX: best.x,
+      tileY,
+      tileZ: best.z,
+      cols,
+      rows,
+      layers,
+      parts: cols * rows * layers,
+      single: false,
+      totalChunks: counts.total,
+      splitY: counts.y > maxChunks
+    }
+  }
+
+  /**
+   * Cut a unit into chunk-limited parts.
+   * Returns `{ plan, parts: [{ unit, offset, number, chunks }] }` where the
+   * offset is the part position in blocks relative to the unit origin and can
+   * be written into the file name (`_x…_z…[_y…]`) for exact reassembly.
+   */
+  function splitUnitIntoParts(unit, options) {
+    if (!unit || !unit.count) throw new Error('Nothing to split: the unit has no blocks.')
+    const size = unitSize(unit)
+    const plan = planTiles(size, options)
+    if (plan.single) {
+      return {
+        plan,
+        parts: [{ unit, offset: { x: 0, y: 0, z: 0 }, number: 1, chunks: unitChunkCount(unit) }]
+      }
+    }
+
+    const voxels = unit.voxels
+    const aabb = unit.aabb
+    const stepX = plan.tileX * CHUNK
+    const stepY = plan.tileY * CHUNK
+    const stepZ = plan.tileZ * CHUNK
+    const groups = new Map()
+
+    for (const key of unit.keys) {
+      const x = voxels.decode(key)
+      const ix = Math.floor((x[0] - aabb.minX) / stepX)
+      const iy = Math.floor((x[1] - aabb.minY) / stepY)
+      const iz = Math.floor((x[2] - aabb.minZ) / stepZ)
+      const groupKey = ix + ',' + iy + ',' + iz
+      let bucket = groups.get(groupKey)
+      if (!bucket) {
+        bucket = { ix, iy, iz, keys: [] }
+        groups.set(groupKey, bucket)
+      }
+      bucket.keys.push(key)
+    }
+
+    const ordered = Array.from(groups.values()).sort(
+      (a, b) => a.iy - b.iy || a.ix - b.ix || a.iz - b.iz
+    )
+
+    const parts = ordered.map((group, index) => {
+      const partAabb = EMPTY_AABB()
+      for (const key of group.keys) {
+        const point = voxels.decode(key)
+        growAabb(partAabb, point[0], point[1], point[2])
+      }
+      const partUnit = makeUnit(voxels, group.keys, partAabb)
+      return {
+        unit: partUnit,
+        offset: {
+          x: partAabb.minX - aabb.minX,
+          y: partAabb.minY - aabb.minY,
+          z: partAabb.minZ - aabb.minZ
+        },
+        number: index + 1,
+        chunks: unitChunkCount(partUnit)
+      }
+    })
+
+    return { plan, parts }
+  }
+
+  function splitVoxelsIntoParts(voxels, options) {
+    return splitUnitIntoParts(unitFromVoxels(voxels), options)
+  }
+
+  /** `base_part001_x0_z64.bloxdschem`, plus `_y…` when a part is stacked. */
+  function partFileName(base, number, offset) {
+    const clean = String(base || 'part').replace(/\.bloxdschem$/i, '')
+    const padded = String(Math.max(1, Math.floor(number || 1))).padStart(3, '0')
+    const x = Math.round((offset && offset.x) || 0)
+    const y = Math.round((offset && offset.y) || 0)
+    const z = Math.round((offset && offset.z) || 0)
+    let name = `${clean}_part${padded}_x${x}_z${z}`
+    if (y) name += `_y${y}`
+    return name + '.bloxdschem'
+  }
+
+  /** Plain-text placement guide shipped inside part ZIP archives. */
+  function buildPartsGuide(options) {
+    const info = options || {}
+    const parts = info.parts || []
+    const maxChunks = info.maxChunks || MAX_CHUNKS_PER_FILE
+    const lines = []
+    lines.push('VOXELFORGE - BLOXD SCHEMATIC PARTS')
+    lines.push('==================================')
+    if (info.name) lines.push('Build: ' + info.name)
+    if (info.blocks != null) lines.push('Blocks: ' + info.blocks)
+    if (info.size) lines.push('Size: ' + info.size.x + ' x ' + info.size.y + ' x ' + info.size.z + ' blocks')
+    if (info.chunks != null) lines.push('Chunks: ' + info.chunks + ' (Bloxd allows ' + maxChunks + ' per file)')
+    lines.push('Files: ' + parts.length + ' - every file stays at or below ' + maxChunks + ' chunks.')
+    lines.push('')
+    lines.push('EN - load every part at the coordinates below, in the same world:')
+    lines.push('  1. //schematic load <file>')
+    lines.push('  2. move the preview so its corner sits on x / z and its base on y')
+    lines.push('  3. place it, then repeat for every part.')
+    lines.push('')
+    parts.forEach(part => {
+      const offset = part.offset || { x: 0, y: 0, z: 0 }
+      const chunks = part.chunks ? '  (' + part.chunks + ' chunks)' : ''
+      lines.push('  - ' + (part.file || '') + '  ->  x=' + offset.x + '  y=' + offset.y + '  z=' + offset.z + chunks)
+    })
+    lines.push('')
+    lines.push('FR - charge chaque partie aux coordonnees ci-dessus, dans le meme monde :')
+    lines.push('  1. //schematic load <fichier>')
+    lines.push('  2. deplace l apercu pour que son coin soit en x / z et sa base en y')
+    lines.push('  3. pose-la, puis repete pour chaque partie.')
+    lines.push('')
+    lines.push('Loading every part at the same Y rebuilds the original build.')
+    lines.push("Charger toutes les parties au meme Y reconstruit le build d'origine.")
+    return lines.join('\n') + '\n'
+  }
+
+  /* ------------------------------------------------------------------ *
    * ZIP writer (store method, UTF-8 file names) — no external dependency
    * ------------------------------------------------------------------ */
 
@@ -1046,6 +1258,7 @@
     CHUNK_VOLUME,
     MAX_BLOCKS,
     SMALL_UNIT_BLOCKS,
+    MAX_CHUNKS_PER_FILE,
     VoxelSet,
     ByteWriter,
     parseSchematic,
@@ -1065,6 +1278,13 @@
     encodeUnit,
     encodeVoxels,
     encodeChunkRLE,
+    chunkCounts,
+    planTiles,
+    bestXZTiling,
+    splitUnitIntoParts,
+    splitVoxelsIntoParts,
+    partFileName,
+    buildPartsGuide,
     createZip,
     crc32,
     unitColor,

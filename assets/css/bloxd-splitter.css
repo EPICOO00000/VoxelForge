@@ -349,3 +349,10 @@
 @media (max-width: 1180px) {
   #openSchemSplitter span { display: none; }
 }
+
+/* Split-mode option groups */
+.ss-option-group { display: block; margin-top: 4px; }
+.ss-option-group.is-dimmed { opacity: 0.42; }
+.ss-option-group.is-dimmed .ss-field,
+.ss-option-group.is-dimmed .ss-check { pointer-events: none; }
+.ss-unit__text small b.ss-warn { color: #ffb072; }

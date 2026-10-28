@@ -289,6 +289,160 @@ test('schematic parsing tolerates an empty result and rejects empty exports', ()
   assert.throws(() => Splitter.encodeVoxels(empty, 'empty'), /no blocks/)
 })
 
+/* ------------------------------------------------------------------ *
+ * Chunk limiter (Bloxd's 160-chunk cap)
+ * ------------------------------------------------------------------ */
+
+/** Sparse build whose bounding box spans `size` blocks (few blocks, many chunks). */
+function sparseBuild(size) {
+  const blocks = []
+  const stepX = Math.max(1, Math.floor(size.x / 6))
+  const stepZ = Math.max(1, Math.floor(size.z / 6))
+  for (let x = 0; x < size.x; x += stepX) {
+    for (let z = 0; z < size.z; z += stepZ) {
+      for (let y = 0; y < size.y; y += Math.max(1, Math.floor(size.y / 3))) {
+        blocks.push([x, y, z, 28 + ((x + y + z) % 4)])
+      }
+    }
+  }
+  // Always keep the far corners so the bounds are exact.
+  blocks.push([size.x - 1, size.y - 1, size.z - 1, 128])
+  return voxelsFrom(blocks)
+}
+
+function blockIndex(voxels) {
+  const map = new Map()
+  voxels.blocks.forEach((id, key) => {
+    const [x, y, z] = voxels.decode(key)
+    map.set(x + ',' + y + ',' + z, id)
+  })
+  return map
+}
+
+test('planTiles leaves a small build in one file', () => {
+  const plan = Splitter.planTiles({ x: 60, y: 40, z: 60 })
+  assert.strictEqual(plan.single, true)
+  assert.strictEqual(plan.parts, 1)
+  assert.strictEqual(plan.totalChunks, 2 * 2 * 2)
+  assert.strictEqual(plan.maxChunks, 160)
+})
+
+test('planTiles keeps every tile under the chunk limit', () => {
+  for (const size of [
+    { x: 400, y: 20, z: 400 },
+    { x: 1024, y: 96, z: 320 },
+    { x: 96, y: 64, z: 2048 },
+    { x: 300, y: 300, z: 300 }
+  ]) {
+    const plan = Splitter.planTiles(size)
+    assert.ok(plan.tileX * plan.tileY * plan.tileZ <= plan.maxChunks, 'tile must fit: ' + JSON.stringify(plan))
+    assert.strictEqual(plan.cols, Math.ceil(plan.nx / plan.tileX))
+    assert.strictEqual(plan.rows, Math.ceil(plan.nz / plan.tileZ))
+    assert.strictEqual(plan.layers, Math.ceil(plan.ny / plan.tileY))
+  }
+})
+
+test('planTiles honours a custom limit and clamps it to 160', () => {
+  assert.strictEqual(Splitter.planTiles({ x: 64, y: 32, z: 64 }, { maxChunks: 4 }).maxChunks, 4)
+  assert.strictEqual(Splitter.planTiles({ x: 64, y: 32, z: 64 }, { maxChunks: 999 }).maxChunks, 160)
+  const plan = Splitter.planTiles({ x: 256, y: 32, z: 256 }, { maxChunks: 4 })
+  assert.ok(plan.tileX * plan.tileY * plan.tileZ <= 4)
+})
+
+test('splitUnitIntoParts cuts an oversized build into valid parts', () => {
+  const voxels = sparseBuild({ x: 400, y: 20, z: 400 })
+  const unit = Splitter.unitFromVoxels(voxels)
+  const total = Splitter.unitChunkCount(unit)
+  assert.ok(total > 160, 'fixture must exceed the Bloxd limit, got ' + total)
+  const { plan, parts } = Splitter.splitUnitIntoParts(unit, { maxChunks: 160 })
+  assert.strictEqual(plan.single, false)
+  assert.ok(parts.length > 1)
+  assert.strictEqual(parts.length, plan.parts, 'empty tiles are skipped only after planning')
+  let blocks = 0
+  for (const part of parts) {
+    assert.ok(part.chunks <= 160, 'part above limit: ' + part.chunks)
+    assert.strictEqual(part.chunks, Splitter.unitChunkCount(part.unit))
+    assert.ok(part.unit.count > 0)
+    assert.ok(part.offset.x >= 0 && part.offset.y >= 0 && part.offset.z >= 0)
+    blocks += part.unit.count
+  }
+  assert.strictEqual(blocks, unit.count, 'no block may be lost or duplicated')
+})
+
+test('parts reassemble into the original build through their file names', () => {
+  const voxels = sparseBuild({ x: 400, y: 20, z: 400 })
+  const unit = Splitter.unitFromVoxels(voxels)
+  const { parts } = Splitter.splitUnitIntoParts(unit, { maxChunks: 160 })
+  const sources = parts.map(part => ({
+    filename: Splitter.partFileName('build', part.number, part.offset),
+    schematic: Splitter.parseSchematic(Splitter.encodeUnit(part.unit, 'part'))
+  }))
+  const merged = Splitter.mergeSources(sources)
+  assert.strictEqual(merged.mode, 'filename')
+  assert.deepStrictEqual(blockIndex(merged.voxels), blockIndex(voxels))
+})
+
+test('a build taller than the chunk limit is split vertically too', () => {
+  const size = { x: 4, y: 32 * 163, z: 4 }
+  const voxels = sparseBuild(size)
+  const unit = Splitter.unitFromVoxels(voxels)
+  assert.ok(Splitter.chunkCounts(Splitter.unitSize(unit)).y > 160)
+  const { plan, parts } = Splitter.splitUnitIntoParts(unit, { maxChunks: 160 })
+  assert.strictEqual(plan.splitY, true)
+  assert.ok(parts.length >= 2)
+  for (const part of parts) assert.ok(part.chunks <= 160)
+  assert.ok(parts.some(part => part.offset.y > 0), 'stacked parts must carry a Y offset')
+  const names = parts.map(part => Splitter.partFileName('tall', part.number, part.offset))
+  assert.ok(names.some(name => /_y\d+/.test(name)), 'Y offset must appear in the file name')
+  for (const name of names) {
+    const parsed = Splitter.parseOffsetsFromName(name)
+    assert.ok(parsed, 'part name must parse: ' + name)
+  }
+  const sources = parts.map((part, index) => ({
+    filename: names[index],
+    schematic: Splitter.parseSchematic(Splitter.encodeUnit(part.unit, 'p'))
+  }))
+  assert.deepStrictEqual(blockIndex(Splitter.mergeSources(sources).voxels), blockIndex(voxels))
+})
+
+test('part names follow the upstream _x…_z… convention', () => {
+  assert.strictEqual(Splitter.partFileName('house', 1, { x: 0, y: 0, z: 0 }), 'house_part001_x0_z0.bloxdschem')
+  assert.strictEqual(Splitter.partFileName('house', 12, { x: 128, y: 0, z: -64 }), 'house_part012_x128_z-64.bloxdschem')
+  assert.strictEqual(Splitter.partFileName('house.bloxdschem', 3, { x: 32, y: 64, z: 96 }), 'house_part003_x32_z96_y64.bloxdschem')
+  assert.deepStrictEqual(Splitter.parseOffsetsFromName('house_part003_x32_z96_y64.bloxdschem'), { x: 32, y: 64, z: 96 })
+})
+
+test('a build at the limit stays a single file', () => {
+  const voxels = sparseBuild({ x: 32 * 10, y: 32, z: 32 * 16 })
+  const unit = Splitter.unitFromVoxels(voxels)
+  assert.strictEqual(Splitter.unitChunkCount(unit), 160)
+  const { plan, parts } = Splitter.splitUnitIntoParts(unit, { maxChunks: 160 })
+  assert.strictEqual(plan.single, true)
+  assert.strictEqual(parts.length, 1)
+  assert.strictEqual(parts[0].unit, unit)
+  assert.deepStrictEqual(parts[0].offset, { x: 0, y: 0, z: 0 })
+})
+
+test('the placement guide lists every part with its coordinates', () => {
+  const parts = [
+    { file: 'house_part001_x0_z0.bloxdschem', offset: { x: 0, y: 0, z: 0 }, chunks: 156 },
+    { file: 'house_part002_x384_z0.bloxdschem', offset: { x: 384, y: 0, z: 0 }, chunks: 13 }
+  ]
+  const guide = Splitter.buildPartsGuide({
+    name: 'house',
+    blocks: 12000,
+    size: { x: 400, y: 20, z: 400 },
+    chunks: 169,
+    maxChunks: 160,
+    parts
+  })
+  assert.ok(guide.includes('house_part001_x0_z0.bloxdschem'))
+  assert.ok(guide.includes('house_part002_x384_z0.bloxdschem'))
+  assert.ok(guide.includes('x=384'))
+  assert.ok(guide.includes('160'))
+  assert.ok(/FR/.test(guide), 'guide is bilingual')
+})
+
 test('parseOffsetsFromName understands Bloxd and Mapslicer names', () => {
   assert.deepStrictEqual(Splitter.parseOffsetsFromName('house_x128_z-64.bloxdschem'), { x: 128, z: -64, y: 0 })
   assert.deepStrictEqual(Splitter.parseOffsetsFromName('house-x0-z12.bloxdschem'), { x: 0, z: 12, y: 0 })

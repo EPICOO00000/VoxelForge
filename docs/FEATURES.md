@@ -148,6 +148,19 @@ Every main editor entry point has a dedicated block-native behavior in Bloxd mod
 
 The equivalent keyboard commands are adapted too: Q, X, G, R, S, B, E, M, N, P, D, Delete, Escape, 1–8, Ctrl/Cmd+C/X/V, and project undo/redo/save shortcuts all route to voxel behavior while Bloxd mode is active.
 
+### Exporting builds above the 160-chunk limit
+
+Bloxd refuses a schematic above 160 chunks. Two paths handle that:
+
+- **Inside the block editor**, `.bloxdschem` export still enforces the limit and
+  explains how many chunks the world needs.
+- **The schematic splitter** (top bar ✂ Splitter) has a **Chunk limiter** mode
+  that cuts any `.bloxdschem` — imported from Bloxd, the editor, or another
+  tool — into the fewest parts that each stay at or below 160 chunks. Parts keep
+  their position in the name (`map_part002_x336_z0.bloxdschem`), so a ZIP of
+  parts can be re-imported and merged back, or loaded part by part in game at
+  the coordinates listed in `GUIDE_IMPORTATION.txt`. See [SPLITTER.md](SPLITTER.md).
+
 ### Bloxd-mode projects and export
 
 Project save/load and crash recovery serialize the full block map and restore permanent Bloxd mode. `.bloxdschem` export writes the block map directly without voxelizing it again, preserving exact IDs. GLB keeps instanced block batches; OBJ and STL expand manageable worlds into ordinary cube meshes. The schematic encoder still enforces Bloxd's 160-chunk limit.
