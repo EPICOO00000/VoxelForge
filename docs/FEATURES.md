@@ -1,56 +1,11 @@
-# 3D Shape Modeler
+# Full feature reference
 
-A browser-based 3D shape modeler with an 82-form geometry library, built with Three.js.
+This is the detailed reference for every part of the VoxelForge website: the 3D
+modeler, the procedural studios, the permanent Bloxd block editor, and the
+project/export formats.
 
-## Start the website
-
-Python 3 is the only local requirement:
-
-```bash
-python init.py
-```
-
-The launcher serves the project at `http://localhost:8000` and opens it in your default browser.
-
-Useful options:
-
-```bash
-python init.py --no-browser
-python init.py --port 9000
-python init.py --host 127.0.0.1
-```
-
-If the requested port is occupied, the launcher automatically chooses a free port.
-
-## Structure
-
-```text
-3d-cube-modeler/
-├── init.py
-├── index.html
-├── assets/
-│   ├── css/                  # Main and Bloxd-specific styles
-│   ├── bloxd-assets/         # 922 Apache-2.0 .bloxdschem assets
-│   └── js/
-│       ├── app.js
-│       ├── bloxd-schematic.js
-│       ├── bloxd-voxel-editor.js
-│       ├── bloxd-block-colors.js
-│       ├── bloxd-block-catalog.js
-│       ├── bloxd-color-matcher.js
-│       ├── bloxd-texture-engine.js
-│       ├── bloxd-procedural-advanced.js
-│       ├── bloxd-procedural-generators.js
-│       ├── bloxd-asset-catalog.js
-│       ├── procedural-generators.js
-│       ├── island-world-system.js
-│       └── vendor/            # Three.js, loaders, exporters, CSG
-├── licenses/
-├── tests/
-├── THIRD_PARTY_NOTICES.md
-└── README.md
-```
-
+New to the project? Start with the [README](../README.md) for hosting on GitHub
+Pages and for the [schematic splitter](SPLITTER.md).
 
 ## Projects, history, and export
 

@@ -1,0 +1,64 @@
+# Optional GitHub Actions deployment template for VoxelForge.
+#
+# The repository is already ready to be served straight from a branch
+# (Settings -> Pages -> Deploy from a branch -> main -> / (root)); no workflow
+# is required for that.
+#
+# To use Actions instead:
+#   1. Copy this file to .github/workflows/deploy-pages.yml
+#      (the GitHub web editor can create workflow files directly).
+#   2. Settings -> Pages -> Build and deployment -> Source: GitHub Actions.
+#   3. Push to main, or run "Deploy website to GitHub Pages" from the Actions tab.
+#
+# This template is kept outside .github/workflows so it can be committed by
+# automation tokens that are not allowed to modify workflow files.
+
+name: Deploy website to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Stage static site
+        run: |
+          mkdir -p _site
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='_site' \
+            --exclude='tests' \
+            ./ _site/
+          echo "Staged files: $(find _site -type f | wc -l)"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

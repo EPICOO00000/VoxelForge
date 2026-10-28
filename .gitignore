@@ -1,0 +1,10 @@
+# Local tooling
+__pycache__/
+*.py[cod]
+node_modules/
+_site/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Start the 3D Cube Modeler development website."""
+"""Serve the VoxelForge website locally (optional; GitHub Pages needs no server)."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ def available_port(host: str, preferred_port: int) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Start the 3D Cube Modeler website")
+    parser = argparse.ArgumentParser(description="Serve the VoxelForge website locally")
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind (default: 0.0.0.0)")
     parser.add_argument("--port", type=int, default=8000, help="Preferred port (default: 8000)")
     parser.add_argument(
@@ -51,7 +51,7 @@ def main() -> None:
 
     browser_host = "localhost" if args.host in {"0.0.0.0", "::"} else args.host
     url = f"http://{browser_host}:{port}/"
-    print(f"3D Cube Modeler is running at {url}")
+    print(f"VoxelForge is running at {url}")
     print("Press Ctrl+C to stop the server.")
 
     if not args.no_browser:
