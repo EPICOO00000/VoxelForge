@@ -37,6 +37,7 @@
     work: null,
     units: null,
     selectedId: null,
+    splitMode: 'objects',
     colorMode: 'units',
     nextUnitId: 1,
     removedPlatforms: 0,
@@ -459,7 +460,8 @@
     view.needsRender = true
     const unitCount = state.units ? state.units.length : 0
     if (state.statusKind !== 'error') {
-      setStatus(`Preview ready · ${number(unitCount)} unit${unitCount === 1 ? '' : 's'} · ${number(job.total)} blocks · ${number(faceCount)} visible faces.`, 'ok')
+      const noun = state.splitMode === 'chunks' ? 'part' : 'unit'
+      setStatus(`Preview ready · ${number(unitCount)} ${noun}${unitCount === 1 ? '' : 's'} · ${number(job.total)} blocks · ${number(faceCount)} visible faces.`, 'ok')
     }
   }
 
@@ -591,8 +593,14 @@
       const merged = state.mergedFragments ? ` · ${number(state.mergedFragments)} fragments merged` : ''
       parts.push(`<span class="ss-file__note">${removed}${merged}</span>`)
     }
+    const chunks = Splitter.chunkCounts({ x: sizeX, y: sizeY, z: sizeZ })
+    state.planChunks = chunks.total
+    parts.push(`<span class="ss-file__note">${number(chunks.total)} chunk${chunks.total === 1 ? '' : 's'} on Bloxd's 32³ grid · limit ${maxChunks()} per file</span>`)
     if (state.units) {
-      parts.push(`<span class="ss-file__note">${number(state.units.length)} unit${state.units.length === 1 ? '' : 's'} ready to export</span>`)
+      const label = state.splitMode === 'chunks'
+        ? `${number(state.units.length)} part${state.units.length === 1 ? '' : 's'}`
+        : `${number(state.units.length)} unit${state.units.length === 1 ? '' : 's'}`
+      parts.push(`<span class="ss-file__note">${label} ready to export</span>`)
     }
     ui.fileInfo.innerHTML = parts.join('')
   }
@@ -630,6 +638,114 @@
   function smallThreshold() {
     const value = Math.floor(Number(ui.smallThreshold.value) || 100)
     return clamp(value, 1, 1000000)
+  }
+
+  function maxChunks() {
+    const limit = Splitter.MAX_CHUNKS_PER_FILE || 160
+    const value = Math.floor(Number(ui.maxChunks.value) || limit)
+    return clamp(value, 1, limit)
+  }
+
+  /**
+   * Parts a unit is exported as. A unit that fits returns null (one file);
+   * a unit above the chunk limit is cut into parts, cached per limit.
+   */
+  function unitExportParts(unit) {
+    const limit = maxChunks()
+    const cached = unit._exportParts
+    if (cached && cached.limit === limit) return cached.parts
+    const parts = Splitter.unitChunkCount(unit) > limit
+      ? Splitter.splitUnitIntoParts(unit, { maxChunks: limit }).parts
+      : null
+    unit._exportParts = { limit, parts }
+    return parts
+  }
+
+  function unitBaseName(unit, index) {
+    if (state.splitMode === 'chunks' || unit._part) return exportPrefix()
+    return exportNameFor(index)
+  }
+
+  /** One entry per file: `{ file, unit, offset, chunks }`. */
+  function unitExportEntries(unit, index) {
+    const base = unitBaseName(unit, index)
+    if (unit._part) {
+      return [{
+        file: Splitter.partFileName(base, unit._part.number, unit._part.offset),
+        unit,
+        offset: unit._part.offset,
+        chunks: Splitter.unitChunkCount(unit),
+        part: true
+      }]
+    }
+    const parts = unitExportParts(unit)
+    if (!parts) {
+      return [{
+        file: base + '.bloxdschem',
+        unit,
+        offset: { x: 0, y: 0, z: 0 },
+        chunks: Splitter.unitChunkCount(unit)
+      }]
+    }
+    return parts.map(part => ({
+      file: Splitter.partFileName(base, part.number, part.offset),
+      unit: part.unit,
+      offset: part.offset,
+      chunks: part.chunks,
+      part: true
+    }))
+  }
+
+  function fileStem(file) {
+    return String(file).replace(/\.bloxdschem$/i, '')
+  }
+
+  function encodeEntry(entry) {
+    return {
+      name: entry.file,
+      data: Splitter.encodeUnit(entry.unit, fileStem(entry.file))
+    }
+  }
+
+  function manifestEntry(entry) {
+    const record = { file: entry.file, name: fileStem(entry.file), type: 'auto', biome: 'classic' }
+    const offset = entry.offset
+    if (entry.part || (offset && (offset.x || offset.y || offset.z))) {
+      record.x = offset ? offset.x : 0
+      record.y = offset ? offset.y : 0
+      record.z = offset ? offset.z : 0
+    }
+    return record
+  }
+
+  function guideFor(entries, units) {
+    const extent = state.original ? state.original.extent : null
+    const blocks = units.reduce((total, unit) => total + unit.count, 0)
+    return Splitter.buildPartsGuide({
+      name: state.name || 'build',
+      blocks,
+      size: extent ? { x: extent.maxX + 1, y: extent.maxY + 1, z: extent.maxZ + 1 } : null,
+      chunks: state.planChunks || (extent ? Splitter.chunkCounts({ x: extent.maxX + 1, y: extent.maxY + 1, z: extent.maxZ + 1 }).total : null),
+      maxChunks: maxChunks(),
+      parts: entries
+    })
+  }
+
+  function applySplitMode() {
+    state.splitMode = ui.splitMode.value === 'chunks' ? 'chunks' : 'objects'
+    const objects = state.splitMode === 'objects'
+    if (ui.objectOptions) ui.objectOptions.classList.toggle('is-dimmed', !objects)
+    ;[ui.mode, ui.removePlatforms, ui.mergeSmall, ui.smallThreshold].forEach(control => {
+      if (control) control.disabled = !objects
+    })
+    if (ui.start) ui.start.disabled = !objects
+    if (ui.detect) ui.detect.textContent = objects ? '✂ Detect & split' : '✂ Split into parts'
+    if (ui.modeNote) {
+      ui.modeNote.textContent = objects
+        ? 'Objects mode finds every building, tree, or prop and exports one schematic per object. Oversized units are cut into parts automatically.'
+        : 'Chunk limiter keeps everything in one build and cuts it into parts of at most 160 chunks, the Bloxd limit. Part names carry the x / z offset used to line them up.'
+    }
+    updateFileInfo()
   }
 
   function updateButtons() {
@@ -708,11 +824,44 @@
 
   async function detectUnits(options) {
     if (!state.original || state.busy) return
-    const settings = options || {}
-    setBusy(true, 'Detecting separate units…')
-    setProgress(0.1, 'Detecting…')
+    setBusy(true, state.splitMode === 'chunks' ? 'Splitting into chunk-limited parts…' : 'Detecting separate units…')
+    setProgress(0.1, 'Working…')
     await nextFrame()
     try {
+      const limit = maxChunks()
+      if (state.splitMode === 'chunks') {
+        const work = state.original.clone()
+        const { plan, parts } = Splitter.splitVoxelsIntoParts(work, { maxChunks: limit })
+        const units = parts.map(part => {
+          part.unit._part = { offset: part.offset, number: part.number }
+          part.unit.id = state.nextUnitId++
+          return part.unit
+        })
+        state.work = work
+        state.units = units
+        state.plan = plan
+        state.removedPlatforms = 0
+        state.mergedFragments = 0
+        state.selectedId = null
+        setProgress(0.8, 'Building preview…')
+        await nextFrame()
+        updateUnitCount()
+        renderUnitList()
+        updateFileInfo()
+        if (plan.single) {
+          setStatus(`This build is ${number(plan.totalChunks)} chunk(s) and fits in one file (limit ${limit}).`, 'ok')
+        } else {
+          const counts = units.map(unit => Splitter.unitChunkCount(unit))
+          const biggest = counts.length ? Math.max(...counts) : 0
+          const where = plan.splitY
+            ? ' It is taller than the limit, so parts are also stacked vertically — load them at the Y shown in the list.'
+            : ' Load every part at the x / z offset shown in the list.'
+          setStatus(`${number(plan.totalChunks)} chunks → ${number(units.length)} part(s), largest ${number(biggest)} chunk(s).${where}`, 'ok')
+        }
+        rebuildPreview()
+        return
+      }
+
       const work = state.original.clone()
       let removed = 0
       if (ui.removePlatforms.checked) {
@@ -732,17 +881,21 @@
       })
       state.work = work
       state.units = units
+      state.plan = null
       state.removedPlatforms = removed
       state.mergedFragments = merged
       state.selectedId = null
       updateUnitCount()
       renderUnitList()
       updateFileInfo()
-      const oversized = units.filter(unit => Splitter.unitChunkCount(unit) > 160).length
+      const oversized = units.filter(unit => Splitter.unitChunkCount(unit) > limit)
+      const splitParts = oversized.reduce((total, unit) => {
+        return total + (unitExportParts(unit) || []).length
+      }, 0)
       if (!units.length) {
         setStatus('No units found. Try the other detection mode or disable platform removal.', 'error')
-      } else if (oversized) {
-        setStatus(`${number(units.length)} unit(s) detected, but ${oversized} exceed Bloxd's 160-chunk limit. Use stricter detection or merge/split them manually.`, 'error')
+      } else if (oversized.length) {
+        setStatus(`${number(units.length)} unit(s) detected · ${number(oversized.length)} exceed ${limit} chunks and will be exported as ${number(splitParts)} parts.`, 'ok')
       } else {
         setStatus(`${number(units.length)} unit(s) detected${removed ? ` · ${number(removed)} platform blocks removed` : ''}${merged ? ` · ${number(merged)} fragments merged` : ''}.`, 'ok')
       }
@@ -759,7 +912,8 @@
   function updateUnitCount() {
     if (!ui.unitCount) return
     const count = state.units ? state.units.length : 0
-    ui.unitCount.textContent = count ? `${number(count)} unit${count === 1 ? '' : 's'}` : '—'
+    const noun = state.splitMode === 'chunks' ? 'part' : 'unit'
+    ui.unitCount.textContent = count ? `${number(count)} ${noun}${count === 1 ? '' : 's'}` : '—'
   }
 
   function renderUnitList() {
@@ -770,17 +924,20 @@
       const note = document.createElement('p')
       note.className = 'ss-note'
       note.textContent = state.original
-        ? 'Press Detect & split to separate the objects in this schematic.'
-        : 'Import a schematic, then run detection.'
+        ? (state.splitMode === 'chunks'
+          ? 'Press Split into parts to cut this build under the chunk limit.'
+          : 'Press Detect & split to separate the objects in this schematic.')
+        : 'Import a schematic, then choose a split mode.'
       ui.unitList.append(note)
       updateUnitCount()
       return
     }
+    const limit = maxChunks()
     const fragment = document.createDocumentFragment()
     const threshold = smallThreshold()
-    const limit = Math.min(units.length, MAX_LISTED_UNITS)
-    const suggestMerges = units.length <= 400
-    for (let index = 0; index < limit; index++) {
+    const listed = Math.min(units.length, MAX_LISTED_UNITS)
+    const suggestMerges = state.splitMode === 'objects' && units.length <= 400
+    for (let index = 0; index < listed; index++) {
       const unit = units[index]
       const size = Splitter.unitSize(unit)
       const chunks = Splitter.unitChunkCount(unit)
@@ -788,30 +945,39 @@
       const row = document.createElement('div')
       row.className = 'ss-unit' + (unit.id === state.selectedId ? ' is-selected' : '')
       row.dataset.unitId = String(unit.id)
-      row.title = 'Click to highlight this unit'
-      const label = exportNameFor(index)
-      const mergeTarget = suggestMerges && unit.count < threshold
+      const partList = unit._part ? null : unitExportParts(unit)
+      const entries = unitExportEntries(unit, index)
+      const label = entries.length === 1
+        ? fileStem(entries[0].file)
+        : `${fileStem(entries[0].file).replace(/_part\d+_x-?\d+_z-?\d+.*$/, '')} · ${entries.length} parts`
+      row.title = entries.length === 1
+        ? `Export as ${entries[0].file}`
+        : `Above ${limit} chunks: exported as ${entries.length} parts at the offsets below`
+      const offsetNote = unit._part
+        ? ` · x${unit._part.offset.x} y${unit._part.offset.y} z${unit._part.offset.z}`
+        : ''
+      const mergeTarget = suggestMerges && !unit._part && unit.count < threshold
         ? Splitter.findParentUnit(units, index, threshold)
         : -1
       row.innerHTML =
         `<span class="ss-unit__swatch" style="background:${color.hex}"></span>` +
         `<div class="ss-unit__text"><strong>${escapeHtml(label)}</strong>` +
-        `<small>${number(unit.count)} blocks · ${size.x}×${size.y}×${size.z}` +
-        (chunks > 160 ? ` · <b class="ss-warn">${number(chunks)} chunks</b>` : '') +
-        `</small></div>` +
+        `<small>${number(unit.count)} blocks · ${size.x}×${size.y}×${size.z} · ${number(chunks)} chunk${chunks === 1 ? '' : 's'}` +
+        (chunks > limit ? ` · <b class="ss-warn">→ ${entries.length} parts</b>` : '') +
+        `${escapeHtml(offsetNote)}</small></div>` +
         `<div class="ss-unit__actions">` +
-        `<button type="button" data-action="download" title="Download this unit as .bloxdschem">⬇</button>` +
+        `<button type="button" data-action="download" title="Download ${escapeHtml(entries.length === 1 ? entries[0].file : entries.length + ' parts as a ZIP')}">⬇</button>` +
         (mergeTarget >= 0
           ? `<button type="button" data-action="merge" title="Merge into ${escapeHtml(exportNameFor(mergeTarget))}">🔗</button>`
           : '') +
-        `<button type="button" data-action="remove" title="Hide this unit from the export">×</button>` +
+        `<button type="button" data-action="remove" title="Remove from this export">×</button>` +
         `</div>`
       fragment.append(row)
     }
-    if (units.length > limit) {
+    if (units.length > listed) {
       const note = document.createElement('p')
       note.className = 'ss-note'
-      note.textContent = `Showing the first ${limit} of ${number(units.length)} units. The ZIP still contains every unit.`
+      note.textContent = `Showing the first ${listed} of ${number(units.length)} entries. The ZIP still contains everything.`
       fragment.append(note)
     }
     ui.unitList.append(fragment)
@@ -826,17 +992,30 @@
     if (!unit || !state.units) return
     const index = state.units.indexOf(unit)
     if (index < 0) return
-    const name = exportNameFor(index)
+    setBusy(true, 'Encoding…')
     try {
-      setBusy(true, `Encoding ${name}…`)
       await nextFrame()
-      const bytes = Splitter.encodeUnit(unit, name)
-      downloadBlob(new Blob([bytes], { type: 'application/octet-stream' }), `${name}.bloxdschem`)
-      setStatus(`Downloaded ${name}.bloxdschem · ${number(unit.count)} blocks.`, 'ok')
+      const entries = unitExportEntries(unit, index)
+      if (entries.length === 1) {
+        const encoded = encodeEntry(entries[0])
+        downloadBlob(new Blob([encoded.data], { type: 'application/octet-stream' }), encoded.name)
+        setStatus(`Downloaded ${encoded.name} · ${number(unit.count)} blocks · ${number(entries[0].chunks)} chunks.`, 'ok')
+        return
+      }
+      setProgress(0.5, `Packing ${entries.length} parts…`)
+      await nextFrame()
+      const files = entries.map(encodeEntry)
+      files.push({ name: 'manifest.json', data: new TextEncoder().encode(JSON.stringify({ schematics: entries.map(manifestEntry) }, null, 2)) })
+      files.push({ name: 'GUIDE_IMPORTATION.txt', data: new TextEncoder().encode(guideFor(entries, [unit])) })
+      const zip = Splitter.createZip(files)
+      const zipName = `${fileStem(entries[0].file).replace(/_part\d+_x-?\d+_z-?\d+.*$/, '')}-parts`
+      downloadBlob(new Blob([zip], { type: 'application/zip' }), `${zipName}.zip`)
+      setStatus(`This unit is above ${maxChunks()} chunks: downloaded ${entries.length} parts plus the placement guide.`, 'ok')
     } catch (error) {
       console.error(error)
-      setStatus(`Could not encode ${name}: ${error.message}`, 'error')
+      setStatus(`Could not encode this unit: ${error.message}`, 'error')
     } finally {
+      setProgress(null)
       setBusy(false)
     }
   }
@@ -846,28 +1025,35 @@
     const units = state.units.slice()
     setBusy(true, 'Encoding units…')
     const files = []
+    const entries = []
     try {
       for (let index = 0; index < units.length; index++) {
-        const name = exportNameFor(index)
         setProgress((index + 1) / (units.length + 1), `Encoding ${index + 1} / ${units.length}…`)
         if (index % 4 === 0) await nextFrame()
-        files.push({ name: `${name}.bloxdschem`, data: Splitter.encodeUnit(units[index], name) })
-      }
-      const manifest = {
-        schematics: units.map((unit, index) => {
-          const name = exportNameFor(index)
-          return { file: `${name}.bloxdschem`, name, type: 'auto', biome: 'classic' }
-        })
+        const unitEntries = unitExportEntries(units[index], index)
+        for (const entry of unitEntries) {
+          files.push(encodeEntry(entry))
+          entries.push(entry)
+        }
       }
       files.push({
         name: 'manifest.json',
-        data: new TextEncoder().encode(JSON.stringify(manifest, null, 2))
+        data: new TextEncoder().encode(JSON.stringify({ schematics: entries.map(manifestEntry) }, null, 2))
       })
+      const parts = entries.filter(entry => entry.part).length
+      if (parts) {
+        files.push({ name: 'GUIDE_IMPORTATION.txt', data: new TextEncoder().encode(guideFor(entries, units)) })
+      }
       setProgress(0.98, 'Building ZIP…')
       await nextFrame()
       const zip = Splitter.createZip(files)
       downloadBlob(new Blob([zip], { type: 'application/zip' }), `${exportZipName()}.zip`)
-      setStatus(`Downloaded ${units.length} unit(s) plus manifest.json (${(zip.length / 1024).toFixed(1)} KB).`, 'ok')
+      const biggest = entries.reduce((max, entry) => Math.max(max, entry.chunks), 0)
+      setStatus(
+        `Downloaded ${entries.length} file(s)${parts ? ` (${parts} parts)` : ''} · largest ${biggest} chunks · ` +
+        `all at or below ${maxChunks()} · ${(zip.length / 1024).toFixed(1)} KB.`,
+        'ok'
+      )
     } catch (error) {
       console.error(error)
       setStatus(`ZIP export failed: ${error.message}`, 'error')
@@ -889,6 +1075,7 @@
     const parent = state.units[parentIndex]
     const parentName = exportNameFor(parentIndex)
     Splitter.mergeUnits(state.units, index, parentIndex)
+    parent._exportParts = null
     state.selectedId = parent.id
     renderUnitList()
     updateFileInfo()
@@ -1001,6 +1188,14 @@
     ui.close.addEventListener('click', closeSplitter)
     ui.clear.addEventListener('click', clearAll)
     ui.openButton.addEventListener('click', openSplitter)
+    ui.splitMode.addEventListener('change', () => {
+      applySplitMode()
+      if (state.original && !state.busy) detectUnits({ automatic: true })
+    })
+    ui.maxChunks.addEventListener('change', () => {
+      ui.maxChunks.value = maxChunks()
+      if (state.original && !state.busy) detectUnits({ automatic: true })
+    })
     ui.mode.addEventListener('change', () => {
       if (state.original && !state.busy) detectUnits({ automatic: true })
     })
@@ -1094,6 +1289,10 @@
     ui.fileInfo = $('splitterFileInfo')
     ui.unitList = $('splitterUnitList')
     ui.unitCount = $('splitterUnitCount')
+    ui.splitMode = $('splitterSplitMode')
+    ui.maxChunks = $('splitterMaxChunks')
+    ui.objectOptions = $('splitterObjectOptions')
+    ui.modeNote = $('splitterModeNote')
     ui.mode = $('splitterMode')
     ui.removePlatforms = $('splitterRemovePlatforms')
     ui.mergeSmall = $('splitterMergeSmall')
@@ -1108,6 +1307,7 @@
   function init() {
     if (!cacheElements()) return
     wireEvents()
+    applySplitMode()
     updateFileInfo()
     renderUnitList()
     updateButtons()

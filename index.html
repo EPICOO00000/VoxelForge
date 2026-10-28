@@ -599,6 +599,7 @@
             <li>Import a <code>.bloxdschem</code> that contains several buildings, trees, or props.</li>
             <li><strong>Detect &amp; split</strong> finds every object. Full ground platforms are removed.</li>
             <li>Download a ZIP with one <code>.bloxdschem</code> per unit and a Bloxd <code>manifest.json</code>.</li>
+            <li><strong>Build bigger than Bloxd's 160-chunk limit?</strong> Pick <strong>Chunk limiter</strong>: the build is cut into numbered parts named <code>_x…_z…</code> that you load side by side.</li>
           </ol>
           <p>Drag &amp; drop files anywhere in this window. Minecraft <code>.schem</code> or <code>.litematic</code> files must be converted to <code>.bloxdschem</code> first.</p>
           <button class="ss-btn ss-btn--primary" id="splitterEmptyImport" type="button">Choose .bloxdschem files</button>
@@ -618,21 +619,31 @@
         <div class="ss-file" id="splitterFileInfo">Nothing loaded yet. Import one or more <code>.bloxdschem</code> files.</div>
       </section>
       <section class="ss-card">
-        <span class="field-title">Detection</span>
-        <label class="ss-field">Detection mode
-          <select id="splitterMode">
-            <option value="columns">Columns (X/Z, recommended)</option>
-            <option value="clusters">3D clusters (strict)</option>
+        <span class="field-title">Split mode</span>
+        <label class="ss-field">What should be split?
+          <select id="splitterSplitMode">
+            <option value="objects">Separate objects (detect units)</option>
+            <option value="chunks">Chunk limiter (≤160 chunks per file)</option>
           </select>
         </label>
-        <label class="ss-check"><input id="splitterRemovePlatforms" type="checkbox" checked> Remove full ground platforms</label>
-        <label class="ss-check"><input id="splitterMergeSmall" type="checkbox" checked> Merge small fragments</label>
+        <p class="ss-note" id="splitterModeNote">Objects mode finds every building, tree, or prop and exports one schematic per object.</p>
         <div class="ss-inline">
-          <label class="ss-field">Fragment size (blocks)<input id="splitterSmallThreshold" type="number" min="1" max="100000" step="1" value="100"></label>
+          <label class="ss-field">Max chunks / file<input id="splitterMaxChunks" type="number" min="1" max="160" step="1" value="160"></label>
           <label class="ss-field">Preview<select id="splitterColorMode"><option value="units">Unit colors</option><option value="blocks">Block colors</option></select></label>
         </div>
-        <button class="ss-btn ss-btn--wide" id="splitterRedetect" type="button" disabled>↻ Re-detect with these settings</button>
-        <p class="ss-note">Columns mode ignores height: everything standing on the same X/Z column belongs to one unit, so a trunk stays with its canopy. 3D clusters only groups blocks that touch.</p>
+        <div id="splitterObjectOptions" class="ss-option-group">
+          <label class="ss-field">Detection mode
+            <select id="splitterMode">
+              <option value="columns">Columns (X/Z, recommended)</option>
+              <option value="clusters">3D clusters (strict)</option>
+            </select>
+          </label>
+          <label class="ss-check"><input id="splitterRemovePlatforms" type="checkbox" checked> Remove full ground platforms</label>
+          <label class="ss-check"><input id="splitterMergeSmall" type="checkbox" checked> Merge small fragments</label>
+          <label class="ss-field">Fragment size (blocks)<input id="splitterSmallThreshold" type="number" min="1" max="100000" step="1" value="100"></label>
+          <p class="ss-note">Columns mode ignores height: everything standing on the same X/Z column belongs to one unit, so a trunk stays with its canopy. 3D clusters only groups blocks that touch.</p>
+        </div>
+        <button class="ss-btn ss-btn--wide" id="splitterRedetect" type="button" disabled>↻ Re-run with these settings</button>
       </section>
       <section class="ss-card ss-card--units">
         <div class="ss-card__head"><span class="field-title">Detected units</span><span class="ss-badge" id="splitterUnitCount">—</span></div>
@@ -646,7 +657,7 @@
         </div>
         <label class="ss-field">ZIP file name<input id="splitterZipName" type="text" value="bloxd-units" maxlength="64" autocomplete="off"></label>
         <button class="ss-btn ss-btn--success ss-btn--wide" id="splitterDownloadSide" type="button" disabled>⬇ Download all units (.zip)</button>
-        <p class="ss-note">Each unit becomes a real <code>.bloxdschem</code>. The archive also contains a <code>manifest.json</code> understood by Bloxd map tools. Units above Bloxd's 160-chunk limit are flagged in the list.</p>
+        <p class="ss-note">Each unit becomes a real <code>.bloxdschem</code>. Builds above Bloxd's 160-chunk limit are exported as numbered parts with their coordinates in the file name, plus a <code>GUIDE_IMPORTATION.txt</code> and a <code>manifest.json</code>.</p>
       </section>
     </aside>
   </div>
