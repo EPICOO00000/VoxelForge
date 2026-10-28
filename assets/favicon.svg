@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="VoxelForge">
+  <rect width="64" height="64" rx="12" fill="#0a0f0c"/>
+  <path d="M32 8 54 20v24L32 56 10 44V20z" fill="#0a1f12" stroke="#00d53a" stroke-width="2"/>
+  <path d="M32 8 54 20 32 32 10 20z" fill="#7cff9f"/>
+  <path d="M10 20 32 32v24L10 44z" fill="#00b832"/>
+  <path d="M54 20 32 32v24l22-12z" fill="#007a22"/>
+</svg>

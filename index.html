@@ -3,18 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Shape Modeler</title>
+  <title>VoxelForge — 3D Modeler &amp; Bloxd Schematic Studio</title>
+  <meta name="description" content="Browser-based 3D modeler, procedural world studio, permanent Bloxd block editor, and .bloxdschem splitter. Runs entirely client-side and is ready for GitHub Pages.">
+  <meta name="theme-color" content="#0a0f0c">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="assets/css/styles.css">
 <link rel="stylesheet" href="assets/css/bloxd-adapted-tools.css">
 <link rel="stylesheet" href="assets/css/bloxd-texture-studio.css">
 <link rel="stylesheet" href="assets/css/bloxd-procedural-advanced.css">
 <link rel="stylesheet" href="assets/css/bloxd-material-clarity.css">
 <link rel="stylesheet" href="assets/css/bloxd-world-tools.css">
+<link rel="stylesheet" href="assets/css/bloxd-splitter.css">
 </head>
 <body>
 
 <header class="project-bar" aria-label="Project controls">
-  <div class="project-bar__brand">Shape Studio</div>
+  <div class="project-bar__brand">VoxelForge</div>
   <div class="editor-mode-switch" id="editorModeSwitch" aria-label="Editor mode"><button class="is-active" type="button" data-editor-mode="3d">3D</button><button type="button" data-editor-mode="bloxd">BLOXD</button></div>
   <div class="project-bar__divider"></div>
   <button id="undoButton" type="button" title="Undo (Ctrl/Cmd+Z)" disabled>↶ <span>Undo</span></button>
@@ -32,6 +36,8 @@
       <button type="button" data-export-format="bloxdschem" role="menuitem"><strong>BLOXD</strong><small>Voxel schematic for Bloxd.io</small></button>
     </div>
   </div>
+  <div class="project-bar__divider"></div>
+  <button id="openSchemSplitter" type="button" title="Split a .bloxdschem into separate units">✂ <span>Splitter</span></button>
   <div class="project-status" id="projectStatus" role="status" aria-live="polite"></div>
 </header>
 
@@ -565,6 +571,87 @@
   </section>
 </div>
 
+<section class="schem-splitter is-hidden" id="schemSplitter" role="dialog" aria-modal="true" aria-labelledby="splitterTitle" aria-hidden="true" tabindex="-1">
+  <header class="ss-bar">
+    <div class="ss-brand">
+      <span class="panel-kicker">Bloxd tool</span>
+      <strong id="splitterTitle">Schematic Splitter</strong>
+      <small>One .bloxdschem in, many units out</small>
+    </div>
+    <div class="ss-bar__actions">
+      <button class="ss-btn ss-btn--primary" id="splitterImport" type="button">⇧ Import .bloxdschem</button>
+      <input class="visually-hidden" id="splitterFileInput" type="file" accept=".bloxdschem,application/octet-stream" multiple>
+      <button class="ss-btn" id="splitterDetect" type="button" disabled>✂ Detect &amp; split</button>
+      <button class="ss-btn ss-btn--success" id="splitterDownload" type="button" disabled>⬇ Download ZIP</button>
+      <button class="ss-btn" id="splitterFit" type="button" title="Fit view (F)" disabled>⌖ Fit</button>
+      <button class="ss-btn" id="splitterClear" type="button" title="Clear the loaded schematic">⌫ Clear</button>
+      <button class="ss-btn ss-btn--icon" id="splitterClose" type="button" title="Close (Esc)" aria-label="Close splitter">✕</button>
+    </div>
+  </header>
+  <div class="ss-body">
+    <div class="ss-stage">
+      <canvas id="splitterCanvas"></canvas>
+      <div class="ss-empty" id="splitterEmpty">
+        <div class="ss-empty__card">
+          <span class="panel-kicker">Splitter</span>
+          <h2>Split one schematic into many</h2>
+          <ol>
+            <li>Import a <code>.bloxdschem</code> that contains several buildings, trees, or props.</li>
+            <li><strong>Detect &amp; split</strong> finds every object. Full ground platforms are removed.</li>
+            <li>Download a ZIP with one <code>.bloxdschem</code> per unit and a Bloxd <code>manifest.json</code>.</li>
+          </ol>
+          <p>Drag &amp; drop files anywhere in this window. Minecraft <code>.schem</code> or <code>.litematic</code> files must be converted to <code>.bloxdschem</code> first.</p>
+          <button class="ss-btn ss-btn--primary" id="splitterEmptyImport" type="button">Choose .bloxdschem files</button>
+        </div>
+      </div>
+      <div class="ss-drop" id="splitterDrop"><strong>Drop to import</strong><span>.bloxdschem · one or many files</span></div>
+      <div class="ss-hint">Left-drag orbits · right-drag pans · wheel zooms · click a block to pick its unit · <kbd>F</kbd> fits · <kbd>Esc</kbd> closes</div>
+      <div class="ss-progress is-hidden" id="splitterProgress">
+        <div class="ss-progress__track"><span id="splitterProgressBar"></span></div>
+        <strong id="splitterProgressLabel">Working…</strong>
+      </div>
+      <div class="ss-status" id="splitterStatus" role="status" aria-live="polite">No schematic loaded.</div>
+    </div>
+    <aside class="ss-side" aria-label="Splitter options">
+      <section class="ss-card">
+        <span class="field-title">Loaded schematic</span>
+        <div class="ss-file" id="splitterFileInfo">Nothing loaded yet. Import one or more <code>.bloxdschem</code> files.</div>
+      </section>
+      <section class="ss-card">
+        <span class="field-title">Detection</span>
+        <label class="ss-field">Detection mode
+          <select id="splitterMode">
+            <option value="columns">Columns (X/Z, recommended)</option>
+            <option value="clusters">3D clusters (strict)</option>
+          </select>
+        </label>
+        <label class="ss-check"><input id="splitterRemovePlatforms" type="checkbox" checked> Remove full ground platforms</label>
+        <label class="ss-check"><input id="splitterMergeSmall" type="checkbox" checked> Merge small fragments</label>
+        <div class="ss-inline">
+          <label class="ss-field">Fragment size (blocks)<input id="splitterSmallThreshold" type="number" min="1" max="100000" step="1" value="100"></label>
+          <label class="ss-field">Preview<select id="splitterColorMode"><option value="units">Unit colors</option><option value="blocks">Block colors</option></select></label>
+        </div>
+        <button class="ss-btn ss-btn--wide" id="splitterRedetect" type="button" disabled>↻ Re-detect with these settings</button>
+        <p class="ss-note">Columns mode ignores height: everything standing on the same X/Z column belongs to one unit, so a trunk stays with its canopy. 3D clusters only groups blocks that touch.</p>
+      </section>
+      <section class="ss-card ss-card--units">
+        <div class="ss-card__head"><span class="field-title">Detected units</span><span class="ss-badge" id="splitterUnitCount">—</span></div>
+        <div class="ss-units" id="splitterUnitList"></div>
+      </section>
+      <section class="ss-card">
+        <span class="field-title">Export</span>
+        <div class="ss-inline">
+          <label class="ss-field">Prefix<input id="splitterPrefix" type="text" value="unit" maxlength="32" autocomplete="off"></label>
+          <label class="ss-field">Start number<input id="splitterStart" type="number" min="0" max="999999" step="1" value="1"></label>
+        </div>
+        <label class="ss-field">ZIP file name<input id="splitterZipName" type="text" value="bloxd-units" maxlength="64" autocomplete="off"></label>
+        <button class="ss-btn ss-btn--success ss-btn--wide" id="splitterDownloadSide" type="button" disabled>⬇ Download all units (.zip)</button>
+        <p class="ss-note">Each unit becomes a real <code>.bloxdschem</code>. The archive also contains a <code>manifest.json</code> understood by Bloxd map tools. Units above Bloxd's 160-chunk limit are flagged in the list.</p>
+      </section>
+    </aside>
+  </div>
+</section>
+
 <div class="array-dialog" id="arrayDialog" aria-hidden="true">
   <div class="array-dialog__backdrop" data-close-array></div>
   <section class="array-dialog__content" role="dialog" aria-modal="true" aria-labelledby="arrayTitle">
@@ -635,6 +722,8 @@
 <script src="assets/js/bloxd-path-engine.js"></script>
 <script src="assets/js/bloxd-voxel-editor.js"></script>
 <script src="assets/js/bloxd-schematic.js"></script>
+<script src="assets/js/bloxd-schematic-splitter.js"></script>
+<script src="assets/js/bloxd-splitter-ui.js"></script>
 <script src="assets/js/island-world-system.js"></script>
 <script src="assets/js/procedural-generators.js"></script>
 <script src="assets/js/app.js"></script>
