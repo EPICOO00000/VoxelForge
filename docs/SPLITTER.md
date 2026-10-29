@@ -18,6 +18,23 @@ Nothing is uploaded; files are decoded and re-encoded in the browser.
 
 ---
 
+## Where it runs
+
+The same core powers two entry points:
+
+- **Export 3D → BLOXD** in the editor: when the model needs more than the limit,
+  the dialog offers *Split automatically above the limit* and downloads a ZIP of
+  parts (plus guide and manifest) instead of refusing. This also covers exports
+  of a permanent Bloxd world.
+- **✂ Splitter workspace**: dedicated, full-screen, works on imported
+  `.bloxdschem` files with preview, selection, merging, and both modes.
+
+`BloxdSchemSplitter.encodeVoxelMapForBloxd(voxelMap, { name, maxChunks, allowSplit })`
+is the shared exporter used by the dialog; it returns `{ mode: 'single' }` or
+`{ mode: 'split', files, zip, parts, plan }` and never throws for size reasons
+(`allowSplit: false` returns `mode: 'single'` with `overLimit: true` so the caller
+can propose splitting).
+
 ## Workflow
 
 ```

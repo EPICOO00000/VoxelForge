@@ -65,83 +65,65 @@ because the Bloxd asset library is loaded with `fetch`.
 
 ---
 
-## Bloxd schematic splitter
+## Exporting to Bloxd — never blocked by the 160-chunk limit
 
-Open it with the **✂ Splitter** button in the top project bar. It is a
-full-screen workspace and leaves your 3D scene untouched.
+Bloxd refuses any schematic above **160 chunks** (32 × 32 × 32 blocks each).
+VoxelForge never just says "too big":
 
-It has two modes, because a `.bloxdschem` can be "too much" in two different ways:
+### Export 3D → BLOXD (the editor)
 
-### Chunk limiter — export builds above Bloxd's 160-chunk limit
-
-Bloxd rejects any schematic above **160 chunks** (32×32×32 blocks), roughly a
-5120-block-wide build at full height. This mode makes any size exportable:
-
-1. Import the big build (or several files: they merge by world offsets).
-2. Choose **Chunk limiter** in *Split mode*.
-3. The build is cut into the **fewest possible parts**, each at or below 160
-   chunks. Full height is kept when possible, so every part loads at the same Y.
-   Very tall builds are also stacked along Y.
-4. **Download ZIP** gives you the parts, a `manifest.json` with each part's
-   `x / y / z` offset, and a `GUIDE_IMPORTATION.txt` explaining where to place
-   each file in Bloxd.
-
-Part names carry the coordinate you load them at, using the same convention as
-the Bloxd Map Editor:
+1. **Export 3D → BLOXD** opens the conversion dialog.
+2. The estimate tells you the result, for example
+   *“512 chunks — above Bloxd's 160-chunk limit: exports as 4 parts (≤ 160 chunks each)”*.
+3. **Split automatically above the limit** is on by default. The button becomes
+   **Voxelize & split into 4 files**, and you get a ZIP containing:
 
 ```text
-greycastle_part001_x0_z0.bloxdschem
-greycastle_part002_x384_z0.bloxdschem
-greycastle_part003_x0_z384.bloxdschem
-greycastle_part004_x384_z384.bloxdschem
+My_Build_part001_x0_z0.bloxdschem
+My_Build_part002_x192_z0.bloxdschem
+…
+manifest.json            ← every part with its x / y / z position
+GUIDE_IMPORTATION.txt    ← where to place each part in Bloxd
 ```
 
-Drag those files back into the splitter (or the Bloxd Map Editor's Schem Placer)
-and they merge at the exact original position, because the offsets are read from
-the names. **The exported parts always pass the 160-chunk limit**, so a build of
-any size can be loaded in game, part by part.
+Every part is **at or below 160 chunks**, so each one loads in game. Place them
+at the coordinates from the guide (or drag the ZIP back into the splitter, which
+re-merges them from their `_x…_z…` names).
 
-### Separate objects — split a map into buildings, trees and props
+Optional **Max chunks per file** (1–160) lets you force smaller parts. If you
+untick the option the dialog tells you the planned part count instead of
+downloading a file Bloxd would reject — it never leaves you stuck.
 
-1. **Import** one or several `.bloxdschem` files (button or drag & drop).
-2. **Detect & split** removes full ground platforms and finds separate objects.
-3. **Inspect** in the 3D preview: drag to orbit, right-drag to pan, wheel to
-   zoom, click a block (or a row) to highlight one unit.
-4. **Export** a single unit with ⬇, or **Download ZIP** for one file per unit plus
-   a `manifest.json`.
+The same treatment applies when exporting a **permanent Bloxd world** from the
+block editor: above the limit you get the ZIP of parts instead of an error.
 
-Objects that are still above the chunk limit are flagged (**→ N parts**) and are
-automatically exported as `unit001_part001_x…_z…` files instead of an invalid
-schematic.
+### ✂ Splitter workspace (top bar)
 
-### Detection modes
+Open **✂ Splitter** for a dedicated workspace that leaves your scene untouched:
 
-- **Columns (X/Z, recommended)** — the upstream *Bloxd Map Editor* rule. Height
-  is ignored: every 8-connected `(x, z)` column group becomes one unit and all
-  blocks of those columns belong to it. A trunk therefore always stays with its
-  canopy, and a small block stacked above a roof stays with the building.
-- **3D clusters (strict)** — 26-connected block clusters. Good for maps where
-  objects are physically separated and floating pieces must become their own
-  units.
+- **Chunk limiter** — import any `.bloxdschem` (from Bloxd, from this editor, or
+  from another tool) and cut it into ≤160-chunk parts with the same naming,
+  guide, and manifest.
+- **Separate objects** — split a map containing several buildings, trees, or
+  props into one file per object.
 
-Two safety nets match the upstream tool: full ground platforms are removed from
-the bottom layers, and fragments smaller than a configurable threshold (100
-blocks by default) are merged into the large unit they overlap, with a manual
-🔗 merge button for the rest.
+Preview, selection, per-unit download, merge/remove, and ZIP export are shared by
+both modes. Detection can follow the upstream *Bloxd Map Editor* column rule
+(8-connected X/Z, height ignored, so trunks stay with their canopy) or strict 3D
+clusters, with automatic ground-platform removal and small-fragment merging.
 
 ### Limits worth knowing
 
-- **Max chunks per file** defaults to 160 and cannot be raised (that is Bloxd's
-  limit); lowering it is allowed.
-- Imports are capped at **3,000,000 blocks** to keep the browser responsive.
-- Platform removal is a heuristic: it deletes any ≥3 × 3 area that fills at least
-  60 % of its own bounding box within the bottom four layers. Turn it off if a
-  low structure is being eaten. A schematic is never emptied by this step.
-- Splitting operates on block data only. It does not read Minecraft `.schem` or
-  `.litematic` files — convert them to `.bloxdschem` first.
+- Splitting never changes block data: total blocks in the parts always equal the
+  original build.
+- Very tall builds (more than 160 chunks vertically) are also stacked on Y; the
+  part names then carry `_y…` and the guide lists the Y position.
+- Voxelization itself still stops at 2,000,000 blocks to protect the browser —
+  lower **Blocks per model unit** if you hit that.
+- The splitter reads `.bloxdschem` only; convert Minecraft `.schem` or
+  `.litematic` files first.
 
-See [docs/SPLITTER.md](docs/SPLITTER.md) for the file format, the splitting
-algorithm, and the programmatic API.
+See [docs/SPLITTER.md](docs/SPLITTER.md) for the format, algorithm, and API.
 
 ## Editor highlights
 

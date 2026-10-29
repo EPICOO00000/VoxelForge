@@ -74,7 +74,8 @@ test('the splitter workspace markup is complete', () => {
     'schemSplitter', 'splitterCanvas', 'splitterFileInput', 'splitterImport', 'splitterDetect',
     'splitterDownload', 'splitterDownloadSide', 'splitterUnitList', 'splitterPrefix',
     'splitterStart', 'splitterZipName', 'splitterMode', 'splitterClose', 'openSchemSplitter',
-    'splitterSplitMode', 'splitterMaxChunks', 'splitterObjectOptions', 'splitterModeNote'
+    'splitterSplitMode', 'splitterMaxChunks', 'splitterObjectOptions', 'splitterModeNote',
+    'bloxdAutoSplit', 'bloxdSplitSize', 'bloxdSplitOption'
   ]
   const missing = required.filter(id => !html.includes(`id="${id}"`))
   assert.deepStrictEqual(missing, [])
@@ -103,10 +104,20 @@ test('the splitter core exposes its public API', () => {
     'parseSchematic', 'VoxelSet', 'mergeSources', 'removePlatforms', 'detectUnits',
     'mergeSmallUnits', 'findParentUnit', 'mergeUnits', 'encodeUnit', 'encodeVoxels',
     'createZip', 'unitColor', 'unitSize', 'unitChunkCount',
-    'planTiles', 'splitUnitIntoParts', 'splitVoxelsIntoParts', 'partFileName', 'buildPartsGuide'
+    'planTiles', 'splitUnitIntoParts', 'splitVoxelsIntoParts', 'partFileName', 'buildPartsGuide',
+    'splitVoxelMap', 'encodeVoxelParts', 'encodeVoxelMapForBloxd'
   ]) {
     assert.strictEqual(typeof Splitter[name], 'function', name + ' must be exported')
   }
+})
+
+test('the editor exports Bloxd schematics through the shared splitter', () => {
+  const app = read('assets/js/app.js')
+  assert.ok(app.includes('encodeVoxelMapForBloxd'), 'app.js must use the shared exporter')
+  assert.ok(app.includes('bloxdAutoSplit'), 'the export dialog must offer automatic splitting')
+  assert.ok(!/Bloxd supports at most/.test(app), 'app.js must not hard-refuse oversized exports')
+  const schematic = read('assets/js/bloxd-schematic.js')
+  assert.ok(/Split automatically/.test(schematic), 'the legacy error must point at the split option')
 })
 
 test('the bundled Bloxd asset library is complete', () => {

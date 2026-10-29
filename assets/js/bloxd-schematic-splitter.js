@@ -233,6 +233,47 @@
       })
       return result
     }
+
+    /**
+     * Adopt a `x,y,z` -> blockId map such as the editor's voxel world.
+     * Coordinates may be negative (the 3D voxelizer works in world space), so
+     * the result is normalised to a zero-based box.
+     */
+    adoptStringMap(map) {
+      if (!map || !map.size) return new VoxelSet(0, 0, 0)
+      const count = map.size
+      const coords = new Int32Array(count * 3)
+      const ids = new Uint16Array(count)
+      let minX = Infinity, minY = Infinity, minZ = Infinity
+      let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity
+      let index = 0
+      map.forEach((id, key) => {
+        const [x, y, z] = key.split(',').map(Number)
+        if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+          throw new Error('Invalid voxel coordinate: ' + key)
+        }
+        coords[index] = x
+        coords[index + 1] = y
+        coords[index + 2] = z
+        ids[index / 3] = id
+        index += 3
+        if (x < minX) minX = x
+        if (y < minY) minY = y
+        if (z < minZ) minZ = z
+        if (x > maxX) maxX = x
+        if (y > maxY) maxY = y
+        if (z > maxZ) maxZ = z
+      })
+      const voxels = new VoxelSet(maxX - minX + 1, maxY - minY + 1, maxZ - minZ + 1)
+      const plane = voxels.sx * voxels.sy
+      for (let block = 0; block < count; block++) {
+        const x = coords[block * 3] - minX
+        const y = coords[block * 3 + 1] - minY
+        const z = coords[block * 3 + 2] - minZ
+        voxels.blocks.set(x + y * voxels.sx + z * plane, ids[block])
+      }
+      return voxels
+    }
   }
 
   /* ------------------------------------------------------------------ *
@@ -1122,6 +1163,116 @@
     return lines.join('\n') + '\n'
   }
 
+  /**
+   * Split a plain `x,y,z` -> blockId map (the editor's voxel world format)
+   * into chunk-limited parts, without building an intermediate VoxelSet first.
+   * Returns `{ voxels, plan, parts }` where every part is `{ unit, offset, number, chunks }`.
+   */
+  function splitVoxelMap(voxelMap, options) {
+    const voxels = new VoxelSet(0, 0, 0).adoptStringMap(voxelMap)
+    const result = splitVoxelsIntoParts(voxels, options)
+    return { voxels, plan: result.plan, parts: result.parts }
+  }
+
+  /** Encode every part as a real .bloxdschem file, ready for a ZIP. */
+  function encodeVoxelParts(parts, baseName) {
+    const base = String(baseName || 'build').replace(/\.bloxdschem$/i, '')
+    return (parts || []).map(part => {
+      const file = partFileName(base, part.number, part.offset)
+      return {
+        name: file,
+        data: encodeUnit(part.unit, file.replace(/\.bloxdschem$/i, '')),
+        offset: part.offset,
+        number: part.number,
+        chunks: part.chunks
+      }
+    })
+  }
+
+  /**
+   * Encode a `x,y,z` -> blockId map for Bloxd, splitting it automatically when
+   * it is above the chunk limit. Never refuses a build.
+   *
+   * Returns either
+   *   { mode: 'single', bytes, chunks, blockCount, size }
+   * or
+   *   { mode: 'split', files, zip, parts, plan, blockCount, largestPart, ... }
+   * The split result also embeds `manifest.json` and `GUIDE_IMPORTATION.txt`.
+   */
+  function encodeVoxelMapForBloxd(voxelMap, options) {
+    const settings = options || {}
+    const name = String(settings.name || 'Bloxd Build')
+    const maxChunks = clampChunks(settings.maxChunks)
+    const allowSplit = settings.allowSplit !== false
+    if (!voxelMap || !voxelMap.size) throw new Error('There are no visible blocks to export.')
+
+    const voxels = new VoxelSet(0, 0, 0).adoptStringMap(voxelMap)
+    const unit = unitFromVoxels(voxels)
+    const chunks = unitChunkCount(unit)
+    if (chunks <= maxChunks || !allowSplit) {
+      return {
+        mode: 'single',
+        bytes: encodeUnit(unit, name),
+        chunks,
+        blockCount: voxels.size,
+        size: unitSize(unit),
+        maxChunks,
+        overLimit: chunks > maxChunks
+      }
+    }
+
+    const { plan, parts } = splitUnitIntoParts(unit, { maxChunks })
+    const base = String(name)
+      .replace(/\.bloxdschem$/i, '')
+      .replace(/[^\w\-.]+/g, '_')
+      .replace(/^[_.-]+|[_.-]+$/g, '') || 'build'
+    const encoded = parts.map(part => ({
+      name: partFileName(base, part.number, part.offset),
+      data: encodeUnit(part.unit, (base + '_part' + String(part.number).padStart(3, '0'))),
+      offset: part.offset,
+      number: part.number,
+      chunks: part.chunks,
+      blocks: part.unit.count
+    }))
+    const manifest = {
+      schematics: encoded.map(part => ({
+        file: part.name,
+        name: part.name.replace(/\.bloxdschem$/i, ''),
+        type: 'auto',
+        biome: 'classic',
+        x: part.offset.x,
+        y: part.offset.y,
+        z: part.offset.z
+      }))
+    }
+    const files = encoded.map(part => ({ name: part.name, data: part.data }))
+    files.push({ name: 'manifest.json', data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)) })
+    files.push({
+      name: 'GUIDE_IMPORTATION.txt',
+      data: new TextEncoder().encode(buildPartsGuide({
+        name: base,
+        blocks: voxels.size,
+        size: unitSize(unit),
+        chunks: plan.totalChunks,
+        maxChunks,
+        parts: encoded
+      }))
+    })
+    return {
+      mode: 'split',
+      files,
+      zip: createZip(files),
+      parts: encoded.length,
+      plan,
+      blockCount: voxels.size,
+      size: unitSize(unit),
+      largestPart: encoded.reduce((max, part) => Math.max(max, part.chunks), 0),
+      splitOnY: plan.splitY,
+      maxChunks,
+      overLimit: true
+    }
+  }
+
   /* ------------------------------------------------------------------ *
    * ZIP writer (store method, UTF-8 file names) — no external dependency
    * ------------------------------------------------------------------ */
@@ -1285,6 +1436,9 @@
     splitVoxelsIntoParts,
     partFileName,
     buildPartsGuide,
+    splitVoxelMap,
+    encodeVoxelParts,
+    encodeVoxelMapForBloxd,
     createZip,
     crc32,
     unitColor,
