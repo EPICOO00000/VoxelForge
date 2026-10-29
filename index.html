@@ -561,9 +561,14 @@
       <label>Color dithering<input id="bloxdColorDither" type="checkbox" checked></label>
     </div>
     <div class="bloxd-export-estimate" id="bloxdEstimate">Scene estimate will appear here.</div>
+    <div class="bloxd-export-split" id="bloxdSplitOption">
+      <label class="bloxd-export-split__mode"><input id="bloxdAutoSplit" type="checkbox" checked> Split automatically above the limit</label>
+      <label class="bloxd-export-split__size">Max chunks per file<input id="bloxdSplitSize" type="number" min="1" max="160" step="1" value="160"></label>
+      <p id="bloxdSplitHelp">Over the limit, the export becomes a ZIP of parts named with their position (<code>name_part001_x0_z0.bloxdschem</code>) plus a placement guide. Nothing is ever refused.</p>
+    </div>
     <div class="bloxd-export-info">
       <span>Axis mapping: model X/Y/Z → Bloxd X/Y/Z</span>
-      <span>Limit: 160 chunks / 2,000,000 blocks</span>
+      <span>Bloxd limit: 160 chunks per file · larger builds are split</span>
     </div>
     <div class="bloxd-progress is-hidden" id="bloxdProgress"><div><span id="bloxdProgressBar"></span></div><strong id="bloxdProgressText">Preparing…</strong></div>
     <div class="bloxd-export-result is-hidden" id="bloxdExportResult"></div>

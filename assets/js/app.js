@@ -3377,9 +3377,21 @@
     const baseName = safeFileName(currentProjectName)
     if (format === 'bloxdschem') {
       try {
-        const result = BloxdSchematic.encodeSchematic(voxelWorld.toVoxelMap(), currentProjectName || 'Bloxd World')
-        downloadBlob(new Blob([result.bytes], { type: 'application/octet-stream' }), `${baseName}.bloxdschem`)
-        showProjectStatus(`Exported ${result.blockCount.toLocaleString()} Bloxd blocks`)
+        const result = encodeBloxdVoxels(voxelWorld.toVoxelMap(), currentProjectName || 'Bloxd World')
+        if (result.mode === 'single' && result.overLimit) {
+          const plan = BloxdSchemSplitter.planTiles(result.size, { maxChunks: bloxdSplitSize() })
+          showProjectStatus(
+            `This world needs ${result.totalChunks} chunks (limit ${bloxdSplitSize()}). ` +
+            `Open Export 3D → BLOXD and keep “Split automatically” ticked to get ${plan.parts} parts instead of one invalid file.`,
+            true
+          )
+        } else if (result.mode === 'split') {
+          downloadBlob(new Blob([result.zip], { type: 'application/zip' }), `${baseName}-parts.zip`)
+          showProjectStatus(`World is above ${bloxdSplitSize()} chunks: exported ${result.parts} schematic parts (largest ${result.largestPart} chunks) with a placement guide`)
+        } else {
+          downloadBlob(new Blob([result.bytes], { type: 'application/octet-stream' }), `${baseName}.bloxdschem`)
+          showProjectStatus(`Exported ${result.blockCount.toLocaleString()} Bloxd blocks`)
+        }
       } catch (error) { showProjectStatus(error.message, true) }
       return
     }
@@ -3409,17 +3421,68 @@
       if (mesh.geometry.boundingBox) bounds.union(mesh.geometry.boundingBox.clone().applyMatrix4(mesh.matrixWorld))
     }))
     const estimate = document.getElementById('bloxdEstimate')
+    const bloxdSplitOption = document.getElementById('bloxdSplitOption')
+    const generateBloxdButton = document.getElementById('generateBloxdSchem')
     if (bounds.isEmpty()) {
       estimate.textContent = 'No visible mesh geometry to convert.'
       estimate.classList.add('is-warning')
+      if (generateBloxdButton) generateBloxdButton.textContent = 'Voxelize & download'
       return
     }
     const size = bounds.getSize(new THREE.Vector3())
     const dimensions = [size.x, size.y, size.z].map(value => Math.max(1, Math.ceil(value * scale) + 2))
     const chunks = dimensions.map(value => Math.ceil(value / 32)).reduce((total, value) => total * value, 1)
     const volume = dimensions.reduce((total, value) => total * value, 1)
-    estimate.textContent = `Estimated bounds: ${dimensions.join(' × ')} blocks · up to ${volume.toLocaleString()} bounding-volume blocks · ${chunks} chunk${chunks === 1 ? '' : 's'}`
-    estimate.classList.toggle('is-warning', chunks > BloxdSchematic.MAX_CHUNKS || volume > 2000000)
+    const limit = bloxdSplitSize()
+    const plan = BloxdSchemSplitter ? BloxdSchemSplitter.planTiles({ x: dimensions[0], y: dimensions[1], z: dimensions[2] }, { maxChunks: limit }) : null
+    const splitEnabled = bloxdAutoSplitEnabled()
+    const tooBig = chunks > limit
+    let text = `Estimated bounds: ${dimensions.join(' × ')} blocks · up to ${volume.toLocaleString()} bounding-volume blocks · ${chunks} chunk${chunks === 1 ? '' : 's'}`
+    if (plan && tooBig && splitEnabled) {
+      text += ` — above Bloxd's ${limit}-chunk limit: exports as ${plan.parts} parts (≤ ${limit} chunks each)` + (plan.splitY ? ', stacked on Y' : '')
+    } else if (plan && tooBig) {
+      text += ` — above Bloxd's ${limit}-chunk limit: enable “Split automatically” (or lower the resolution)`
+    }
+    estimate.textContent = text
+    estimate.classList.toggle('is-warning', (tooBig && !splitEnabled) || volume > 2000000)
+    if (bloxdSplitOption) bloxdSplitOption.classList.toggle('is-off', !splitEnabled)
+    if (generateBloxdButton) {
+      generateBloxdButton.textContent = tooBig && splitEnabled && plan && plan.parts > 1
+        ? `Voxelize & split into ${plan.parts} files`
+        : 'Voxelize & download'
+    }
+  }
+
+  function bloxdSplitSize() {
+    const input = document.getElementById('bloxdSplitSize')
+    const raw = Math.floor(Number(input && input.value) || BloxdSchematic.MAX_CHUNKS)
+    const limit = Math.max(1, Math.min(BloxdSchematic.MAX_CHUNKS, raw))
+    if (input) input.value = limit
+    return limit
+  }
+
+  function bloxdAutoSplitEnabled() {
+    const input = document.getElementById('bloxdAutoSplit')
+    return !input || input.checked
+  }
+
+  /**
+   * Encode a voxel map for Bloxd. Delegates to the shared splitter core so an
+   * oversized build becomes a ZIP of parts instead of an error.
+   */
+  function encodeBloxdVoxels(voxels, name) {
+    if (window.BloxdSchemSplitter?.encodeVoxelMapForBloxd) {
+      const result = window.BloxdSchemSplitter.encodeVoxelMapForBloxd(voxels, {
+        name,
+        maxChunks: bloxdSplitSize(),
+        allowSplit: bloxdAutoSplitEnabled()
+      })
+      if (result.mode === 'single') return Object.assign({}, result, { totalChunks: result.chunks, actualSize: result.size })
+      return result
+    }
+    // Fallback for a stripped build: original behaviour.
+    const result = BloxdSchematic.encodeSchematic(voxels, name)
+    return Object.assign({ mode: 'single', totalChunks: result.totalChunks, actualSize: result.actualSize }, result)
   }
 
   function setBloxdExportOpen(open) {
@@ -3435,6 +3498,15 @@
   }
 
   document.getElementById('bloxdResolution').addEventListener('input', updateBloxdEstimate)
+  document.getElementById('bloxdAutoSplit').addEventListener('change', updateBloxdEstimate)
+  const bloxdSplitSizeInput = document.getElementById('bloxdSplitSize')
+  const syncBloxdSplitSize = () => {
+    bloxdSplitSize() // clamps to 1…160
+    updateBloxdEstimate()
+  }
+  bloxdSplitSizeInput.addEventListener('input', syncBloxdSplitSize)
+  bloxdSplitSizeInput.addEventListener('change', syncBloxdSplitSize)
+  bloxdSplitSizeInput.addEventListener('blur', syncBloxdSplitSize)
   BloxdSchematic.BLOCK_PALETTE.forEach((block) => {
     const option = document.createElement('option')
     option.value = block.id
@@ -3475,13 +3547,34 @@
       bloxdProgressBar.style.width = '90%'
       bloxdProgressText.textContent = 'Encoding Bloxd chunks and RLE…'
       const name = document.getElementById('bloxdSchemName').value.trim() || '3D Model'
-      const result = BloxdSchematic.encodeSchematic(voxels, name)
+      const result = encodeBloxdVoxels(voxels, name)
       bloxdProgressBar.style.width = '100%'
-      bloxdProgressText.textContent = 'Download ready'
-      downloadBlob(new Blob([result.bytes], { type: 'application/octet-stream' }), `${safeFileName(name)}.bloxdschem`)
+      bloxdProgressText.textContent = result.mode === 'split' ? 'Parts packed' : 'Download ready'
       bloxdExportResult.classList.remove('is-hidden', 'is-error')
-      bloxdExportResult.textContent = `${result.blockCount.toLocaleString()} blocks · ${result.actualSize.x}×${result.actualSize.y}×${result.actualSize.z} · ${result.totalChunks} chunk${result.totalChunks === 1 ? '' : 's'}`
-      showProjectStatus('Bloxd schematic downloaded')
+      bloxdExportResult.classList.remove('is-split')
+      if (result.mode === 'single' && result.overLimit) {
+        const plan = BloxdSchemSplitter.planTiles(result.size, { maxChunks: bloxdSplitSize() })
+        bloxdExportResult.classList.add('is-error')
+        bloxdExportResult.textContent =
+          `This model needs ${result.totalChunks} chunks, above the ${bloxdSplitSize()}-chunk Bloxd limit. ` +
+          `Tick “Split automatically above the limit” to export it as ${plan.parts} files instead — ` +
+          `nothing is lost, each part just loads next to the others.`
+        bloxdProgressText.textContent = 'Needs splitting'
+        showProjectStatus('This build is over the Bloxd limit: enable automatic splitting', true)
+      } else if (result.mode === 'split') {
+        downloadBlob(new Blob([result.zip], { type: 'application/zip' }), `${safeFileName(name)}-parts.zip`)
+        bloxdExportResult.classList.add('is-split')
+        bloxdExportResult.textContent =
+          `${result.blockCount.toLocaleString()} blocks were above Bloxd’s ${bloxdSplitSize()}-chunk limit, ` +
+          `so they were split into ${result.parts} files (largest ${result.largestPart} chunks` +
+          `${result.splitOnY ? ', stacked on Y' : ''}). ` +
+          `The ZIP also contains manifest.json and GUIDE_IMPORTATION.txt.`
+        showProjectStatus(`Split into ${result.parts} Bloxd schematics`)
+      } else {
+        downloadBlob(new Blob([result.bytes], { type: 'application/octet-stream' }), `${safeFileName(name)}.bloxdschem`)
+        bloxdExportResult.textContent = `${result.blockCount.toLocaleString()} blocks · ${result.actualSize.x}×${result.actualSize.y}×${result.actualSize.z} · ${result.totalChunks} chunk${result.totalChunks === 1 ? '' : 's'}`
+        showProjectStatus('Bloxd schematic downloaded')
+      }
     } catch (error) {
       console.error('Bloxd schematic export failed:', error)
       bloxdExportResult.classList.remove('is-hidden')

@@ -152,8 +152,11 @@ The equivalent keyboard commands are adapted too: Q, X, G, R, S, B, E, M, N, P, 
 
 Bloxd refuses a schematic above 160 chunks. Two paths handle that:
 
-- **Inside the block editor**, `.bloxdschem` export still enforces the limit and
-  explains how many chunks the world needs.
+- **The export dialogs** (Export 3D → BLOXD and the block editor's world export)
+  offer *Split automatically above the limit*, on by default. Above the limit the
+  download becomes a ZIP of parts, each at or below the limit, with a
+  `manifest.json` of positions and a `GUIDE_IMPORTATION.txt`. Turning the option
+  off shows the planned part count instead of refusing.
 - **The schematic splitter** (top bar ✂ Splitter) has a **Chunk limiter** mode
   that cuts any `.bloxdschem` — imported from Bloxd, the editor, or another
   tool — into the fewest parts that each stay at or below 160 chunks. Parts keep

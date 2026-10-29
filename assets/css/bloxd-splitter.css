@@ -356,3 +356,14 @@
 .ss-option-group.is-dimmed .ss-field,
 .ss-option-group.is-dimmed .ss-check { pointer-events: none; }
 .ss-unit__text small b.ss-warn { color: #ffb072; }
+
+/* Export dialog: automatic 160-chunk split offer */
+.bloxd-export-split { display: grid; gap: 7px; margin-top: 12px; padding: 10px; border: 1px solid #35543c; border-radius: 6px; background: #121a14; }
+.bloxd-export-split__mode { display: flex; align-items: center; gap: 8px; color: #b7d8c1; font-size: 11px; cursor: pointer; }
+.bloxd-export-split__mode input { width: 14px; height: 14px; accent-color: #00d53a; }
+.bloxd-export-split__size { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #8fb39a; font-size: 10px; }
+.bloxd-export-split__size input { width: 82px; padding: 5px 6px; color: #dbe9df; border: 1px solid #2d4634; border-radius: 4px; background: #0a100c; font: 11px monospace; }
+.bloxd-export-split p { margin: 0; color: #7f9b88; font-size: 9.5px; line-height: 1.5; }
+.bloxd-export-split.is-off { opacity: 0.72; border-color: #5c3a2a; background: #1a1310; }
+.bloxd-export-split code { padding: 1px 4px; border-radius: 3px; background: #16231a; color: #8fe6ad; font-size: 9px; }
+.bloxd-export-result.is-split { color: #9df2c1; border-color: #2f7a4d; background: #10201a; }

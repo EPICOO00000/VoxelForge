@@ -175,7 +175,11 @@
     }
     const totalChunks = chunkCount.x * chunkCount.y * chunkCount.z
     if (totalChunks > MAX_CHUNKS) {
-      throw new Error(`This model needs ${totalChunks} chunks; Bloxd supports at most ${MAX_CHUNKS} in one schematic. Lower the resolution.`)
+      throw new Error(
+        `This model needs ${totalChunks} chunks and Bloxd allows ${MAX_CHUNKS} per schematic. ` +
+        `Keep “Split automatically above the limit” ticked in the BLOXD export dialog to export it as several parts, ` +
+        `or lower the resolution.`
+      )
     }
 
     const chunks = new Map()

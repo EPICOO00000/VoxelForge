@@ -443,6 +443,90 @@ test('the placement guide lists every part with its coordinates', () => {
   assert.ok(/FR/.test(guide), 'guide is bilingual')
 })
 
+test('encodeVoxelMapForBloxd exports a small build as one file', () => {
+  const map = new Map([['0,0,0', 28], ['1,0,0', 28], ['2,0,0', 28]])
+  const result = Splitter.encodeVoxelMapForBloxd(map, { name: 'tiny', maxChunks: 160 })
+  assert.strictEqual(result.mode, 'single')
+  assert.strictEqual(result.blockCount, 3)
+  assert.strictEqual(result.chunks, 1)
+  assert.strictEqual(result.overLimit, false)
+  const parsed = Splitter.parseSchematic(result.bytes)
+  assert.strictEqual(parsed.voxels.size, 3)
+  assert.strictEqual(parsed.name, 'tiny')
+})
+
+test('encodeVoxelMapForBloxd splits an oversized build instead of failing', () => {
+  const map = new Map()
+  for (let x = 0; x < 400; x++) map.set(`${x},5,0`, 28)
+  for (let z = 1; z < 400; z++) map.set(`0,5,${z}`, 15)
+  const result = Splitter.encodeVoxelMapForBloxd(map, { name: 'My Castle', maxChunks: 160 })
+  assert.strictEqual(result.mode, 'split')
+  assert.ok(result.parts > 1)
+  assert.strictEqual(result.overLimit, true)
+  assert.ok(result.largestPart <= 160)
+  assert.strictEqual(result.blockCount, map.size)
+  assert.deepStrictEqual(result.files.map(file => file.name), [
+    'My_Castle_part001_x0_z0.bloxdschem',
+    'My_Castle_part002_x384_z0.bloxdschem',
+    'manifest.json',
+    'GUIDE_IMPORTATION.txt'
+  ])
+  // The archive must be readable and contain every part plus metadata.
+  const zipFiles = readZip(result.zip)
+  assert.strictEqual(zipFiles.length, 4)
+  for (const file of zipFiles.filter(entry => entry.name.endsWith('.bloxdschem'))) {
+    assert.strictEqual(file.crc, zlib.crc32(file.data))
+    const part = Splitter.parseSchematic(file.data)
+    assert.ok(part.voxels.size > 0)
+    const chunks = Splitter.chunkCounts({ x: part.voxels.sx, y: part.voxels.sy, z: part.voxels.sz }).total
+    assert.ok(chunks <= 160, `${file.name} needs ${chunks} chunks`)
+  }
+  const manifest = JSON.parse(new TextDecoder().decode(zipFiles.find(file => file.name === 'manifest.json').data))
+  assert.strictEqual(manifest.schematics.length, 2)
+  assert.strictEqual(manifest.schematics[1].x, 384)
+  // Every block survives the split.
+  const total = zipFiles.filter(file => file.name.endsWith('.bloxdschem'))
+    .reduce((sum, file) => sum + Splitter.parseSchematic(file.data).voxels.size, 0)
+  assert.strictEqual(total, map.size)
+})
+
+test('encodeVoxelMapForBloxd honours a disabled split with an explicit flag', () => {
+  const map = new Map()
+  for (let x = 0; x < 400; x++) map.set(`${x},5,0`, 28)
+  for (let z = 1; z < 400; z++) map.set(`0,5,${z}`, 15)
+  const result = Splitter.encodeVoxelMapForBloxd(map, { name: 'raw', allowSplit: false })
+  assert.strictEqual(result.mode, 'single')
+  assert.strictEqual(result.overLimit, true, 'the caller can propose splitting without losing the single file')
+  assert.ok(result.bytes.length > 0)
+})
+
+test('encodeVoxelMapForBloxd respects a custom chunk limit', () => {
+  const map = new Map()
+  for (let x = 0; x < 200; x++) map.set(`${x},0,0`, 28)
+  const result = Splitter.encodeVoxelMapForBloxd(map, { name: 'long', maxChunks: 3 })
+  assert.strictEqual(result.mode, 'split')
+  for (const file of result.files.filter(entry => entry.name.endsWith('.bloxdschem'))) {
+    const part = Splitter.parseSchematic(file.data)
+    assert.ok(Splitter.chunkCounts({ x: part.voxels.sx, y: part.voxels.sy, z: part.voxels.sz }).total <= 3)
+  }
+})
+
+test('adoptStringMap normalises negative voxel coordinates', () => {
+  // The 3D voxelizer produces world-space coordinates that can be negative.
+  const map = new Map([['-5,-3,-8', 28], ['-4,-3,-8', 15], ['0,0,0', 28]])
+  const voxels = new Splitter.VoxelSet(0, 0, 0).adoptStringMap(map)
+  assert.deepStrictEqual([voxels.sx, voxels.sy, voxels.sz], [6, 4, 9])
+  assert.strictEqual(voxels.size, 3)
+  assert.ok(voxels.has(0, 0, 0) && voxels.has(1, 0, 0) && voxels.has(5, 3, 8))
+  const result = Splitter.encodeVoxelMapForBloxd(map, { name: 'negative' })
+  assert.strictEqual(result.mode, 'single')
+  assert.strictEqual(Splitter.parseSchematic(result.bytes).voxels.size, 3)
+})
+
+test('encodeVoxelMapForBloxd rejects an empty build', () => {
+  assert.throws(() => Splitter.encodeVoxelMapForBloxd(new Map(), { name: 'x' }), /no visible blocks/i)
+})
+
 test('parseOffsetsFromName understands Bloxd and Mapslicer names', () => {
   assert.deepStrictEqual(Splitter.parseOffsetsFromName('house_x128_z-64.bloxdschem'), { x: 128, z: -64, y: 0 })
   assert.deepStrictEqual(Splitter.parseOffsetsFromName('house-x0-z12.bloxdschem'), { x: 0, z: 12, y: 0 })
