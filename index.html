@@ -88,25 +88,6 @@
     <button data-voxel-tool="asset" type="button" title="Place loaded Bloxd assets">⌂<small>Assets</small></button><button data-voxel-tool="terrain" type="button" title="Paint and sculpt terrain biomes">⛰<small>Terrain</small></button>
     <button data-voxel-tool="scatter" type="button" title="Procedurally scatter schematic assets">✣<small>Scatter</small></button><button data-voxel-tool="path" type="button" title="Draw editable roads, rivers, and structures">〰<small>Paths</small></button>
   </div>
-  <details class="voxel-live-forms" open>
-    <summary>Live 3D forms</summary>
-    <p>Keep shapes editable. Transform the cyan 3D preview; blocks rebuild when you release the gizmo. Positions are in blocks, rotations in degrees.</p>
-    <label><input id="voxelKeepForms" type="checkbox" checked> Keep added shapes as live forms</label>
-    <div><button id="voxelAddLiveForm" type="button">＋ Add form</button><button id="voxelEditBlocks" type="button">Edit blocks</button></div>
-    <label>Retained forms <select id="voxelLiveFormList" aria-label="Retained 3D forms"><option value="">No live forms</option></select></label>
-    <div id="voxelLiveFormControls" hidden>
-      <div><button type="button" data-live-transform="translate">Move (G)</button><button type="button" data-live-transform="rotate">Rotate (R)</button><button type="button" data-live-transform="scale">Scale (S)</button></div>
-      <div class="voxel-live-fields">
-        <span>Position</span><input id="livePosX" type="number" step="0.5" aria-label="Form position X"><input id="livePosY" type="number" step="0.5" aria-label="Form position Y"><input id="livePosZ" type="number" step="0.5" aria-label="Form position Z">
-        <span>Rotation</span><input id="liveRotX" type="number" step="1" aria-label="Form rotation X"><input id="liveRotY" type="number" step="1" aria-label="Form rotation Y"><input id="liveRotZ" type="number" step="1" aria-label="Form rotation Z">
-        <span>Scale</span><input id="liveScaleX" type="number" step="0.1" aria-label="Form scale X"><input id="liveScaleY" type="number" step="0.1" aria-label="Form scale Y"><input id="liveScaleZ" type="number" step="0.1" aria-label="Form scale Z">
-      </div>
-      <label>Fill <select id="voxelLiveFill"><option value="solid">Solid</option><option value="shell">Shell</option></select></label>
-      <div><button id="voxelLiveApply" type="button">Apply transform</button><button id="voxelLiveDuplicate" type="button">Duplicate</button><button id="voxelLiveDelete" type="button">Delete form</button></div>
-    </div>
-    <button id="voxelLiveBake" type="button">Bake all forms into blocks</button>
-    <p id="voxelLiveStatus" role="status">Add a shape to retain its 3D source alongside the blocks.</p>
-  </details>
   <div class="voxel-tool-hint" id="voxelToolHint">Click a block face to place the selected block.</div>
   <div class="voxel-block-picker">
     <label>Official Bloxd block<input id="voxelBlockSearch" type="search" placeholder="Search 2,090 blocks…"></label>
@@ -401,8 +382,8 @@
 <div class="voxel-convert-dialog" id="voxelConvertDialog" aria-hidden="true">
   <div class="voxel-convert-dialog__backdrop" data-close-voxel-convert></div>
   <section role="dialog" aria-modal="true" aria-labelledby="voxelConvertTitle">
-    <header><div><div class="panel-kicker">Permanent project conversion</div><h2 id="voxelConvertTitle">Enter Bloxd mode</h2><p>Convert your scene into editable Bloxd blocks. Keep its 3D source as a live form to transform and rebuild it later.</p></div><button data-close-voxel-convert type="button">×</button></header>
-    <div class="voxel-warning">Bloxd exports contain blocks only. Live 3D sources are saved in your VoxelForge project, not in the schematic.</div>
+    <header><div><div class="panel-kicker">Permanent project conversion</div><h2 id="voxelConvertTitle">Enter Bloxd mode</h2><p>This permanently replaces the smooth triangle scene with editable Bloxd blocks. Save a separate project first if you may need the original meshes.</p></div><button data-close-voxel-convert type="button">×</button></header>
+    <div class="voxel-warning">⚠ Original smooth geometry will be discarded after conversion. This cannot be reversed by switching back to 3D view.</div>
     <label>Global blocks per model unit<input id="voxelConvertResolution" type="number" min="0.5" max="12" step="0.5" value="2"></label>
     <label>Conversion style<select id="voxelConvertFill"><option value="shell">Hollow surface shell</option><option value="solid">Approximate solid fill</option></select></label>
     <label>Block assignment<select id="voxelConvertMaterials"><option value="colors">Match model material colors to Bloxd blocks</option><option value="single">Use selected block everywhere</option></select></label>
@@ -410,8 +391,7 @@
     <label>Color palette<select id="voxelConvertPalette"><option value="safe">Safe placeable blocks</option><option value="natural">Natural terrain</option><option value="concrete">Concrete only</option><option value="wool">Wool only</option><option value="glass">Glass and ice</option><option value="wood">Wood family</option><option value="colored">Colored building blocks</option></select></label>
     <label class="voxel-confirm"><input id="voxelTextureColors" type="checkbox" checked> Sample uploaded/imported textures when matching colors.</label>
     <label class="voxel-confirm"><input id="voxelColorDither" type="checkbox" checked> Dither between the two closest blocks for smoother gradients.</label>
-    <label class="voxel-confirm"><input id="voxelConvertKeepForms" type="checkbox" checked> Retain the converted scene as an editable live 3D form.</label>
-    <label class="voxel-confirm"><input id="voxelPermanentConfirm" type="checkbox"> I understand that Bloxd mode edits blocks; sources are retained only if enabled above.</label>
+    <label class="voxel-confirm"><input id="voxelPermanentConfirm" type="checkbox"> I understand that mesh geometry will be permanently replaced.</label>
     <div class="bloxd-progress is-hidden" id="voxelConvertProgress"><div><span id="voxelConvertProgressBar"></span></div><strong id="voxelConvertProgressText">Preparing…</strong></div>
     <footer><button data-close-voxel-convert type="button">Cancel</button><button class="primary-action" id="confirmVoxelConvert" type="button" disabled>Convert entire scene</button></footer>
   </section>
@@ -762,8 +742,6 @@
 <script src="assets/js/bloxd-splitter-ui.js"></script>
 <script src="assets/js/island-world-system.js"></script>
 <script src="assets/js/procedural-generators.js"></script>
-<script src="assets/js/model-clipboard.js"></script>
-<script src="assets/js/bloxd-live-forms.js"></script>
 <script src="assets/js/app.js"></script>
 
 </body>

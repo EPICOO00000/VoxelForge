@@ -24,19 +24,9 @@ Smooth and diagonal surfaces necessarily become stair-stepped blocks. Shell mode
 
 ## 3D and permanent Bloxd modes
 
-A compact **3D / BLOXD** switch is available in the project bar. Entering Bloxd mode voxelizes visible world-space triangle meshes and turns the project into an editable block world. The confirmation dialog offers global blocks-per-unit, shell/solid conversion, nearest-color matching, or a single selected Bloxd block. **Retain the converted scene as an editable live 3D form** is on by default; disabling it discards the smooth sources. Returning to 3D view changes only the workspace, not the project back into a mesh scene.
+A compact **3D / BLOXD** switch is available in the project bar. Entering Bloxd mode performs a true, permanent voxel conversion: visible world-space triangle meshes are voxelized, the original smooth scene is disposed, and the project becomes an editable block world. A confirmation dialog requires an explicit acknowledgement and offers global blocks-per-unit, shell/solid conversion, nearest-color matching, or a single selected Bloxd block. Returning to 3D view changes only the viewing workspace—the discarded smooth geometry does not return.
 
 Bloxd projects store real game block IDs, not arbitrary colors. The searchable palette includes the complete **2,090-name/ID catalog** researched from `Souls-equal/Bloxd_Map_Editor`; renderer colors use its shared approximation system. The active block, global grid resolution, selection, clipboard, voxel history, and complete block map are maintained separately from the former mesh scene.
-
-### Retained live 3D forms
-
-The **Live 3D forms** section keeps triangle sources in memory and project files alongside their generated blocks. New library shapes are retained by default, using the active official block and the global blocks-per-unit setting as their initial size. The converted scene can be retained as one source, keeping its conversion color/fill options.
-
-Select a form from the list and use **Move / Rotate / Scale**, **G / R / S**, or numeric XYZ fields. Positions are in block-world units and rotations are in degrees. The cyan wireframe previews the smooth geometry during dragging; release the gizmo or press **Apply transform** to calculate the stepped Bloxd result. Arbitrary rotation angles and nonuniform scale always rasterize the original source, so repeated transforms do not progressively damage the shape. Shell and approximate solid fill use the existing converter and its cavity limitations.
-
-**Duplicate** creates an independent descriptor, **Delete form** removes its generated footprint, and **Bake all forms into blocks** forgets the sources without changing the blocks. Undo/redo restores both forms and block data together. Removing/moving forms unwinds their previous footprints in reverse layer order, restoring underlying terrain and overlapping forms. Rebuilds are calculated before committing: limit failures or locked-block intersections leave the previous result intact. Calculation is limited to 35 million triangle/voxel checks per form and a 2,000,000-block resulting world.
-
-**Edit blocks** (or Escape) hides the preview and returns to block tools. Bake before manually modifying generated blocks: a later rebuild regenerates their entire footprint and can replace hand edits there. `.shapeproject` and autosave retain the sources; `.bloxdschem` contains only the final blocks. Imported schematics and already-baked blocks cannot recover an original smooth source.
 
 ### Palette Texture Studio
 
@@ -176,7 +166,7 @@ Bloxd refuses a schematic above 160 chunks. Two paths handle that:
 
 ### Bloxd-mode projects and export
 
-Project save/load and crash recovery serialize the full block map and retained live 3D sources and restore Bloxd mode. `.bloxdschem` export writes the block map directly without voxelizing it again, preserving exact IDs. GLB keeps instanced block batches; OBJ and STL expand manageable worlds into ordinary cube meshes. The schematic encoder still enforces Bloxd's 160-chunk limit.
+Project save/load and crash recovery serialize the full block map and restore permanent Bloxd mode. `.bloxdschem` export writes the block map directly without voxelizing it again, preserving exact IDs. GLB keeps instanced block batches; OBJ and STL expand manageable worlds into ordinary cube meshes. The schematic encoder still enforces Bloxd's 160-chunk limit.
 
 ## Procedural generation studio
 
