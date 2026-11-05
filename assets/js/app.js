@@ -40,8 +40,6 @@
       if (activeTool === 'edit') {
         editDragState = null
         commitHistory(`Edit ${componentMode}`)
-      } else if (liveFormPreview && transformGizmo.object === liveFormPreview) {
-        applyLiveFormPreview()
       } else {
         commitHistory('Transform shape')
       }
@@ -49,8 +47,7 @@
   })
 
   transformGizmo.addEventListener('objectChange', () => {
-    if (liveFormPreview && transformGizmo.object === liveFormPreview) syncLiveFormFields()
-    else if (activeTool === 'edit') applyEditDrag()
+    if (activeTool === 'edit') applyEditDrag()
   })
 
   transformGizmo.addEventListener('change', () => {
@@ -532,26 +529,15 @@
     commitHistory(targets.length > 1 ? 'Delete objects' : 'Delete shape')
   }
 
-  let modelClipboard = []
-  function copyModelSelection() {
-    modelClipboard = ModelClipboard.capture(cubes, selectedShapes.size ? selectedShapes : (selectedCube ? [selectedCube] : []))
-    showProjectStatus(`Copied ${modelClipboard.length} objects`)
-  }
-
-  function pasteModelSelection(entries = modelClipboard) {
-    if (!entries.length) return
-    const result = ModelClipboard.paste(entries, THREE,
-      (object, name) => new ModelShape('imported', object.position.clone(), object, name),
-      scene, new THREE.Vector3(1.5, 1.5, 1.5))
-    cubes.push(...result.copies)
-    result.roots.forEach((shape, index) => selectCube(shape, index > 0))
-    updateCubeCount()
-    commitHistory('Paste objects')
-  }
-
   function duplicateCube() {
-    const entries = ModelClipboard.capture(cubes, selectedShapes.size ? selectedShapes : (selectedCube ? [selectedCube] : []))
-    pasteModelSelection(entries)
+    if (!selectedCube) return
+    const sourceParent = selectedCube.mesh.parent
+    const newCube = selectedCube.clone()
+    if (sourceParent && sourceParent !== scene) sourceParent.add(newCube.mesh)
+    cubes.push(newCube)
+    selectCube(newCube)
+    updateCubeCount()
+    commitHistory('Duplicate shape')
   }
 
   function clearAll() {
@@ -622,7 +608,6 @@
   }
 
   function onCanvasClick(event) {
-    if (editorMode === 'bloxd') return
     const hit = raycastShapes(event)
     if (hit) selectCube(hit.modelShape, event.ctrlKey || event.metaKey)
     else deselectCube()
@@ -831,7 +816,6 @@
       historyRestoring = true
       try {
         disposeCurrentSceneObjects()
-        clearLiveFormPreview()
         if (voxelWorld) voxelWorld.dispose()
         voxelWorld = createVoxelWorld()
         voxelWorld.restore(snapshot.voxelWorld)
@@ -840,7 +824,7 @@
       } finally { historyRestoring = false }
       return
     }
-    if (voxelWorld) { clearLiveFormPreview(); voxelWorld.dispose(); voxelWorld = null }
+    if (voxelWorld) { voxelWorld.dispose(); voxelWorld = null }
     setEditorMode('3d', true)
     const loader = new THREE.ObjectLoader()
     const parsedEntries = snapshot.objects.map((entry) => ({
@@ -920,7 +904,6 @@
   }
 
   function undoScene() {
-    if (liveFormsBusy) return showProjectStatus('Wait for the form rebuild to finish.')
     if (editorMode === 'bloxd' && voxelWorld) { voxelWorld.undo(); syncVoxelUI(); return }
     if (sceneHistoryIndex <= 0) return
     sceneHistoryIndex--
@@ -930,7 +913,6 @@
   }
 
   function redoScene() {
-    if (liveFormsBusy) return showProjectStatus('Wait for the form rebuild to finish.')
     if (editorMode === 'bloxd' && voxelWorld) { voxelWorld.redo(); syncVoxelUI(); return }
     if (sceneHistoryIndex >= sceneHistory.length - 1) return
     sceneHistoryIndex++
@@ -2018,12 +2000,7 @@
     if (!card) return
     if (voxelWorld) {
       const temporary = new ModelShape(card.dataset.shapeId, new THREE.Vector3(0, .5, 0))
-      try {
-        if (document.getElementById('voxelKeepForms').checked) {
-          deselectCube()
-          await runLiveFormEdit(engine => engine.add(temporary.mesh, temporary.shapeName, voxelWorld.globalBlocksPerUnit))
-        } else await voxelizeObjectIntoWorld(temporary.mesh, `Add ${temporary.shapeName} blocks`, { materialMode: 'single' })
-      }
+      try { await voxelizeObjectIntoWorld(temporary.mesh, `Add ${temporary.shapeName} blocks`, { materialMode: 'single' }) }
       finally { temporary.remove() }
       closeShapePicker(); return
     }
@@ -2104,7 +2081,7 @@
   }
 
   function groupSelectedObjects() {
-    const items = [...selectedShapes].filter(shape => ![...selectedShapes].some(other => other !== shape && isModelAncestor(other, shape)))
+    const items = [...selectedShapes]
     if (items.length < 2) {
       showProjectStatus('Select at least two objects to group.', true)
       return
@@ -3042,108 +3019,10 @@
     if (!world.texturePalette.length) world.texturePalette = BloxdTextureEngine.generateNearRgb(`#${BloxdBlockColors.hex(world.currentBlockId).toString(16).padStart(6,'0')}`, 5, 'safe', 55).map(item=>({id:item.id,weight:item.weight}))
     world.onChange = (label) => {
       syncVoxelUI()
-      if (label !== 'render' && label !== 'selection') renderHierarchy()
       if (label !== 'render' && label !== 'selection') showProjectStatus(label)
     }
     return world
   }
-
-  let activeLiveFormId = null
-  let liveFormPreview = null
-  let liveFormsBusy = false
-  const liveFormList = document.getElementById('voxelLiveFormList')
-  const liveFormStatus = document.getElementById('voxelLiveStatus')
-  function liveFormEngine() { return new BloxdLiveForms.LiveForms(voxelWorld) }
-  function clearLiveFormPreview() {
-    if (!liveFormPreview) return
-    if (transformGizmo.object === liveFormPreview) transformGizmo.detach()
-    scene.remove(liveFormPreview)
-    BloxdLiveForms.dispose(liveFormPreview)
-    liveFormPreview = null
-  }
-  function syncLiveFormFields() {
-    if (!liveFormPreview) return
-    const groups = { Pos: liveFormPreview.position.toArray(), Rot: [liveFormPreview.rotation.x, liveFormPreview.rotation.y, liveFormPreview.rotation.z].map(n => n * 180 / Math.PI), Scale: liveFormPreview.scale.toArray() }
-    Object.entries(groups).forEach(([prefix, values]) => ['X','Y','Z'].forEach((axis, index) => {
-      document.getElementById(`live${prefix}${axis}`).value = Number(values[index].toFixed(4))
-    }))
-  }
-  function renderLiveFormsUI() {
-    if (!voxelWorld) { clearLiveFormPreview(); return }
-    const forms = voxelWorld.liveForms
-    if (!forms.some(form => form.id === activeLiveFormId)) activeLiveFormId = null
-    liveFormList.replaceChildren(new Option('Select a live form…', ''), ...forms.map(form => new Option(form.name, form.id)))
-    liveFormList.value = activeLiveFormId || ''
-    document.getElementById('voxelLiveFormControls').hidden = !activeLiveFormId
-    if (isTransforming || liveFormsBusy) return
-    clearLiveFormPreview()
-    const form = forms.find(form => form.id === activeLiveFormId)
-    if (!form || editorMode !== 'bloxd') return
-    liveFormPreview = BloxdLiveForms.sourceObject(THREE, form)
-    liveFormPreview.userData.liveFormId = form.id
-    liveFormPreview.traverse(child => {
-      if (!child.isMesh) return
-      const old = Array.isArray(child.material) ? child.material : [child.material]
-      old.filter(Boolean).forEach(material => material.dispose())
-      child.material = new THREE.MeshBasicMaterial({ color: 0x57e5ff, transparent: true, opacity: .28, depthTest: false, side: THREE.DoubleSide, wireframe: true })
-      child.renderOrder = 1000
-    })
-    scene.add(liveFormPreview)
-    transformGizmo.setMode(['translate','rotate','scale'].includes(activeTool) ? activeTool : 'translate')
-    transformGizmo.attach(liveFormPreview)
-    document.getElementById('voxelLiveFill').value = form.fillMode || 'solid'
-    syncLiveFormFields()
-  }
-  async function runLiveFormEdit(operation) {
-    if (liveFormsBusy || !voxelWorld) return
-    liveFormsBusy = true
-    transformGizmo.enabled = false
-    const world = voxelWorld
-    liveFormStatus.textContent = 'Calculating blocks from the 3D source…'
-    document.querySelectorAll('.voxel-live-forms button').forEach(button => { button.disabled = true })
-    try {
-      const selectedId = await operation(liveFormEngine())
-      if (world !== voxelWorld) return
-      if (typeof selectedId === 'string') activeLiveFormId = selectedId
-      liveFormStatus.textContent = 'Blocks rebuilt. The original 3D form is still editable.'
-      scheduleAutosave('Live 3D forms')
-    } catch (error) {
-      liveFormStatus.textContent = `Form edit failed: ${error.message}`
-      showProjectStatus(error.message, true)
-    } finally {
-      liveFormsBusy = false
-      transformGizmo.enabled = true
-      document.querySelectorAll('.voxel-live-forms button').forEach(button => { button.disabled = false })
-      renderLiveFormsUI()
-      syncVoxelUI()
-    }
-  }
-  function applyLiveFormPreview() {
-    if (!liveFormPreview || !activeLiveFormId) return
-    const patch = { position: liveFormPreview.position.toArray(), rotation: [liveFormPreview.rotation.x, liveFormPreview.rotation.y, liveFormPreview.rotation.z], scale: liveFormPreview.scale.toArray(), fillMode: document.getElementById('voxelLiveFill').value }
-    runLiveFormEdit(engine => engine.transform(activeLiveFormId, patch))
-  }
-  function setLiveFormTool(tool) {
-    if (!liveFormPreview || liveFormsBusy) return
-    activeTool = tool
-    transformGizmo.setMode(tool)
-    transformGizmo.attach(liveFormPreview)
-  }
-  document.getElementById('voxelAddLiveForm').addEventListener('click', () => { document.getElementById('voxelKeepForms').checked = true; showShapePicker() })
-  document.getElementById('voxelEditBlocks').addEventListener('click', () => { activeLiveFormId = null; renderLiveFormsUI() })
-  liveFormList.addEventListener('change', () => { deselectCube(); activeLiveFormId = liveFormList.value || null; renderLiveFormsUI() })
-  document.querySelectorAll('[data-live-transform]').forEach(button => button.addEventListener('click', () => setLiveFormTool(button.dataset.liveTransform)))
-  document.getElementById('voxelLiveApply').addEventListener('click', () => {
-    if (!liveFormPreview) return
-    const values = prefix => ['X','Y','Z'].map(axis => Number(document.getElementById(`live${prefix}${axis}`).value))
-    liveFormPreview.position.fromArray(values('Pos'))
-    liveFormPreview.rotation.set(...values('Rot').map(n => n * Math.PI / 180))
-    liveFormPreview.scale.fromArray(values('Scale'))
-    applyLiveFormPreview()
-  })
-  document.getElementById('voxelLiveDuplicate').addEventListener('click', () => runLiveFormEdit(engine => engine.duplicate(activeLiveFormId)))
-  document.getElementById('voxelLiveDelete').addEventListener('click', () => runLiveFormEdit(engine => engine.remove(activeLiveFormId)))
-  document.getElementById('voxelLiveBake').addEventListener('click', () => runLiveFormEdit(engine => engine.bakeAll()))
 
   async function voxelizeObjectIntoWorld(object, label = 'Add voxelized object', options = {}) {
     if (!voxelWorld) throw new Error('Bloxd mode is not active.')
@@ -3203,7 +3082,7 @@
     }
     document.getElementById('voxelGlobalResolution').value = voxelWorld.globalBlocksPerUnit
     document.getElementById('voxelChunkSize').value = String(voxelWorld.chunkSize)
-    restoreVoxelTextureControls();renderVoxelTexturePalette();renderVoxelPathList();renderLiveFormsUI()
+    restoreVoxelTextureControls();renderVoxelTexturePalette();renderVoxelPathList()
     undoButton.disabled = voxelWorld.historyIndex <= 0
     redoButton.disabled = voxelWorld.historyIndex >= voxelWorld.history.length - 1
   }
@@ -3213,7 +3092,6 @@
       if (!restoring) setVoxelConvertOpen(true)
       return
     }
-    clearLiveFormPreview()
     editorMode = mode
     document.body.classList.toggle('is-bloxd-mode', mode === 'bloxd')
     const bloxdLabels={select:'Select block',boxselect:'Select block box',translate:'Move selected blocks',rotate:'Rotate selected blocks 90°',scale:'Discrete block scale',sculpt:'Spherical block sculpt',edit:'Block vertex / edge / face edit',measure:'Measure blocks',add:'Add shape as blocks',duplicate:'Copy selection for paste',color:'Choose official block',delete:'Delete selected blocks',array:'Block array',procedural:'Generate as blocks',hierarchy:'Block groups & types',materials:'Official block materials & texture sampling',modifiers:'Block modifiers & booleans',statistics:'Block-world statistics',advanced:'Advanced block inspector'}
@@ -3273,22 +3151,10 @@
         progressBar.style.width = `${Math.round(value * 100)}%`
         progressText.textContent = `Voxelizing permanent scene… ${Math.round(value * 100)}%`
       })
-      let retainedForm = null
-      if (document.getElementById('voxelConvertKeepForms').checked) {
-        retainedForm = BloxdLiveForms.createForm(THREE, exportGroup, 'Converted scene', blocksPerUnit, Number(document.getElementById('voxelConvertBlock').value) || 28)
-        Object.assign(retainedForm, {
-          fillMode: document.getElementById('voxelConvertFill').value,
-          materialMode: document.getElementById('voxelConvertMaterials').value,
-          paletteFamily: document.getElementById('voxelConvertPalette').value,
-          textureColors: document.getElementById('voxelTextureColors').checked,
-          dither: document.getElementById('voxelColorDither').checked,
-          generated: [...voxels], previous: [...voxels.keys()].map(key => [key, 0])
-        })
-      }
       historyRestoring = true
       try { disposeCurrentSceneObjects() } finally { historyRestoring = false }
       if (voxelWorld) voxelWorld.dispose()
-      voxelWorld = createVoxelWorld(); voxelWorld.globalBlocksPerUnit = blocksPerUnit; voxelWorld.load(voxels); voxelWorld.liveForms = retainedForm ? [retainedForm] : []; voxelWorld.commit('Converted scene to Bloxd blocks', true)
+      voxelWorld = createVoxelWorld(); voxelWorld.globalBlocksPerUnit = blocksPerUnit; voxelWorld.load(voxels); voxelWorld.commit('Converted scene to Bloxd blocks', true)
       document.getElementById('voxelGlobalResolution').value = blocksPerUnit
       setVoxelConvertOpen(false); setEditorMode('bloxd'); updateCubeCount()
       sceneHistory = []; sceneHistoryIndex = -1; commitHistory('Permanent Bloxd conversion')
@@ -3309,9 +3175,6 @@
     'measure-blocks': 'Click two blocks for distance or three blocks for an angle.', texture: 'Paint the composed block palette through the selected procedural noise.', asset: 'Move the ghost with the cursor, use the wheel for height, and click to place.', terrain: 'Drag over terrain with the selected terrain or biome operation.', scatter: 'Configure biome rules, spacing, and weighted assets, then scatter.', path: 'Click terrain to add control points; Shift-click moves the nearest point.', 'smooth-brush': 'Click a block to smooth its local voxel surface.', 'flatten-brush': 'Click a block to flatten the brush area.'
   }
   function setVoxelTool(tool) {
-    activeLiveFormId = null
-    clearLiveFormPreview()
-    renderLiveFormsUI()
     activeVoxelTool = tool; voxelToolAnchor = null
     document.querySelectorAll('[data-voxel-tool]').forEach(button => button.classList.toggle('is-active', button.dataset.voxelTool === tool))
     voxelToolHint.textContent = voxelToolHints[tool] || 'Edit blocks.'
@@ -3429,7 +3292,7 @@
   document.querySelectorAll('[data-voxel-advanced-mirror]').forEach(button=>button.addEventListener('click',()=>{if(voxelWorld){voxelWorld.mirrorSelection(button.dataset.voxelAdvancedMirror);syncVoxelUI()}}))
   document.getElementById('voxelAdvancedDuplicate').addEventListener('click',()=>{if(voxelWorld){voxelWorld.copySelection();setVoxelTool('paste');showProjectStatus(`Copied ${voxelWorld.clipboard.length.toLocaleString()} blocks; click to paste`)}})
   document.getElementById('voxelAdvancedDelete').addEventListener('click',()=>{if(voxelWorld){voxelWorld.deleteSelection();syncVoxelUI()}})
-  document.getElementById('voxelAdvancedClearWorld').addEventListener('click',()=>{if(voxelWorld&&confirm('Delete every block in this world?')){voxelWorld.blocks.clear();voxelWorld.selection.clear();voxelWorld.liveForms=[];voxelWorld.groups=[];voxelWorld.render();voxelWorld.commit('Clear block world');syncVoxelUI()}})
+  document.getElementById('voxelAdvancedClearWorld').addEventListener('click',()=>{if(voxelWorld&&confirm('Delete every block in this world?')){voxelWorld.blocks.clear();voxelWorld.selection.clear();voxelWorld.render();voxelWorld.commit('Clear block world');syncVoxelUI()}})
 
   function blockIdFromMaterialColor(){const hex=parseInt(document.getElementById('voxelMaterialColor').value.slice(1),16);return BloxdColorMatcher.nearest(hex,{family:'safe'}).best.id}
   document.getElementById('voxelMaterialUse').addEventListener('click',()=>{if(!voxelWorld)return;voxelWorld.currentBlockId=blockIdFromMaterialColor();renderVoxelBlockOptions(BLOXD_ID_TO_NAME[voxelWorld.currentBlockId]);updateVoxelBlockSwatch();showProjectStatus(`Using ${blockLabel(voxelWorld.currentBlockId)}`)})
@@ -3451,7 +3314,7 @@
   }
 
   function handleVoxelPointer(event) {
-    if (editorMode !== 'bloxd' || !voxelWorld || liveFormsBusy || liveFormPreview || event.button !== 0 || event.target !== renderer.domElement) return
+    if (editorMode !== 'bloxd' || !voxelWorld || event.button !== 0 || event.target !== renderer.domElement) return
     const hit = voxelPointerPosition(event); if (!hit) return
     event.preventDefault(); event.stopImmediatePropagation()
     const existing = hit.position
@@ -3499,7 +3362,7 @@
   let lastVoxelBrushKey = null
   renderer.domElement.addEventListener('pointerdown', event=>{lastVoxelBrushKey=null;handleVoxelPointer(event)}, true)
   renderer.domElement.addEventListener('pointermove', event=>{
-    if(editorMode!=='bloxd'||!voxelWorld||liveFormPreview||liveFormsBusy)return
+    if(editorMode!=='bloxd'||!voxelWorld)return
     if(activeVoxelTool==='asset'&&event.buttons===0){const hit=voxelPointerPosition(event);if(hit){const target=hit.position.map((value,index)=>value+Math.round(hit.normal.getComponent(index)));updateVoxelAssetGhost(target)}return}
     if(activeVoxelTool==='terrain'&&event.buttons===1){const hit=voxelPointerPosition(event);if(hit)applyVoxelTerrainBrush(hit.position);return}
     if(event.buttons!==1||!['place','remove','paint','texture','smooth-brush','flatten-brush'].includes(activeVoxelTool))return
@@ -3845,8 +3708,6 @@
     if (button.dataset.tool) {
       if (editorMode === 'bloxd' && voxelWorld) {
         const tool=button.dataset.tool
-        if (liveFormPreview && ['translate','rotate','scale'].includes(tool)) { setLiveFormTool(tool); return }
-        activeLiveFormId = null; clearLiveFormPreview()
         const mapping = { select:'single-select', boxselect:'select', translate:'move', rotate:'rotate-select', scale:'select', sculpt:'place', edit:'paint', measure:'measure-blocks' }
         if(tool==='rotate'&&voxelWorld.selection.size){voxelWorld.rotateSelection('y');showProjectStatus('Rotated selected blocks 90° around Y')}
         setVoxelTool(mapping[tool] || 'place')
@@ -3864,8 +3725,7 @@
         showShapePicker()
         break
       case 'duplicate':
-        if (editorMode === 'bloxd' && liveFormPreview) runLiveFormEdit(engine => engine.duplicate(activeLiveFormId))
-        else if (editorMode === 'bloxd' && voxelWorld) { voxelWorld.copySelection(); setVoxelTool('paste') }
+        if (editorMode === 'bloxd' && voxelWorld) { voxelWorld.copySelection(); setVoxelTool('paste') }
         else duplicateCube()
         break
       case 'color':
@@ -3875,8 +3735,7 @@
         toolbarColor.click()
         break
       case 'delete':
-        if (editorMode === 'bloxd' && liveFormPreview) runLiveFormEdit(engine => engine.remove(activeLiveFormId))
-        else if (editorMode === 'bloxd' && voxelWorld) voxelWorld.deleteSelection()
+        if (editorMode === 'bloxd' && voxelWorld) voxelWorld.deleteSelection()
         else deleteCube()
         break
       case 'reset-view':
@@ -4110,12 +3969,6 @@
       return
     }
 
-    if (editorMode === 'bloxd' && voxelWorld && liveFormPreview) {
-      if (['g','r','s'].includes(key) && !commandKey) { event.preventDefault(); setLiveFormTool({g:'translate',r:'rotate',s:'scale'}[key]); return }
-      if (key === 'd' && !commandKey) { runLiveFormEdit(engine => engine.duplicate(activeLiveFormId)); return }
-      if (event.key === 'Delete') { runLiveFormEdit(engine => engine.remove(activeLiveFormId)); return }
-      if (event.key === 'Escape') { activeLiveFormId = null; renderLiveFormsUI(); return }
-    }
     if (editorMode === 'bloxd' && voxelWorld) {
       const tools = { '1': 'place', '2': 'remove', '3': 'paint', '4': 'box', '5': 'line', '6': 'fill', '7': 'select', '8': 'eyedropper', '9': 'texture' }
       if (tools[key]) setVoxelTool(tools[key])
@@ -4138,8 +3991,6 @@
       return
     }
 
-    if (commandKey && key === 'c') { event.preventDefault(); copyModelSelection(); return }
-    if (commandKey && key === 'v') { event.preventDefault(); pasteModelSelection(); return }
     if (key === 'q') setTool('select')
     if (key === 'x') setTool('boxselect')
     if (key === 'g') setTool('translate')

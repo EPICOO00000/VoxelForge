@@ -12,7 +12,6 @@
       this.selection = new Set()
       this.clipboard = []
       this.groups = []
-      this.liveForms = []
       this.activeGroupId = null
       this.texturePalette = Array.isArray(options.texturePalette) ? options.texturePalette.map(item=>({...item})) : []
       this.textureSettings = { ...(options.textureSettings || {}) }
@@ -49,7 +48,6 @@
     }
 
     dispose() {
-      this.disposed = true
       this.scene.remove(this.root)
       this.clearRenderMeshes()
       this.selectionHelper.traverse(child => {
@@ -108,7 +106,6 @@
         terrainSettings: { ...this.terrainSettings },
         scatterSettings: { ...this.scatterSettings },
         proceduralPaths: JSON.parse(JSON.stringify(this.proceduralPaths)),
-        liveForms: JSON.parse(JSON.stringify(this.liveForms)),
         blocks: [...this.blocks].map(([key, id]) => [...parseKey(key), id])
       }
     }
@@ -124,7 +121,6 @@
       this.terrainSettings = { ...(data.terrainSettings || {}) }
       this.scatterSettings = { ...(data.scatterSettings || {}) }
       this.proceduralPaths = JSON.parse(JSON.stringify(data.proceduralPaths || []))
-      this.liveForms = JSON.parse(JSON.stringify(data.liveForms || []))
       this.load(data.blocks || [])
       this.commit('Loaded voxel world', true)
     }
@@ -133,7 +129,7 @@
     commit(label = 'Edit blocks', reset = false) {
       if (reset) { this.history = []; this.historyIndex = -1 }
       this.history.splice(this.historyIndex + 1)
-      this.history.push({ label, blocks: this.snapshot(), selection: new Set(this.selection), proceduralPaths: JSON.parse(JSON.stringify(this.proceduralPaths)), liveForms: JSON.parse(JSON.stringify(this.liveForms)), groups: JSON.parse(JSON.stringify(this.groups)), activeGroupId: this.activeGroupId })
+      this.history.push({ label, blocks: this.snapshot(), selection: new Set(this.selection), proceduralPaths: JSON.parse(JSON.stringify(this.proceduralPaths)) })
       if (this.history.length > 24) this.history.shift()
       this.historyIndex = this.history.length - 1
       if (this.onChange) this.onChange(label)
@@ -142,7 +138,7 @@
       if (this.historyIndex <= 0) return false
       this.historyIndex--
       const state = this.history[this.historyIndex]
-      this.liveForms=JSON.parse(JSON.stringify(state.liveForms||[])); this.groups=JSON.parse(JSON.stringify(state.groups||[])); this.activeGroupId=state.activeGroupId||null; this.blocks = new Map(state.blocks); this.selection = new Set(state.selection); this.proceduralPaths=JSON.parse(JSON.stringify(state.proceduralPaths||[])); this.rebuildChunkIndex(); this.render()
+      this.blocks = new Map(state.blocks); this.selection = new Set(state.selection); this.proceduralPaths=JSON.parse(JSON.stringify(state.proceduralPaths||[])); this.rebuildChunkIndex(); this.render()
       if (this.onChange) this.onChange(`Undo: ${state.label}`)
       return true
     }
@@ -150,7 +146,7 @@
       if (this.historyIndex >= this.history.length - 1) return false
       this.historyIndex++
       const state = this.history[this.historyIndex]
-      this.liveForms=JSON.parse(JSON.stringify(state.liveForms||[])); this.groups=JSON.parse(JSON.stringify(state.groups||[])); this.activeGroupId=state.activeGroupId||null; this.blocks = new Map(state.blocks); this.selection = new Set(state.selection); this.proceduralPaths=JSON.parse(JSON.stringify(state.proceduralPaths||[])); this.rebuildChunkIndex(); this.render()
+      this.blocks = new Map(state.blocks); this.selection = new Set(state.selection); this.proceduralPaths=JSON.parse(JSON.stringify(state.proceduralPaths||[])); this.rebuildChunkIndex(); this.render()
       if (this.onChange) this.onChange(`Redo: ${state.label}`)
       return true
     }
@@ -295,35 +291,13 @@
     }
     clearSelection() { this.selection.clear(); this.renderSelection(); if(this.onChange)this.onChange('selection') }
     copySelection() {
-      const keys = [...this.selection].filter(key => this.blocks.has(key))
-      if (!keys.length) { this.clipboard = []; this.clipboardGroups = []; return 0 }
-      const min = [Infinity, Infinity, Infinity]
-      keys.forEach(key => parseKey(key).forEach((v, i) => { min[i] = Math.min(min[i], v) }))
-      this.clipboard = keys.map(key => ({ offset: parseKey(key).map((v, i) => v - min[i]), id: this.blocks.get(key) }))
-      const selected = new Set(keys)
-      this.clipboardGroups = this.groups.filter(group => group.keys.length && group.keys.every(key => selected.has(key)))
-        .map(group => ({ ...group, offsets: group.keys.map(key => parseKey(key).map((v, i) => v - min[i])), keys: undefined }))
-      return this.clipboard.length
+      if (!this.selection.size) return 0
+      const points=[...this.selection].map(key=>({position:parseKey(key),id:this.blocks.get(key)}))
+      const min=[Math.min(...points.map(p=>p.position[0])),Math.min(...points.map(p=>p.position[1])),Math.min(...points.map(p=>p.position[2]))]
+      this.clipboard=points.map(item=>({offset:item.position.map((v,i)=>v-min[i]),id:item.id}));return this.clipboard.length
     }
     cutSelection() { const count=this.copySelection();this.selection.forEach(key=>{if(!this.isLockedKey(key))this.blocks.delete(key)});this.selection=new Set([...this.selection].filter(key=>this.blocks.has(key)));this.render();this.commit('Cut blocks');return count }
-    paste(position) {
-      if (!this.clipboard.length) return 0
-      const placed = new Set()
-      this.clipboard.forEach(item => {
-        const p = item.offset.map((v, i) => v + position[i]), key = keyOf(...p)
-        if (!this.isLockedKey(key)) { this.set(...p, item.id); placed.add(key) }
-      })
-      const ids = new Map((this.clipboardGroups || []).map(group => [group.id, this.THREE.MathUtils.generateUUID()]))
-      ;(this.clipboardGroups || []).forEach(group => {
-        const { offsets, ...metadata } = group
-        const keys = offsets.map(offset => keyOf(...offset.map((v, i) => v + position[i]))).filter(key => placed.has(key))
-        if (keys.length) this.groups.push({ ...metadata, id: ids.get(group.id), name: group.name + ' Copy', keys, parentId: ids.get(group.parentId) || null })
-      })
-      this.selection = placed
-      this.activeGroupId = (this.clipboardGroups || []).length ? ids.get(this.clipboardGroups[0].id) : null
-      this.render(); this.commit('Paste blocks'); return placed.size
-    }
-
+    paste(position) { this.clipboard.forEach(item=>this.set(...item.offset.map((v,i)=>v+position[i]),item.id));this.render();this.commit('Paste blocks');return this.clipboard.length }
     deleteSelection() { let count=0;this.selection.forEach(key=>{if(!this.isLockedKey(key)&&this.blocks.delete(key))count++});this.selection=new Set([...this.selection].filter(key=>this.blocks.has(key)));this.render();this.commit('Delete selected blocks');return count }
 
     transformSelection(mapper, label) {
