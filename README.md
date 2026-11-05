@@ -141,11 +141,30 @@ See [docs/SPLITTER.md](docs/SPLITTER.md) for the format, algorithm, and API.
 
 The complete reference lives in [docs/FEATURES.md](docs/FEATURES.md).
 
+### Copying groups and live Bloxd forms
+
+- **Ctrl/Cmd+C → Ctrl/Cmd+V** copies the whole 3D selection, including nested
+  groups and their children. **D / Duplicate** uses the same hierarchy-aware
+  copy. Copies have independent geometry/materials and preserve relative transforms.
+- In **BLOXD → Live 3D forms**, use **Add form** (or **N**) to add a shape.
+  **Keep added shapes as live forms** is on by default. Select a retained form
+  from the list, then use **G / R / S** or the XYZ fields to move, rotate by any
+  angle, or scale it. A cyan 3D wireframe follows the gizmo; releasing it rebuilds
+  the blocks from the original source, not from the previous voxel result.
+- Conversion into Bloxd mode can also retain the existing scene as one live form.
+  Live forms support duplicate/delete, shell/solid fill, undo/redo, project files,
+  and autosave. Moving/removing forms restores the terrain beneath them.
+- Choose **Edit blocks** to leave form editing. **Bake all forms into blocks**
+  removes the sources while keeping the current blocks; bake before detailed
+  hand-editing so a later form rebuild cannot overwrite those edits.
+- `.shapeproject` saves the sources. `.bloxdschem` exports only the calculated
+  blocks—Bloxd itself does not receive editable 3D forms.
+
 ### Controls (3D editor)
 
 `Q` select · `X` box select · `G` move · `R` rotate · `S` scale · `B` sculpt ·
 `E` edit geometry · `M` measure · `N` add shape · `P` procedural studio ·
-`D` duplicate · `Delete` remove · `Escape` deselect · `Ctrl/Cmd+Z` undo ·
+`D` duplicate · `Ctrl/Cmd+C/V` copy/paste selection · `Delete` remove · `Escape` deselect · `Ctrl/Cmd+Z` undo ·
 `Ctrl/Cmd+S` save project · `Ctrl/Cmd+O` open project.
 
 ---
